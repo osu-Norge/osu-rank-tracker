@@ -1,0 +1,23 @@
+from discord.ext import commands
+
+import yaml
+
+with open('config.yaml', 'r', encoding='utf8') as f:
+    config = yaml.load(f, Loader=yaml.SafeLoader)
+    guild_id = config['guild']
+    set_channel_id = config['set_channel']
+
+
+def is_guild():
+    def predicate(ctx):
+        guild = ctx.bot.get_guild(guild_id)
+        return ctx.guild is guild
+    return commands.check(predicate)
+
+
+def is_set_channel():
+    def predicate(ctx):
+        guild = ctx.bot.get_guild(guild_id)
+        set_channel = guild.get_channel(set_channel_id)
+        return ctx.message.channel is set_channel
+    return commands.check(predicate)

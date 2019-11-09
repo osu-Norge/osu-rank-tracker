@@ -1,0 +1,43 @@
+# Bot settings
+bot:
+  token: 
+  prefix: '-'
+  presence: Voldtar API-er
+  presence_activity: watching
+
+# API Keys
+osu_api_key: 
+
+# Database
+database: mongodb://username:password@ip:port/osu-rank-tracker
+
+# Server-options
+guild: 565230012366848000
+set_channel: 569615483184349193
+
+roles:
+  anti-server-pass: 570277507580952576
+  dansk: 570154443216125954
+  svensk: 570154387364642836
+  digit_1: 565270960077275146
+  digit_2: 565230048278347776
+  digit_3: 565230052380246046
+  digit_4: 565230057338044446
+  digit_5: 565230062010368010
+  digit_6: 565232469322760223
+  osu: 565270262614851615
+  mania: 565279322756087868
+  taiko: 565279360681115668
+  ctb: 565279393392361487
+
+# Emoji
+emoji:
+  online: <:online:516328785910431754>
+  idle: <:idle:516328783347843082>
+  dnd: <:dnd:516328782844395579>
+  offline: <:offline:516328785407246356>
+
+# Misc
+misc:
+  website: https://lblend.moe/
+  source_code: https://github.com/osu-Norge/osu-rank-tracker
