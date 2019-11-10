@@ -9,6 +9,7 @@ class NewMember(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        """Gives the user the anti-server-pass role whenever they join the guild"""
 
         if member.bot or member.guild.id != self.bot.guild:
             return
@@ -16,6 +17,7 @@ class NewMember(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
+        """Removes the user from database whenever they leave the guild"""
 
         if member.bot or member.guild.id != self.bot.guild:
             return
