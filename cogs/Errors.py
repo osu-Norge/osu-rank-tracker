@@ -13,6 +13,8 @@ class Errors(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command(self, ctx):
+        """Prints command execution metadata"""
+
         status = {False: '✔ ', True: '❌ '}
         print(f'{datetime.now().strftime("%d.%m.%Y %H:%M:%S")} | ' +
               f'{ctx.command} {status[ctx.command_failed]} - ' +
@@ -21,6 +23,7 @@ class Errors(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
+        """Returns something based on the type of command error"""
 
         try:
             self.bot.get_command(f'{ctx.command}').reset_cooldown(ctx)

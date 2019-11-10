@@ -9,6 +9,8 @@ with open('config.yaml', 'r', encoding='utf8') as f:
 
 
 def is_guild():
+    """Checks whether or not a command is executed in the specified guild"""
+
     def predicate(ctx):
         guild = ctx.bot.get_guild(guild_id)
         return ctx.guild is guild
@@ -16,6 +18,8 @@ def is_guild():
 
 
 def is_set_channel():
+    """Checks whether or not a command is executed in the specified channel"""
+
     def predicate(ctx):
         guild = ctx.bot.get_guild(guild_id)
         set_channel = guild.get_channel(set_channel_id)
