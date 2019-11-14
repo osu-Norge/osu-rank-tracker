@@ -79,3 +79,27 @@ async def get_gamemode_roles(self, guild):
     ctb = guild.get_role(self.bot.roles['ctb'])
     mania = guild.get_role(self.bot.roles['mania'])
     return standard, taiko, ctb, mania, [standard, taiko, ctb, mania]
+
+
+async def get_gamemode_url(gamemode):
+    """Converts gamemode id to url name"""
+
+    gamemode_url = {
+        '0': 'osu',
+        '1': 'taiko',
+        '2': 'fruits',
+        '3': 'mania'
+    }
+    return gamemode_url[gamemode]
+
+
+async def convert_gamemode_name(gamemode):
+    """Converts gamemode id to its name"""
+
+    gamemodes = {
+        '0': 'Standard',
+        '1': 'Taiko',
+        '2': 'Catch The Beat',
+        '3': 'Mania'
+    }
+    return gamemodes[gamemode]
