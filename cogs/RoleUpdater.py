@@ -75,8 +75,6 @@ class RoleUpdater(commands.Cog):
 
             discord_user = guild.get_member(discord_user_id)
             if discord_user is None:
-                print(f'{discord_user_id} - BRUKER ER IKKE I GUILD! SLETTER...')
-                self.bot.database.delete_one({'_id': discord_user_id})
                 continue
 
             try:
