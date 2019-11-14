@@ -27,3 +27,15 @@ async def error_warning_send(ctx, text, *, mention=False):
 
 async def set_footer(ctx, embed):
     return embed.set_footer(icon_url=ctx.author.avatar_url, text=f'{ctx.author.name}#{ctx.author.discriminator}')
+
+
+async def get_user_color(user):
+    """Returns the top role color of a user"""
+
+
+    if str(user.color) != '#000000':
+            color = user.color
+    else:
+        color = discord.Colour(0x99AAB5)
+
+    return color

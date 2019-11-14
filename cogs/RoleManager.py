@@ -211,6 +211,7 @@ class RoleManager(commands.Cog):
             data = get(url).json()
             user_id = data[0]['user_id']
             country = data[0]['country'].lower()
+            username = data[0]['username']
         except:
             return await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
 
@@ -264,10 +265,6 @@ class RoleManager(commands.Cog):
         await OsuUtils.remove_old_roles(discord_bruker, rank_roles, rank_role)
         if rank_role != 'no rank role':
             await discord_bruker.add_roles(rank_role)
-            await ctx.send(f'{discord_bruker.mention} har fått rollen **{rank_role.name}**')
-        else:
-            await ctx.send(f'{discord_bruker.mention} Har ikke fått rank-rolle pga. ' +
-                           'for lav rank, men er lagt inn alikavel')
 
         standard, taiko, ctb, mania, gamemode_roles = await OsuUtils.get_gamemode_roles(self, ctx.guild)
         gamemode = str(gamemode)
@@ -283,6 +280,18 @@ class RoleManager(commands.Cog):
 
         anti_server_pass = ctx.guild.get_role(self.bot.roles['anti-server-pass'])
         await discord_bruker.remove_roles(anti_server_pass)
+
+        color = await Defaults.get_user_color(discord_bruker)
+        embed = discord.Embed(color=color, title='Bruker satt!',
+                              description=f'{discord_bruker.mention}\n' +
+                              f'{discord_bruker.name}#{discord_bruker.discriminator}')
+        embed.set_thumbnail(url=discord_bruker.avatar_url)
+        embed.add_field(name='osu!brukernavn', value=username)
+        embed.add_field(name='osu!id', value=user_id)
+        embed.add_field(name='Gamemode', value=gamemode)
+        embed.add_field(name='URL', value=f'https://osu.ppy.sh/users/{user_id}')
+        await Defaults.set_footer(ctx, embed)
+        await ctx.send(embed=embed)
 
     @Checks.is_guild()
     @commands.command(aliases=['user'])
@@ -301,27 +310,11 @@ class RoleManager(commands.Cog):
         if db_user is None:
             return await Defaults.error_fatal_send(ctx, text='Brukeren har ikke koblet til osu!kontoen sin!')
 
-        if str(bruker.color) != '#000000':
-            color = bruker.color
-        else:
-            color = discord.Colour(0x99AAB5)
+        color = await Defaults.get_user_color(bruker)
 
         user_id = db_user['osu_user_id']
-        gamemode = db_user['gamemode']
-        gamemode_url = {
-            '0': 'osu',
-            '1': 'taiko',
-            '2': 'fruits',
-            '3': 'mania'
-        }
-        gamemode_url = gamemode_url[gamemode]
-        gamemodes = {
-            '0': 'Standard',
-            '1': 'Taiko',
-            '2': 'Catch The Beat',
-            '3': 'Mania'
-        }
-        gamemode = gamemodes[gamemode]
+        gamemode_url = await OsuUtils.get_gamemode_url(db_user['gamemode'])
+        gamemode = await OsuUtils.convert_gamemode_name(db_user['gamemode'])
         url = f'https://osu.ppy.sh/users/{user_id}/{gamemode_url}'
 
         embed = discord.Embed(color=color, url=url, description=bruker.mention)
