@@ -26,11 +26,9 @@ async def get_gamemode(gamemode):
     }
 
     if gamemode in gamemodes:
-        gamemode = gamemodes[gamemode]
+        return gamemodes[gamemode]
     else:
         return None
-
-    return gamemode
 
 
 async def rank_role(rank: int, role_list):

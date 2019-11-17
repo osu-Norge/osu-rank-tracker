@@ -32,10 +32,7 @@ async def set_footer(ctx, embed):
 async def get_user_color(user):
     """Returns the top role color of a user"""
 
-
     if str(user.color) != '#000000':
-            color = user.color
-    else:
-        color = discord.Colour(0x99AAB5)
+        return user.color
 
-    return color
+    return discord.Colour(0x99AAB5)
