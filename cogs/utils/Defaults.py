@@ -26,6 +26,8 @@ async def error_warning_send(ctx, text, *, mention=False):
 
 
 async def set_footer(ctx, embed):
+    """Adds commands invoker's user info to embed footer"""
+
     return embed.set_footer(icon_url=ctx.author.avatar_url, text=f'{ctx.author.name}#{ctx.author.discriminator}')
 
 
