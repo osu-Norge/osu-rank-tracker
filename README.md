@@ -32,14 +32,14 @@
 
 <h3>Installing & Running</h3>
 
-*Assming that you have set your Python 3 path to `python` and you have set up a database*
+*Assming that you have set your Python 3 path to `python` and you have set up a database.*
 
 * Install the required Python modules:
   ```
   python -m pip install -r requirements.txt
   ```
 
-* Rename the [config.yaml.example](https://github.com/osu-Norge/osu-rank-tracker/blob/master/config.yaml.example) file to `config.yaml` replace the values with your own
+* Rename the [config.yaml.example](https://github.com/osu-Norge/osu-rank-tracker/blob/master/config.yaml.example) file to `config.yaml` and replace the values inside the file with your own.
 
 * Run the bot
   ```
@@ -73,7 +73,7 @@ Click [here](https://github.com/osu-Norge/osu-rank-tracker/contributors) to see 
 
 <h2 align="center">License</h2>
 
-Mozilla Public License 2.0 - see the [LICENSE.md](LICENSE.md) file for details
+Mozilla Public License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
 
 <br>
 
