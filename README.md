@@ -4,7 +4,7 @@
 <p>A Discord bot that keeps track of members' osu! ranks and updates their roles accordingly.</p>
 </div>
 
-⚠️ <b>This bot is not made with scalability in mind. It is made for the purpose of being used in the osu!Norge Discord server. If you decide to use this code, and you don't have the same role setup as the osu!Norge Discord, it will break.</b> ⚠️
+⚠️ <b>This bot is not made with scalability in mind. It is made for the purpose of being used in the osu!Norge Discord server. If you decide to use this code, and you don't have the correct role setup, it will break.</b> ⚠️
 
 <br>
 
