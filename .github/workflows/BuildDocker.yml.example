@@ -14,22 +14,14 @@ jobs:
       run: |
         branch="${ref##*/}"
         echo $branch
-        docker build -t $Repo:$branch -t $Repo:$branch-${{github.sha}} .       
+        docker build -t docker.pkg.github.com/$Repo/alpine:$branch -t $Repo:$branch-${{github.sha}} .       
  
     - name: Login to registry
       env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_HUB_PUSHER }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_TOKEN }}
-      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        DOCKER_USERNAME: ${{ github.actor }}
+        DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      run: echo $DOCKER_PASSWORD | docker login docker.pkg.github.com -u $DOCKER_USERNAME --password-stdin
       
     - name: Pushes the Docker image
       if: github.event_name != 'pull_request' && contains(github.ref, 'actions') != 'true'
-      run: docker push osu-Norge/osu_rank_tracker
-    
-    - name: Docker Hub README & description sync
-      if: github.event_name != 'pull_request' && contains(github.ref, 'actions') != 'true'
-      uses: meeDamian/sync-readme@v1.0.5
-      with:
-        user: ${{ secrets.DOCKER_HUB_PUSHER }}
-        pass: ${{ secrets.DOCKER_HUB_TOKEN }}
-        slug: osu-Norge/osu_rank_tracker
+      run: docker push docker.pkg.github.com/osu_rank_tracker/alpine
