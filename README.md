@@ -48,6 +48,25 @@
 
 <br>
 
+<details>
+  <summary>Docker</summary>
+  
+Example docker-compose.yml
+
+NOTE: `config.yaml` need to exist on the host as a file
+
+```yml
+  osu-bot:     
+    container_name: osu-bot
+    image: osu-Norge/osu_rank_tracker
+    networks:
+      - internal
+    volumes:
+      - ./config.yaml:/app/data/config.yaml
+```
+  
+</details>
+
 <h2 align="center">Built With</h2>
 
 * [Discord.py](https://github.com/Rapptz/discord.py)
