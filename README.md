@@ -23,15 +23,18 @@
 
 <h2 align="center">Getting Started</h2>
 
-<details>
-  <summary>Normal setup</summary>
-
 <h3>Prerequisites</h3>
 
-* [Python](https://github.com/python/cpython) 3.6 or newer
 * A [MongoDB](https://github.com/mongodb/mongo) Database
 
-<br>
+<h3>Setup</h3>
+
+<details>
+  <summary>Normal</summary>
+
+<h3>Additional prerequisites</h3>
+
+* [Python](https://github.com/python/cpython) 3.6 or newer
 
 <h3>Installing & Running</h3>
 
@@ -49,8 +52,6 @@
   python run.py
   ```
 </details>
-
-<br>
 
 <details>
   <summary>Docker</summary>
