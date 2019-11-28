@@ -23,6 +23,9 @@
 
 <h2 align="center">Getting Started</h2>
 
+<details>
+  <summary>Normal setup</summary>
+
 <h3>Prerequisites</h3>
 
 * [Python](https://github.com/python/cpython) 3.6 or newer
@@ -45,6 +48,7 @@
   ```
   python run.py
   ```
+</details>
 
 <br>
 
