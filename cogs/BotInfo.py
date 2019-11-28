@@ -3,7 +3,7 @@ import discord
 
 from time import time, perf_counter
 import platform
-from os import getpid
+from os import getpid, environ
 from psutil import Process
 from git import Repo as repo
 
@@ -67,6 +67,8 @@ class BotInfo(commands.Cog):
         embed.add_field(name='Python Versjon', value=platform.python_version())
         embed.add_field(name='Ressursbruk', value=f'RAM: {memory_usage} MB\nCPU: {cpu_percent}%')
         embed.add_field(name='Maskin', value=f'{platform.system()} {platform.release()}')
+        if "docker" in environ:
+            embed.add_field(name='Docker', value=f'U+FE0F')
         embed.add_field(name=f'Brukere ({len(total_members)})',
                         value=f'{self.bot.emoji["online"]}{len(online_members)} ' +
                               f'{self.bot.emoji["idle"]}{len(idle_members)} ' +

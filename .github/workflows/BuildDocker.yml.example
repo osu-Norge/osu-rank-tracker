@@ -1,0 +1,35 @@
+name: Test And Build BOT
+on: [push]
+
+jobs:        
+  build-and-push:
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/checkout@v1        
+    - name: Build the Docker image
+      env:
+        Repo : osu-Norge/osu_rank_tracker
+        ref: ${{github.ref}}
+      run: |
+        branch="${ref##*/}"
+        echo $branch
+        docker build -t $Repo:$branch -t $Repo:$branch-${{github.sha}} .       
+ 
+    - name: Login to registry
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_HUB_PUSHER }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_TOKEN }}
+      run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+      
+    - name: Pushes the Docker image
+      if: github.event_name != 'pull_request' && contains(github.ref, 'actions') != 'true'
+      run: docker push osu-Norge/osu_rank_tracker
+    
+    - name: Docker Hub README & description sync
+      if: github.event_name != 'pull_request' && contains(github.ref, 'actions') != 'true'
+      uses: meeDamian/sync-readme@v1.0.5
+      with:
+        user: ${{ secrets.DOCKER_HUB_PUSHER }}
+        pass: ${{ secrets.DOCKER_HUB_TOKEN }}
+        slug: osu-Norge/osu_rank_tracker
