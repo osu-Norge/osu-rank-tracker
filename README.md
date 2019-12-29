@@ -105,7 +105,7 @@ Mozilla Public License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
 
 We want to thank the following people:
 
-* [Ev-1](https://github.com/Ev-1) for coming up with a better way to calculate which role that should be given based on the rank - ([code](https://github.com/osu-Norge/osu-rank-tracker/blob/master/cogs/utils/OsuUtils.py#L42))
+* [Ev-1](https://github.com/Ev-1) for coming up with a better way to calculate which role that should be given based on the rank - ([code](https://github.com/osu-Norge/osu-rank-tracker/blob/master/cogs/utils/OsuUtils.py#L40))
 * [Roxedus](https://github.com/Roxedus) for adding Docker support
 * [PurpleBooth](https://github.com/PurpleBooth) for creating the [README template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2) used to write what you're looking at right now :)
 
