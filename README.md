@@ -45,7 +45,7 @@
   python -m pip install -r requirements.txt
   ```
 
-* Rename the [config.yaml.example](https://github.com/osu-Norge/osu-rank-tracker/blob/master/config.yaml.example) file to `config.yaml` and replace the values inside the file with your own.
+* Rename the [config.yaml.example](config.yaml.example) file to `config.yaml` and replace the values inside the file with your own.
 
 * Run the bot
   ```
@@ -77,7 +77,7 @@ NOTE: `config.yaml` need to exist on the host as a file
 * [Discord.py](https://github.com/Rapptz/discord.py)
 * [PyMongo](https://github.com/mongodb/mongo-python-driver)
 <br><br>
-...and all the other modules listed in the [requirements.txt](https://github.com/osu-Norge/osu-rank-tracker/blob/master/requirements.txt) file.
+...and all the other modules listed in the [requirements.txt](requirements.txt) file.
 
 <br>
 
@@ -105,14 +105,14 @@ Mozilla Public License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
 
 We want to thank the following people:
 
-* [Ev-1](https://github.com/Ev-1) for coming up with a better way to calculate which role that should be given based on the rank - ([code](https://github.com/osu-Norge/osu-rank-tracker/blob/master/cogs/utils/OsuUtils.py#L40))
+* [Ev-1](https://github.com/Ev-1) for coming up with a better way to calculate which role that should be given based on the rank - ([code](cogs/utils/OsuUtils.py#L40))
 * [Roxedus](https://github.com/Roxedus) for adding Docker support
 * [PurpleBooth](https://github.com/PurpleBooth) for creating the [README template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2) used to write what you're looking at right now :)
 
 and these people for their indirect contributions to the project. Their code is not necessary in order for the bot to operate however their code is used in the production version of the bot and they deserve credit nonetheless:
 
-* [nitros12](https://github.com/nitros12) for writing the [Eval.py](https://github.com/osu-Norge/osu-rank-tracker/blob/master/cogs/Eval.py) cog - ([original code](https://gist.github.com/nitros12/2c3c265813121492655bc95aa54da6b9))
-* [EvieePy](https://github.com/EvieePy) for writing a template for the [Errors.py](https://github.com/osu-Norge/osu-rank-tracker/blob/master/cogs/Errors.py) cog - ([original code](https://gist.github.com/EvieePy/7822af90858ef65012ea500bcecf1612))
+* [nitros12](https://github.com/nitros12) for writing the [Eval.py](cogs/Eval.py) cog - ([original code](https://gist.github.com/nitros12/2c3c265813121492655bc95aa54da6b9))
+* [EvieePy](https://github.com/EvieePy) for writing a template for the [Errors.py](cogs/Errors.py) cog - ([original code](https://gist.github.com/EvieePy/7822af90858ef65012ea500bcecf1612))
 
 <br>
 
