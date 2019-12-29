@@ -12,7 +12,7 @@
 
 * [Getting Started](#getting-started)
   * [Prerequisites](#prerequisites)
-  * [Installing & Running](#installing--running)
+  * [Setup](#setup)
 * [Built With](#built-with)
 * [Contributing](#contributing)
 * [Authors](#authors)
