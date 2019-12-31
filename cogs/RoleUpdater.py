@@ -59,14 +59,14 @@ class RoleUpdater(commands.Cog):
     async def update_roles(self):
         """Checks all db users' ranks and updates their roles accordingly"""
 
-        print(f'Starter loop | {datetime.now().strftime("%d.%m.%Y %H:%M:%S")}')
+        print(f'Checking all users\' ranks | {datetime.now().strftime("%d.%m.%Y %H:%M:%S")}')
 
         guild = self.bot.get_guild(self.bot.guild)
 
         try:
             db_users = self.bot.database.find()
         except:
-            return 'TILKOBLING TIL DATABASE MISLYKTES!'
+            return 'DATABASE CONNECTION FAILED!'
 
         for user in db_users:
             discord_user_id = user['_id']
@@ -84,7 +84,7 @@ class RoleUpdater(commands.Cog):
                 data = get(url).json()
                 rank = data[0]["pp_rank"]
             except:
-                print(f'{discord_user.id} - KUNNE IKKE HENTE DATA FOR osu!BRUKER ({osu_user})!')
+                print(f'{discord_user.id} - COULD NOT FETCH DATA osu! USER DATA - ({osu_user})')
                 continue
 
             try:
@@ -98,11 +98,11 @@ class RoleUpdater(commands.Cog):
             if rank_role != 'no rank role':
                 await discord_user.add_roles(rank_role)
 
-            print(f'Rank-oppdatering for {discord_user.id} fullført!')
+            print(f'Checking rank - {discord_user.id}')
 
             await sleep(2)
 
-        print(f'Loop fullført | {datetime.now().strftime("%d.%m.%Y %H:%M:%S")}')
+        print(f'All users have been checked! | {datetime.now().strftime("%d.%m.%Y %H:%M:%S")}')
 
     @update_roles.before_loop
     async def before_upate_roles(self):
@@ -115,7 +115,7 @@ class RoleUpdater(commands.Cog):
         """Prints cancel message when loop is cancelled"""
 
         if self.update_roles.is_being_cancelled():
-            print('Avbryter loop...')
+            print('Stopping loop...')
 
 
 def setup(bot):

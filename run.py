@@ -59,7 +59,7 @@ async def on_ready():
             name = file[:-3]
             bot.load_extension(f'cogs.{name}')
 
-    print(f'\nBrukernavn:      {bot.user.name}')
+    print(f'\nUsername:      {bot.user.name}')
     print(f'ID:              {bot.user.id}')
     print(f'Version:         {discord.__version__}')
     print('...............................................................\n')
