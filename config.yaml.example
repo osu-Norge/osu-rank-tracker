@@ -2,7 +2,7 @@
 bot:
   token: 
   prefix: '-'
-  presence: Voldtar API-er
+  presence: Voldtekt av API-er
   presence_activity: watching
 
 # API Keys
@@ -11,7 +11,7 @@ osu_api_key:
 # Database
 database: mongodb://username:password@ip:port/osu-rank-tracker
 
-# Server-options
+# Guild
 guild: 565230012366848000
 set_channel: 569615483184349193
 
@@ -39,5 +39,5 @@ emoji:
 
 # Misc
 misc:
-  website: https://lblend.moe/
+  website: https://github.com/osu-Norge
   source_code: https://github.com/osu-Norge/osu-rank-tracker
