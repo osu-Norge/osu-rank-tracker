@@ -106,7 +106,7 @@ class RoleUpdater(commands.Cog):
 
     @update_roles.before_loop
     async def before_upate_roles(self):
-        """Delays loop initialization until the bot ready for use"""
+        """Delays loop initialization until the bot is ready for use"""
 
         await self.bot.wait_until_ready()
 
