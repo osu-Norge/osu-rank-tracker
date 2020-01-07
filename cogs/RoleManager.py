@@ -271,7 +271,7 @@ class RoleManager(commands.Cog):
         embed = discord.Embed(color=color, title='Bruker satt!',
                               description=f'{discord_bruker.mention}\n' +
                               f'{discord_bruker.name}#{discord_bruker.discriminator}')
-        embed.set_thumbnail(url=discord_bruker.avatar_url)
+        embed.set_thumbnail(url=f'https://a.ppy.sh/{user_id}?.png')
         embed.add_field(name='osu!brukernavn', value=username)
         embed.add_field(name='osu!id', value=user_id)
         embed.add_field(name='Gamemode', value=gamemode)
@@ -305,7 +305,7 @@ class RoleManager(commands.Cog):
 
         embed = discord.Embed(color=color, url=url, description=bruker.mention)
         embed.set_author(name=f'{bruker.name}#{bruker.discriminator}', icon_url=bruker.avatar_url)
-        embed.set_thumbnail(url=bruker.avatar_url)
+        embed.set_thumbnail(url=f'https://a.ppy.sh/{user_id}?.png')
         embed.add_field(name='osu!id', value=user_id)
         embed.add_field(name='Gamemode', value=gamemode)
         embed.add_field(name='Lenke til osu!profil', value=url, inline=False)
