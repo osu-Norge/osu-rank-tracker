@@ -53,7 +53,8 @@ class RoleUpdater(commands.Cog):
         self.update_roles.cancel()
         await ctx.send(':thumbsup:')
 
-    @tasks.loop(time=[time(hour=0, minute=0), time(hour=12, minute=0)], reconnect=True)
+    #@tasks.loop(time=[time(hour=0, minute=0), time(hour=12, minute=0)], reconnect=True)
+    @tasks.loop(hours=12.0, reconnect=True) # Temporary
     async def update_roles(self):
         """Checks all db users' ranks and updates their roles accordingly"""
 
