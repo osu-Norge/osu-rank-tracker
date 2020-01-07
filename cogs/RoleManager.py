@@ -76,13 +76,6 @@ class RoleManager(commands.Cog):
 
         status_msg = await ctx.send(f'Gyldig bruker funnet! Legger deg inn i databasen og sjekker rank...')
 
-        query = {'_id': ctx.author.id}
-        try:
-            db_user = self.bot.database.find_one(query)
-        except:
-            return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
-                                                             'Be båtteier om å fikse dette')
-
         if db_user is None:
             self.bot.database.insert_one({
                 '_id': ctx.author.id,
@@ -239,12 +232,6 @@ class RoleManager(commands.Cog):
 
         status_msg = await ctx.send(f'Gyldig bruker funnet! Legger inn i databasen og sjekker rank...')
 
-        query = {'_id': discord_bruker.id}
-        try:
-            db_user = self.bot.database.find_one(query)
-        except:
-            return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
-                                                             'Be båtteier om å fikse dette')
         if db_user is None:
             self.bot.database.insert_one({
                 '_id': discord_bruker.id,
