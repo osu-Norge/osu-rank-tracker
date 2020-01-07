@@ -1,7 +1,5 @@
 from discord.ext import commands
 
-import pymongo
-
 
 class NewMember(commands.Cog):
     def __init__(self, bot):

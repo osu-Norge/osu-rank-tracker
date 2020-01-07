@@ -1,7 +1,6 @@
 from discord.ext import commands
 import discord
 
-import pymongo
 from requests import get
 import urllib.parse
 from asyncio import sleep

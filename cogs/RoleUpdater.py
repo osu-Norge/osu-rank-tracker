@@ -1,7 +1,5 @@
 from discord.ext import commands, tasks
 
-import pymongo
-
 from requests import get
 import urllib.parse
 from datetime import time, datetime
