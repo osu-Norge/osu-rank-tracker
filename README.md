@@ -97,7 +97,7 @@ Click [here](https://github.com/osu-Norge/osu-rank-tracker/contributors) to see 
 
 <h2 align="center">License</h2>
 
-Mozilla Public License 2.0 - see the [LICENSE.md](LICENSE.md) file for details.
+Mozilla Public License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 <br>
 
