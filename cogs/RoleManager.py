@@ -76,14 +76,11 @@ class RoleManager(commands.Cog):
 
         status_msg = await ctx.send(f'Gyldig bruker funnet! Legger deg inn i databasen og sjekker rank...')
 
-        if db_user is None:
-            self.bot.database.insert_one({
-                '_id': ctx.author.id,
-                'osu_user_id': user_id,
-                'gamemode': gamemode
-            })
-        else:
-            self.bot.database.update_one(query, {'$set': {'osu_user_id': user_id, 'gamemode': gamemode}})
+        self.bot.database.insert_one({
+            '_id': ctx.author.id,
+            'osu_user_id': user_id,
+            'gamemode': gamemode
+        })
 
         try:
             rank = int(data[0]["pp_rank"])
