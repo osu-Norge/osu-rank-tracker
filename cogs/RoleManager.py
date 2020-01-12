@@ -95,7 +95,7 @@ class RoleManager(commands.Cog):
             rank_msg = await ctx.send(f'{ctx.author.mention} Du har fått rollen **{rank_role.name}**')
         else:
             rank_msg = await ctx.send(f'{ctx.author.mention} Ranken din er for lav for å få en rolle. Du har ' +
-                                      'likevel fått tilgang til serveren og heg vil følge med på ranken din og ' +
+                                      'likevel fått tilgang til serveren og jeg vil følge med på ranken din og ' +
                                       'gi deg rolle om den blir høy nok :eyes:')
 
         standard, taiko, ctb, mania, gamemode_roles = await OsuUtils.get_gamemode_roles(self, ctx.guild)
