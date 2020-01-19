@@ -30,13 +30,13 @@
 <h3>Setup</h3>
 
 <details>
-  <summary>Normal</summary>
+  <summary>Manual</summary>
 
 <h3>Additional prerequisites</h3>
 
-* [Python](https://github.com/python/cpython) 3.6 or newer
+* [Python](https://github.com/python/cpython) 3.6+
 
-<h3>Installing & Running</h3>
+<h3>Installation</h3>
 
 *Assming that you have set your Python 3 path to `python` and you have set up a database.*
 
@@ -45,7 +45,7 @@
   python -m pip install -r requirements.txt
   ```
 
-* Rename the [config.yaml.example](config.yaml.example) file to `config.yaml` and replace the values inside the file with your own.
+* Rename the [config.yaml.example](config.yaml.example) file to `config.yaml` and replace the values within it with your own.
 
 * Run the bot
   ```
@@ -58,7 +58,7 @@
   
 Example docker-compose.yml
 
-NOTE: `config.yaml` need to exist on the host as a file
+NOTE: `config.yaml` needs to exist on the host as a file
 
 ```yml
   osu-bot:     
@@ -97,7 +97,7 @@ Click [here](https://github.com/osu-Norge/osu-rank-tracker/contributors) to see 
 
 <h2 align="center">License</h2>
 
-Mozilla Public License 2.0 - see the [LICENSE](LICENSE) file for details.
+Mozilla Public License 2.0 - Please read [LICENSE](LICENSE) for details.
 
 <br>
 
