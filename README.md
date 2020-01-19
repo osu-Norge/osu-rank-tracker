@@ -30,13 +30,13 @@
 <h3>Setup</h3>
 
 <details>
-  <summary>Normal</summary>
+  <summary>Manual</summary>
 
 <h3>Additional prerequisites</h3>
 
-* [Python](https://github.com/python/cpython) 3.6 or newer
+* [Python](https://github.com/python/cpython) 3.6+
 
-<h3>Installing & Running</h3>
+<h3>Installation</h3>
 
 *Assming that you have set your Python 3 path to `python` and you have set up a database.*
 
