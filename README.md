@@ -58,7 +58,7 @@
   
 Example docker-compose.yml
 
-NOTE: `config.yaml` need to exist on the host as a file
+NOTE: `config.yaml` needs to exist on the host as a file
 
 ```yml
   osu-bot:     
@@ -97,7 +97,7 @@ Click [here](https://github.com/osu-Norge/osu-rank-tracker/contributors) to see 
 
 <h2 align="center">License</h2>
 
-Mozilla Public License 2.0 - see the [LICENSE](LICENSE) file for details.
+Mozilla Public License 2.0 - Please read [LICENSE](LICENSE) for details.
 
 <br>
 
