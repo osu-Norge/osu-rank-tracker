@@ -45,7 +45,7 @@
   python -m pip install -r requirements.txt
   ```
 
-* Rename the [config.yaml.example](config.yaml.example) file to `config.yaml` and replace the values inside the file with your own.
+* Rename the [config.yaml.example](config.yaml.example) file to `config.yaml` and replace the values within it with your own.
 
 * Run the bot
   ```
