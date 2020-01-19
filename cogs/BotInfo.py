@@ -63,8 +63,8 @@ class BotInfo(commands.Cog):
         embed.add_field(name='Oppetid', value=f'{days}d {hours}t {minutes}m {seconds}s')
         embed.add_field(name='Ping', value=f'Ekte ping: {ping} ms\nWebsocket ping: {int(self.bot.latency * 1000)} ms')
         embed.add_field(name='Servere', value=len(self.bot.guilds))
-        embed.add_field(name='Discord.py Versjon', value=discord.__version__)
-        embed.add_field(name='Python Versjon', value=platform.python_version())
+        embed.add_field(name='Discord.py', value=discord.__version__)
+        embed.add_field(name='Python', value=platform.python_version())
         embed.add_field(name='Ressursbruk', value=f'RAM: {memory_usage} MB\nCPU: {cpu_percent}%')
         embed.add_field(name='Maskin', value=f'{platform.system()} {platform.release()}')
         if "docker" in environ:
