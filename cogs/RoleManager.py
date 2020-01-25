@@ -14,7 +14,6 @@ class RoleManager(commands.Cog):
 
     @Checks.is_set_channel()
     @commands.bot_has_permissions(embed_links=True)
-    @commands.cooldown(1, 5, commands.BucketType.guild)
     @commands.command()
     async def osuset(self, ctx, osu_brukernavn: str, *, gamemode: str=None):
         """Kobler osu!brukeren din opp mot båtten"""
