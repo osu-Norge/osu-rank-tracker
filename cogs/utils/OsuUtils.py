@@ -16,7 +16,7 @@ async def get_gamemode(gamemode):
         'osu!': '0',
         'osu!standard': '0',
         'taiko': '1',
-        'osu!taiko': '0',
+        'osu!taiko': '1',
         'ctb': '2',
         'catch the beat': '2',
         'catch': '2',
