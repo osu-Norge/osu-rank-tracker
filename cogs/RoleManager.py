@@ -38,8 +38,8 @@ class RoleManager(commands.Cog):
 
         dansk, svensk, country_roles = await OsuUtils.get_country_roles(self, ctx.guild)
         accepted_countries = {
-            "dk": dansk,
-            "se": svensk
+            'dk': dansk,
+            'se': svensk
         }
         if country in accepted_countries:
             country = accepted_countries[country]
@@ -82,7 +82,7 @@ class RoleManager(commands.Cog):
         })
 
         try:
-            rank = int(data[0]["pp_rank"])
+            rank = int(data[0]['pp_rank'])
         except:
             rank = 0
 
@@ -100,10 +100,10 @@ class RoleManager(commands.Cog):
         standard, taiko, ctb, mania, gamemode_roles = await OsuUtils.get_gamemode_roles(self, ctx.guild)
         gamemode = str(gamemode)
         gamemodes = {
-            "0": standard,
-            "1": taiko,
-            "2": ctb,
-            "3": mania
+            '0': standard,
+            '1': taiko,
+            '2': ctb,
+            '3': mania
         }
         gamemode = gamemodes[gamemode]
         await OsuUtils.remove_old_roles(ctx.author, gamemode_roles, gamemode)
@@ -152,7 +152,7 @@ class RoleManager(commands.Cog):
             return await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
 
         try:
-            rank = int(data[0]["pp_rank"])
+            rank = int(data[0]['pp_rank'])
         except:
             rank = 0
 
@@ -165,10 +165,10 @@ class RoleManager(commands.Cog):
         standard, taiko, ctb, mania, gamemode_roles = await OsuUtils.get_gamemode_roles(self, ctx.guild)
         gamemode = str(gamemode)
         gamemodes = {
-            "0": standard,
-            "1": taiko,
-            "2": ctb,
-            "3": mania
+            '0': standard,
+            '1': taiko,
+            '2': ctb,
+            '3': mania
         }
         gamemode = gamemodes[gamemode]
         await OsuUtils.remove_old_roles(ctx.author, gamemode_roles, gamemode)
@@ -205,8 +205,8 @@ class RoleManager(commands.Cog):
 
         dansk, svensk, country_roles = await OsuUtils.get_country_roles(self, ctx.guild)
         accepted_countries = {
-            "dk": dansk,
-            "se": svensk
+            'dk': dansk,
+            'se': svensk
         }
         if country in accepted_countries:
             country = accepted_countries[country]
@@ -238,7 +238,7 @@ class RoleManager(commands.Cog):
             self.bot.database.update_one(query, {'$set': {'osu_user_id': user_id, 'gamemode': gamemode}})
 
         try:
-            rank = int(data[0]["pp_rank"])
+            rank = int(data[0]['pp_rank'])
         except:
             rank = 0
 
@@ -251,10 +251,10 @@ class RoleManager(commands.Cog):
         standard, taiko, ctb, mania, gamemode_roles = await OsuUtils.get_gamemode_roles(self, ctx.guild)
         gamemode = str(gamemode)
         gamemodes = {
-            "0": standard,
-            "1": taiko,
-            "2": ctb,
-            "3": mania
+            '0': standard,
+            '1': taiko,
+            '2': ctb,
+            '3': mania
         }
         gamemode = gamemodes[gamemode]
         await OsuUtils.remove_old_roles(discord_bruker, gamemode_roles, gamemode)

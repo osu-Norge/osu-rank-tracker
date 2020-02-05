@@ -67,7 +67,7 @@ class BotInfo(commands.Cog):
         embed.add_field(name='Python', value=platform.python_version())
         embed.add_field(name='Ressursbruk', value=f'RAM: {memory_usage} MB\nCPU: {cpu_percent}%')
         embed.add_field(name='Maskin', value=f'{platform.system()} {platform.release()}')
-        if "docker" in environ:
+        if 'docker' in environ:
             embed.add_field(name='Docker', value=f'U+FE0F')
         embed.add_field(name=f'Brukere ({len(total_members)})',
                         value=f'{self.bot.emoji["online"]}{len(online_members)} ' +

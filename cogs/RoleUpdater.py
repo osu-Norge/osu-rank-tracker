@@ -81,7 +81,7 @@ class RoleUpdater(commands.Cog):
                     'u': osu_user, 'm': gamemode, 'k': self.bot.osu_api_key
                 })
                 data = get(url).json()
-                rank = data[0]["pp_rank"]
+                rank = data[0]['pp_rank']
             except:
                 print(f'{discord_user.id} - COULD NOT FETCH osu! USER DATA - ({osu_user})')
                 continue
