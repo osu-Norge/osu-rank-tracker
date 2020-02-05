@@ -13,7 +13,7 @@ def is_guild():
 
     def predicate(ctx):
         guild = ctx.bot.get_guild(guild_id)
-        return ctx.guild is guild
+        return ctx.guild == guild
     return commands.check(predicate)
 
 
@@ -23,5 +23,5 @@ def is_set_channel():
     def predicate(ctx):
         guild = ctx.bot.get_guild(guild_id)
         set_channel = guild.get_channel(set_channel_id)
-        return ctx.message.channel is set_channel
+        return ctx.message.channel == set_channel
     return commands.check(predicate)
