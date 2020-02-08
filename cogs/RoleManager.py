@@ -129,6 +129,7 @@ class RoleManager(commands.Cog):
         except:
             pass
 
+    @Checks.is_not_set_channel()
     @Checks.is_guild()
     @commands.bot_has_permissions(embed_links=True)
     @commands.cooldown(1, 5, commands.BucketType.guild)
@@ -287,6 +288,7 @@ class RoleManager(commands.Cog):
         await Defaults.set_footer(ctx, embed)
         await ctx.send(embed=embed)
 
+    @Checks.is_not_set_channel()
     @Checks.is_guild()
     @commands.command(aliases=['user'])
     async def bruker(self, ctx, *, bruker: discord.Member=None):

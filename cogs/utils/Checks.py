@@ -25,3 +25,13 @@ def is_set_channel():
         set_channel = guild.get_channel(set_channel_id)
         return ctx.message.channel == set_channel
     return commands.check(predicate)
+
+
+def is_not_set_channel():
+    """Checks whether or not a command is executed in the specified channel"""
+
+    def predicate(ctx):
+        guild = ctx.bot.get_guild(guild_id)
+        set_channel = guild.get_channel(set_channel_id)
+        return ctx.message.channel != set_channel
+    return commands.check(predicate)
