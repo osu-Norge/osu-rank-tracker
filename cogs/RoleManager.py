@@ -32,8 +32,11 @@ class RoleManager(commands.Cog):
         except:
             invalid_user_msg = await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
             await sleep(120)
-            await ctx.message.delete()
-            await invalid_user_msg.delete()
+            try:
+                await invalid_user_msg.delete()
+                await ctx.message.delete()
+            except:
+                pass
             return
 
         dansk, svensk, country_roles = await OsuUtils.get_country_roles(self, ctx.guild)
@@ -52,8 +55,11 @@ class RoleManager(commands.Cog):
                                                                            'and Danish users on this server :(')
 
             await sleep(120)
-            await ctx.message.delete()
-            await invalid_user_msg.delete()
+            try:
+                await invalid_user_msg.delete()
+                await ctx.message.delete()
+            except:
+                pass
             return
 
         query = {'osu_user_id': user_id}
@@ -69,8 +75,11 @@ class RoleManager(commands.Cog):
                                                                            'Om du er helt sikker på at dette er ' +
                                                                            'din bruker, kontakt mods')
             await sleep(120)
-            await ctx.message.delete()
-            await invalid_user_msg.delete()
+            try:
+                await invalid_user_msg.delete()
+                await ctx.message.delete()
+            except:
+                pass
             return
 
         status_msg = await ctx.send(f'Gyldig bruker funnet! Legger deg inn i databasen og sjekker rank...')
@@ -113,9 +122,12 @@ class RoleManager(commands.Cog):
         await ctx.author.remove_roles(anti_server_pass)
 
         await sleep(60)
-        await ctx.message.delete()
-        await status_msg.delete()
-        await rank_msg.delete()
+        try:
+            await status_msg.delete()
+            await rank_msg.delete()
+            await ctx.message.delete()
+        except:
+            pass
 
     @Checks.is_guild()
     @commands.bot_has_permissions(embed_links=True)
