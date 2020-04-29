@@ -322,6 +322,46 @@ class RoleManager(commands.Cog):
         await Defaults.set_footer(ctx, embed)
         await ctx.send(embed=embed)
 
+    @Checks.is_not_set_channel()
+    @Checks.is_guild()
+    @commands.command(aliases=['osuuser'])
+    async def osubruker(self, ctx, osu_bruker: str):
+        """Se hvilken Discord-bruker som er koblet til en osu!bruker"""
+
+        try:
+            url = 'https://osu.ppy.sh/api/get_user?' + urllib.parse.urlencode({
+                'u': osu_bruker, 'k': self.bot.osu_api_key
+            })
+            data = get(url).json()
+            osu_user_id = data[0]['user_id']
+        except IndexError:
+            return await Defaults.error_fatal_send(ctx, text='osu!brukeren finnes ikke!')
+
+        query = {'osu_user_id': osu_user_id}
+        try:
+            db_user = self.bot.database.find_one(query)
+        except:
+            return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
+                                                             'Be båtteier om å fikse dette')
+        if db_user is None:
+            return await Defaults.error_fatal_send(ctx, text='Ingen har registrert seg med denne osu!brukeren')
+
+        bruker = ctx.guild.get_member(int(db_user['_id']))
+        color = await Defaults.get_user_color(bruker)
+
+        gamemode_url = await OsuUtils.get_gamemode_url(db_user['gamemode'])
+        gamemode = await OsuUtils.convert_gamemode_name(db_user['gamemode'])
+        url = f'https://osu.ppy.sh/users/{osu_user_id}/{gamemode_url}'
+
+        embed = discord.Embed(color=color, url=url, description=bruker.mention)
+        embed.set_author(name=f'{bruker.name}#{bruker.discriminator}', icon_url=bruker.avatar_url)
+        embed.set_thumbnail(url=f'https://a.ppy.sh/{osu_user_id}?.png')
+        embed.add_field(name='osu!id', value=osu_user_id)
+        embed.add_field(name='Gamemode', value=gamemode)
+        embed.add_field(name='Lenke til osu!profil', value=url, inline=False)
+        await Defaults.set_footer(ctx, embed)
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(RoleManager(bot))
