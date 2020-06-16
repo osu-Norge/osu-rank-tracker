@@ -112,6 +112,31 @@ class BotInfo(commands.Cog):
         await Defaults.set_footer(ctx, embed)
         await status_msg.edit(embed=embed, content=None)
 
+    @commands.is_owner()
+    @commands.bot_has_permissions(embed_links=True)
+    @commands.command(aliases=['databaseinfo', 'db', 'database', 'databasestatus', 'dbstatus'])
+    async def dbinfo(self, ctx):
+        """Sjekk antall registrerte brukere og status til databasen"""
+
+        start = perf_counter()
+        db_user_count = self.bot.database.count_documents({})
+        end = perf_counter()
+        ping = int((end - start) * 1000)
+
+        membercount = 0
+        for member in ctx.guild.members:
+            if member.bot:
+                continue
+            membercount += 1
+
+        embed = discord.Embed(color=ctx.me.color)
+        embed.add_field(name='Query ping: count_documents({})', value=f'{ping} ms')
+        embed.add_field(name='Registrert i database', value=db_user_count)
+        embed.add_field(name='Totalt antall brukere på server (uten bots)', value=membercount)
+        embed.add_field(name='Database', value=f'MongoDB {self.bot.database_plain.server_info()["version"]}')
+        await Defaults.set_footer(ctx, embed)
+        await ctx.send(embed=embed)
+
     @commands.bot_has_permissions(embed_links=True)
     @commands.cooldown(1, 2, commands.BucketType.guild)
     @commands.command(aliases=['githubrepo', 'repo', 'git'])
