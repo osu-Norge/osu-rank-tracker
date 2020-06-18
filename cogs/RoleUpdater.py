@@ -89,10 +89,7 @@ class RoleUpdater(commands.Cog):
                 print(f'{discord_user.id} - COULD NOT FETCH osu! USER DATA - ({osu_user})')
                 continue
 
-            try:
-                rank = int(rank)
-            except TypeError:
-                rank = 0
+            rank = await OsuUtils.validate_rank(data[0]['pp_rank'])
 
             rank_roles = await OsuUtils.get_rank_roles(self, guild)
             rank_role = await OsuUtils.rank_role(rank, rank_roles)

@@ -92,10 +92,7 @@ class RoleManager(commands.Cog):
             'gamemode': gamemode
         })
 
-        try:
-            rank = int(data[0]['pp_rank'])
-        except TypeError:
-            rank = 0
+        rank = await OsuUtils.validate_rank(data[0]['pp_rank'])
 
         rank_roles = await OsuUtils.get_rank_roles(self, ctx.guild)
         rank_role = await OsuUtils.rank_role(rank, rank_roles)
@@ -167,10 +164,7 @@ class RoleManager(commands.Cog):
         except (IndexError, KeyError):
             return await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
 
-        try:
-            rank = int(data[0]['pp_rank'])
-        except TypeError:
-            rank = 0
+        rank = await OsuUtils.validate_rank(data[0]['pp_rank'])
 
         rank_roles = await OsuUtils.get_rank_roles(self, ctx.guild)
         rank_role = await OsuUtils.rank_role(rank, rank_roles)
@@ -253,10 +247,7 @@ class RoleManager(commands.Cog):
         else:
             self.bot.database.update_one(query, {'$set': {'osu_user_id': user_id, 'gamemode': gamemode}})
 
-        try:
-            rank = int(data[0]['pp_rank'])
-        except TypeError:
-            rank = 0
+        rank = await OsuUtils.validate_rank(data[0]['pp_rank'])
 
         rank_roles = await OsuUtils.get_rank_roles(self, ctx.guild)
         rank_role = await OsuUtils.rank_role(rank, rank_roles)

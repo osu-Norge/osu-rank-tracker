@@ -31,6 +31,15 @@ async def get_gamemode(gamemode):
         return None
 
 
+async def validate_rank(pp_rank):
+    try:
+        rank = int(pp_rank)
+    except TypeError:
+        rank = 0
+
+    return rank
+
+
 async def rank_role(rank: int, role_list):
     """Calculates role based on your rank"""
 
