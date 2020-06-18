@@ -12,7 +12,7 @@ from time import time
 
 locale.setlocale(locale.LC_ALL, '')
 
-with open('config.yaml', 'r', encoding='utf8') as f:
+with open('src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
 
 
@@ -55,7 +55,7 @@ async def on_ready():
     if not hasattr(bot, 'uptime'):
         bot.uptime = time()
 
-    for file in listdir('cogs'):
+    for file in listdir('src/cogs'):
         if file.endswith('.py'):
             name = file[:-3]
             bot.load_extension(f'cogs.{name}')

@@ -45,10 +45,13 @@
   python -m pip install -r requirements.txt
   ```
 
-* Rename the [config.yaml.example](config.yaml.example) file to `config.yaml` and replace the values within it with your own.
+* Go to the `src/config` directory & rename the [config.yaml.example](config.yaml.example) file to `config.yaml`. Replace the values within the config file with your own.
+
+* Return to the [src](src) directory
 
 * Run the bot
-  ```
+
+  ```cmd
   python run.py
   ```
 </details>
@@ -61,7 +64,7 @@ Example docker-compose.yml
 NOTE: `config.yaml` needs to exist on the host as a file
 
 ```yml
-  osu-bot:     
+  osu-bot:
     container_name: osu-bot
     image: osu-Norge/osu_rank_tracker
     networks:

@@ -114,7 +114,7 @@ class DevTools(commands.Cog):
     async def unload(self, ctx, cog):
         """Slår av spesifisert cog"""
 
-        for file in listdir('cogs'):
+        for file in listdir('src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 if name == cog:
@@ -151,7 +151,7 @@ class DevTools(commands.Cog):
     async def load(self, ctx, cog):
         """Slår på spesifisert cog"""
 
-        for file in listdir('cogs'):
+        for file in listdir('src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 if name == cog:
@@ -167,7 +167,7 @@ class DevTools(commands.Cog):
     async def reload(self, ctx, cog):
         """Laster inn spesifisert cog på nytt"""
 
-        for file in listdir('cogs'):
+        for file in listdir('src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 if name == cog:
@@ -181,12 +181,12 @@ class DevTools(commands.Cog):
     async def reloadunloaded(self, ctx):
         """laster inn alle cogs på nytt"""
 
-        for file in listdir('cogs'):
+        for file in listdir('src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 self.bot.unload_extension(f'cogs.{name}')
 
-        for file in listdir('cogs'):
+        for file in listdir('src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 self.bot.load_extension(f'cogs.{name}')
@@ -200,7 +200,7 @@ class DevTools(commands.Cog):
     async def reloadall(self, ctx):
         """laster inn alle cogs på nytt"""
 
-        for file in listdir('cogs'):
+        for file in listdir('src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 self.bot.reload_extension(f'cogs.{name}')
