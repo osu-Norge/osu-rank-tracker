@@ -52,7 +52,7 @@ class DevTools(commands.Cog):
 
         pagecount = ceil(len(guild_list) / 10)
 
-        if side is ():
+        if side == ():
             side = 1
         else:
             side = side[0]
@@ -90,7 +90,7 @@ class DevTools(commands.Cog):
 
         pagecount = ceil(len(user_list) / 10)
 
-        if side is ():
+        if side == ():
             side = 1
         else:
             side = side[0]
@@ -114,22 +114,16 @@ class DevTools(commands.Cog):
     async def unload(self, ctx, cog):
         """Slår av spesifisert cog"""
 
-        try:
-            for file in listdir('cogs'):
-                if file.endswith('.py'):
-                    name = file[:-3]
-                    if name == cog:
-                        try:
-                            self.bot.unload_extension(f'cogs.{name}')
-                        except:
-                            return await Defaults.error_fatal_send(ctx, text='Error!')
+        for file in listdir('cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                if name == cog:
+                    self.bot.unload_extension(f'cogs.{name}')
 
-                        embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt skrudd av')
-                        return await ctx.send(embed=embed)
+                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt skrudd av')
+                    return await ctx.send(embed=embed)
 
-            await Defaults.error_fatal_send(ctx, text=f'{cog} er ikke en cog')
-        except:
-            return await Defaults.error_fatal_send(ctx, text='Error!')
+        await Defaults.error_fatal_send(ctx, text=f'{cog} er ikke en cog')
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
@@ -157,22 +151,15 @@ class DevTools(commands.Cog):
     async def load(self, ctx, cog):
         """Slår på spesifisert cog"""
 
-        try:
-            for file in listdir('cogs'):
-                if file.endswith('.py'):
-                    name = file[:-3]
-                    if name == cog:
-                        try:
-                            self.bot.load_extension(f'cogs.{name}')
-                        except:
-                            return await Defaults.error_fatal_send(ctx, text='Error!')
+        for file in listdir('cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                if name == cog:
+                    self.bot.load_extension(f'cogs.{name}')
+                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt lastet inn!')
+                    return await ctx.send(embed=embed)
 
-                        embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt lastet inn!')
-                        return await ctx.send(embed=embed)
-
-            await Defaults.error_fatal_send(ctx, text=f'{cog} er ikke en cog')
-        except:
-            return await Defaults.error_fatal_send(ctx, text='Error!')
+        await Defaults.error_fatal_send(ctx, text=f'{cog} er ikke en cog')
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
@@ -180,20 +167,13 @@ class DevTools(commands.Cog):
     async def reload(self, ctx, cog):
         """Laster inn spesifisert cog på nytt"""
 
-        try:
-            for file in listdir('cogs'):
-                if file.endswith('.py'):
-                    name = file[:-3]
-                    if name == cog:
-                        try:
-                            self.bot.reload_extension(f'cogs.{name}')
-                        except:
-                            return await Defaults.error_fatal_send(ctx, text='Error!')
-
-                        embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt lastet inn på nytt!')
-                        await ctx.send(embed=embed)
-        except:
-            await Defaults.error_fatal_send(ctx, text=f'{cog} er ikke en cog')
+        for file in listdir('cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                if name == cog:
+                    self.bot.reload_extension(f'cogs.{name}')
+                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt lastet inn på nytt!')
+                    await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
@@ -201,27 +181,18 @@ class DevTools(commands.Cog):
     async def reloadunloaded(self, ctx):
         """laster inn alle cogs på nytt"""
 
-        try:
-            for file in listdir('cogs'):
-                if file.endswith('.py'):
-                    name = file[:-3]
-                    try:
-                        self.bot.unload_extension(f'cogs.{name}')
-                    except:
-                        pass
+        for file in listdir('cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                self.bot.unload_extension(f'cogs.{name}')
 
-            for file in listdir('cogs'):
-                if file.endswith('.py'):
-                    name = file[:-3]
-                    try:
-                        self.bot.load_extension(f'cogs.{name}')
-                    except:
-                        await Defaults.error_fatal_send(ctx, text=f'{name} feilet')
+        for file in listdir('cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                self.bot.load_extension(f'cogs.{name}')
 
-            embed = discord.Embed(color=ctx.me.color, description='Lastet inn alle cogs!')
-            await ctx.send(embed=embed)
-        except:
-            await Defaults.error_fatal_send(ctx, text='Error!')
+        embed = discord.Embed(color=ctx.me.color, description='Lastet inn alle cogs!')
+        await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
@@ -229,19 +200,13 @@ class DevTools(commands.Cog):
     async def reloadall(self, ctx):
         """laster inn alle cogs på nytt"""
 
-        try:
-            for file in listdir('cogs'):
-                if file.endswith('.py'):
-                    name = file[:-3]
-                    try:
-                        self.bot.reload_extension(f'cogs.{name}')
-                    except:
-                        pass
+        for file in listdir('cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                self.bot.reload_extension(f'cogs.{name}')
 
-            embed = discord.Embed(color=ctx.me.color, description='Lastet inn alle cogs på nytt!')
-            await ctx.send(embed=embed)
-        except:
-            await Defaults.error_fatal_send(ctx, text='Error!')
+        embed = discord.Embed(color=ctx.me.color, description='Lastet inn alle cogs på nytt!')
+        await ctx.send(embed=embed)
 
     @commands.is_owner()
     @commands.command()
@@ -305,13 +270,11 @@ class DevTools(commands.Cog):
 
         if not status_type:
             status_type = status_types['online']
-        try:
-            await self.bot.change_presence(status=status_type,
-                                           activity=discord.Activity(type=activity_type, name=message))
-            embed = discord.Embed(color=ctx.me.color, description='Endret Presence!')
-            await ctx.send(embed=embed)
-        except:
-            await Defaults.error_warning_send(ctx, text='Error!')
+
+        await self.bot.change_presence(status=status_type,
+                                       activity=discord.Activity(type=activity_type, name=message))
+        embed = discord.Embed(color=ctx.me.color, description='Endret Presence!')
+        await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True, add_reactions=True)
     @commands.is_owner()
@@ -319,14 +282,14 @@ class DevTools(commands.Cog):
     async def leave(self, ctx, *guild_id: int):
         """Forlater spesifisert guild"""
 
-        if guild_id is ():
+        if guild_id == ():
             guild_id = ctx.message.guild.id
         else:
             guild_id = guild_id[0]
 
         try:
             guild = await self.bot.fetch_guild(guild_id)
-        except:
+        except discord.errors.Forbidden:
             return await Defaults.error_fatal_send(ctx, text='Båtten er ikke i denne guilden')
 
         confirmation_msg = await ctx.send(f'Vil du virkelig forlate {guild.name} (`{guild.id}`)?')
@@ -345,7 +308,7 @@ class DevTools(commands.Cog):
             try:
                 embed = discord.Embed(color=ctx.me.color, description='Forlatt guild!')
                 await ctx.send(embed=embed)
-            except:
+            except discord.errors.Forbidden:
                 pass
 
     @commands.bot_has_permissions(embed_links=True)

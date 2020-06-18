@@ -1,8 +1,11 @@
 from discord.ext import commands, tasks
 
+import pymongo.errors
+
 from requests import get
 import urllib.parse
-from datetime import time, datetime
+from datetime import datetime
+# from datetime import time
 from asyncio import sleep
 
 from cogs.utils import OsuUtils
@@ -53,8 +56,8 @@ class RoleUpdater(commands.Cog):
         self.update_roles.cancel()
         await ctx.send(':thumbsup:')
 
-    #@tasks.loop(time=[time(hour=0, minute=0), time(hour=12, minute=0)], reconnect=True)
-    @tasks.loop(hours=12.0, reconnect=True) # Temporary
+    # @tasks.loop(time=[time(hour=0, minute=0), time(hour=12, minute=0)], reconnect=True)
+    @tasks.loop(hours=12.0, reconnect=True)  # Temporary
     async def update_roles(self):
         """Checks all db users' ranks and updates their roles accordingly"""
 
@@ -64,8 +67,8 @@ class RoleUpdater(commands.Cog):
 
         try:
             db_users = self.bot.database.find()
-        except:
-            return 'DATABASE CONNECTION FAILED!'
+        except pymongo.errors.ServerSelectionTimeoutError:
+            return print('DATABASE CONNECTION FAILED!')
 
         for user in db_users:
             discord_user_id = user['_id']
@@ -82,13 +85,13 @@ class RoleUpdater(commands.Cog):
                 })
                 data = get(url).json()
                 rank = data[0]['pp_rank']
-            except:
+            except KeyError:
                 print(f'{discord_user.id} - COULD NOT FETCH osu! USER DATA - ({osu_user})')
                 continue
 
             try:
                 rank = int(rank)
-            except:
+            except TypeError:
                 rank = 0
 
             rank_roles = await OsuUtils.get_rank_roles(self, guild)

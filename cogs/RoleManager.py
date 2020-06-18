@@ -1,6 +1,8 @@
 from discord.ext import commands
 import discord
 
+import pymongo.errors
+
 from requests import get
 import urllib.parse
 from asyncio import sleep
@@ -29,14 +31,14 @@ class RoleManager(commands.Cog):
             data = get(url).json()
             user_id = data[0]['user_id']
             country = data[0]['country'].lower()
-        except:
+        except KeyError:
             invalid_user_msg = await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
             await sleep(120)
             try:
                 await invalid_user_msg.delete()
                 await ctx.message.delete()
-            except:
-                pass
+            except discord.errors.Forbidden:
+                print('Missing permissions! Can\'t delete messages!')
             return
 
         dansk, svensk, country_roles = await OsuUtils.get_country_roles(self, ctx.guild)
@@ -58,14 +60,14 @@ class RoleManager(commands.Cog):
             try:
                 await invalid_user_msg.delete()
                 await ctx.message.delete()
-            except:
-                pass
+            except discord.errors.Forbidden:
+                print('Missing permissions! Can\'t delete messages!')
             return
 
         query = {'osu_user_id': user_id}
         try:
             db_user = self.bot.database.find_one(query)
-        except:
+        except pymongo.errors.ServerSelectionTimeoutError:
             return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
                                                              'Be båtteier om å fikse dette')
 
@@ -78,11 +80,11 @@ class RoleManager(commands.Cog):
             try:
                 await invalid_user_msg.delete()
                 await ctx.message.delete()
-            except:
-                pass
+            except discord.errors.Forbidden:
+                print('Missing permissions! Can\'t delete messages!')
             return
 
-        status_msg = await ctx.send(f'Gyldig bruker funnet! Legger deg inn i databasen og sjekker rank...')
+        status_msg = await ctx.send('Gyldig bruker funnet! Legger deg inn i databasen og sjekker rank...')
 
         self.bot.database.insert_one({
             '_id': ctx.author.id,
@@ -92,7 +94,7 @@ class RoleManager(commands.Cog):
 
         try:
             rank = int(data[0]['pp_rank'])
-        except:
+        except TypeError:
             rank = 0
 
         rank_roles = await OsuUtils.get_rank_roles(self, ctx.guild)
@@ -126,8 +128,8 @@ class RoleManager(commands.Cog):
             await status_msg.delete()
             await rank_msg.delete()
             await ctx.message.delete()
-        except:
-            pass
+        except discord.errors.Forbidden:
+            print('Missing permissions! Can\'t delete messages!')
 
     @Checks.is_not_set_channel()
     @Checks.is_guild()
@@ -144,7 +146,7 @@ class RoleManager(commands.Cog):
         query = {'_id': ctx.author.id}
         try:
             db_user = self.bot.database.find_one(query)
-        except:
+        except pymongo.errors.ServerSelectionTimeoutError:
             return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
                                                              'Be båtteier om å fikse dette')
 
@@ -161,12 +163,13 @@ class RoleManager(commands.Cog):
                 'u': osu_user, 'm': gamemode, 'k': self.bot.osu_api_key
             })
             data = get(url).json()
-        except:
+            data[0]['user_id']  # Added in order to check whether the has api returned a valid user
+        except (IndexError, KeyError):
             return await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
 
         try:
             rank = int(data[0]['pp_rank'])
-        except:
+        except TypeError:
             rank = 0
 
         rank_roles = await OsuUtils.get_rank_roles(self, ctx.guild)
@@ -192,7 +195,7 @@ class RoleManager(commands.Cog):
                            f'rank har blitt satt til **{rank_role.name}**!')
         else:
             await ctx.send(f'{ctx.author.mention} Du har fått rollen **{gamemode.name}** og ' +
-                           f'rank har blitt fjernet pga for lav rank')
+                           'rank har blitt fjernet pga for lav rank')
 
     @Checks.is_guild()
     @commands.has_permissions(administrator=True)
@@ -213,7 +216,7 @@ class RoleManager(commands.Cog):
             user_id = data[0]['user_id']
             country = data[0]['country'].lower()
             username = data[0]['username']
-        except:
+        except KeyError:
             return await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
 
         dansk, svensk, country_roles = await OsuUtils.get_country_roles(self, ctx.guild)
@@ -231,7 +234,7 @@ class RoleManager(commands.Cog):
         query = {'osu_user_id': user_id}
         try:
             db_user = self.bot.database.find_one(query)
-        except:
+        except pymongo.errors.ServerSelectionTimeoutError:
             return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
                                                              'Be båtteier om å fikse dette')
 
@@ -239,7 +242,7 @@ class RoleManager(commands.Cog):
             await ctx.send(f'{ctx.author.mention} ADVARSEL! Denne osu!brukeren er allerede ' +
                            'registrert på serveren. Fortsetter alikavel...')
 
-        status_msg = await ctx.send(f'Gyldig bruker funnet! Legger inn i databasen og sjekker rank...')
+        await ctx.send('Gyldig bruker funnet! Legger inn i databasen og sjekker rank...')
 
         if db_user is None:
             self.bot.database.insert_one({
@@ -252,7 +255,7 @@ class RoleManager(commands.Cog):
 
         try:
             rank = int(data[0]['pp_rank'])
-        except:
+        except TypeError:
             rank = 0
 
         rank_roles = await OsuUtils.get_rank_roles(self, ctx.guild)
@@ -300,7 +303,7 @@ class RoleManager(commands.Cog):
         query = {'_id': bruker.id}
         try:
             db_user = self.bot.database.find_one(query)
-        except:
+        except pymongo.errors.ServerSelectionTimeoutError:
             return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
                                                              'Be båtteier om å fikse dette')
         if db_user is None:
@@ -340,7 +343,7 @@ class RoleManager(commands.Cog):
         query = {'osu_user_id': osu_user_id}
         try:
             db_user = self.bot.database.find_one(query)
-        except:
+        except pymongo.errors.ServerSelectionTimeoutError:
             return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
                                                              'Be båtteier om å fikse dette')
         if db_user is None:

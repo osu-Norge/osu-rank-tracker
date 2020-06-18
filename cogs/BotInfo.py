@@ -68,7 +68,7 @@ class BotInfo(commands.Cog):
         embed.add_field(name='Ressursbruk', value=f'RAM: {memory_usage} MB\nCPU: {cpu_percent}%')
         embed.add_field(name='Maskin', value=f'{platform.system()} {platform.release()}')
         if 'docker' in environ:
-            embed.add_field(name='Docker', value=f'U+FE0F')
+            embed.add_field(name='Docker', value='U+FE0F')
         embed.add_field(name=f'Brukere ({len(total_members)})',
                         value=f'{self.bot.emoji["online"]}{len(online_members)} ' +
                               f'{self.bot.emoji["idle"]}{len(idle_members)} ' +
@@ -108,7 +108,8 @@ class BotInfo(commands.Cog):
         ping = int((end - start) * 1000)
 
         embed = discord.Embed(color=ctx.me.color)
-        embed.add_field(name='📶 Ping', value=f'**Ekte ping:** {ping} ms\n**Websocket ping:** {int(self.bot.latency * 1000)} ms')
+        embed.add_field(name='📶 Ping', value=f'**Ekte ping:** {ping} ms\n' +
+                        f'**Websocket ping:** {int(self.bot.latency * 1000)} ms')
         await Defaults.set_footer(ctx, embed)
         await status_msg.edit(embed=embed, content=None)
 

@@ -1,4 +1,5 @@
 from discord.ext import commands
+import discord
 
 import traceback
 import sys
@@ -49,7 +50,7 @@ class Errors(commands.Cog):
 
         elif isinstance(error, commands.BotMissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            return await Defaults.error_warning_send(ctx, text=f'Jeg mangler følgende tillatelser:\n\n' +
+            return await Defaults.error_warning_send(ctx, text='Jeg mangler følgende tillatelser:\n\n' +
                                                                f'```\n{permissions}\n```')
 
         elif isinstance(error, commands.NotOwner):
@@ -57,7 +58,7 @@ class Errors(commands.Cog):
 
         elif isinstance(error, commands.MissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            return await Defaults.error_warning_send(ctx, text=f'Du mangler følgende tillatelser:\n\n' +
+            return await Defaults.error_warning_send(ctx, text='Du mangler følgende tillatelser:\n\n' +
                                                                f'```\n{permissions}\n```')
 
         elif isinstance(error, commands.CommandOnCooldown):
@@ -70,7 +71,7 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.NoPrivateMessage):
             try:
                 return await Defaults.error_fatal_send(ctx, text=f'`{ctx.command}` kan ikke brukes i DMs')
-            except:
+            except discord.errors.Forbidden:
                 pass
 
         elif isinstance(error, commands.CheckFailure):
@@ -78,7 +79,7 @@ class Errors(commands.Cog):
 
         try:
             await Defaults.error_fatal_send(ctx, text='En ukjent feil oppstod. Be båtteier om å sjekke feilen')
-        except:
+        except discord.errors.Forbidden:
             pass
 
         print(f'Ignoring exception in command {ctx.command}:', file=sys.stderr)
