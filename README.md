@@ -45,7 +45,7 @@
   python -m pip install -r requirements.txt
   ```
 
-* Go to the `src/config` directory & rename the [config.yaml.example](config.yaml.example) file to `config.yaml`. Replace the values within the config file with your own.
+* Go to the `src/config` directory & rename the [config.yaml.example](src/config/config.yaml.example) file to `config.yaml`. Replace the values within the config file with your own.
 
 * Return to the [src](src) directory
 
