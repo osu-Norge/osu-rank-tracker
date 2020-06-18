@@ -37,8 +37,9 @@ class RoleManager(commands.Cog):
             try:
                 await invalid_user_msg.delete()
                 await ctx.message.delete()
-            except discord.errors.Forbidden:
-                print(f'Missing permissions! Could not delete messages: {invalid_user_msg.id}, {ctx.message.id}')
+            except (discord.errors.Forbidden, discord.errors.NotFound):
+                print('Could not delete one or more of the following messages: ' +
+                      f'{invalid_user_msg.id}, {ctx.message.id}')
             return
 
         dansk, svensk, country_roles = await OsuUtils.get_country_roles(self, ctx.guild)
@@ -60,8 +61,9 @@ class RoleManager(commands.Cog):
             try:
                 await invalid_user_msg.delete()
                 await ctx.message.delete()
-            except discord.errors.Forbidden:
-                print(f'Missing permissions! Could not delete messages: {invalid_user_msg.id}, {ctx.message.id}')
+            except (discord.errors.Forbidden, discord.errors.NotFound):
+                print('Could not delete one or more of the following messages: ' +
+                      f'{invalid_user_msg.id}, {ctx.message.id}')
             return
 
         query = {'osu_user_id': user_id}
@@ -80,8 +82,9 @@ class RoleManager(commands.Cog):
             try:
                 await invalid_user_msg.delete()
                 await ctx.message.delete()
-            except discord.errors.Forbidden:
-                print(f'Missing permissions! Could not delete messages: {invalid_user_msg.id}, {ctx.message.id}')
+            except (discord.errors.Forbidden, discord.errors.NotFound):
+                print('Could not delete one or more of the following messages: ' +
+                      f'{invalid_user_msg.id}, {ctx.message.id}')
             return
 
         status_msg = await ctx.send('Gyldig bruker funnet! Legger deg inn i databasen og sjekker rank...')
@@ -125,8 +128,9 @@ class RoleManager(commands.Cog):
             await status_msg.delete()
             await rank_msg.delete()
             await ctx.message.delete()
-        except discord.errors.Forbidden:
-            print(f'Missing permissions! Could not delete messages: {status_msg.id}, {rank_msg.id}, {ctx.message.id}')
+        except (discord.errors.Forbidden, discord.errors.NotFound):
+            print('Could not delete one or more of the following messages: ' +
+                  f'{status_msg.id}, {rank_msg.id}, {ctx.message.id}')
 
     @Checks.is_not_set_channel()
     @Checks.is_guild()
