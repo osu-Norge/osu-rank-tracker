@@ -17,7 +17,7 @@ class RoleManager(commands.Cog):
     @Checks.is_set_channel()
     @commands.bot_has_permissions(embed_links=True)
     @commands.command()
-    async def osuset(self, ctx, osu_brukernavn: str, *, gamemode: str=None):
+    async def osuset(self, ctx, osu_brukernavn: str, *, gamemode: str = None):
         """Kobler osu!brukeren din opp mot båtten"""
 
         gamemode = await OsuUtils.get_gamemode(gamemode)
@@ -199,7 +199,7 @@ class RoleManager(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.bot_has_permissions(embed_links=True)
     @commands.command()
-    async def forceset(self, ctx, discord_bruker: discord.Member, osu_bruker: str, *, gamemode: str=None):
+    async def forceset(self, ctx, discord_bruker: discord.Member, osu_bruker: str, *, gamemode: str = None):
         """Setter rollene til en bruker"""
 
         gamemode = await OsuUtils.get_gamemode(gamemode)
@@ -289,7 +289,7 @@ class RoleManager(commands.Cog):
     @Checks.is_not_set_channel()
     @Checks.is_guild()
     @commands.command(aliases=['user'])
-    async def bruker(self, ctx, *, bruker: discord.Member=None):
+    async def bruker(self, ctx, *, bruker: discord.Member = None):
         """Se hvilken osu!bruker som er koblet til båtten"""
 
         if not bruker:
