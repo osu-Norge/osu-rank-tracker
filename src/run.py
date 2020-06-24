@@ -12,7 +12,7 @@ from time import time
 
 locale.setlocale(locale.LC_ALL, '')
 
-with open('src/config/config.yaml', 'r', encoding='utf8') as f:
+with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
 
 
