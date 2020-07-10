@@ -85,7 +85,7 @@ class RoleUpdater(commands.Cog):
                 })
                 data = get(url).json()
                 rank = data[0]['pp_rank']
-            except KeyError:
+            except (KeyError, IndexError):
                 print(f'{discord_user.id} - COULD NOT FETCH osu! USER DATA - ({osu_user})')
                 continue
 
