@@ -2,7 +2,7 @@ from discord.ext import commands
 
 import yaml
 
-with open('src/config/config.yaml', 'r', encoding='utf8') as f:
+with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
     guild_id = config['guild']
     set_channel_id = config['set_channel']
