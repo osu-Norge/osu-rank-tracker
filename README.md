@@ -52,7 +52,7 @@
 * Run the bot
 
   ```cmd
-  python run.py
+  python src/run.py
   ```
 </details>
 
