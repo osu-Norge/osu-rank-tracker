@@ -122,7 +122,7 @@ and these people for their indirect contributions to the project. Their code is 
 ##
 <div align="center">
   <h3>Project developed by</h3>
-  <a href="https://discord.gg/Y7zyjGU"><img src="https://raw.githubusercontent.com/osu-Norge/assets/master/banner.png"></a>
+  <a href="https://discord.gg/Y7zyjGU"><img src="https://raw.githubusercontent.com/osu-Norge/assets/master/products/banner_discord.png"></a>
 </div>
 
 
