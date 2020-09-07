@@ -1,6 +1,3 @@
-from math import floor, log10
-
-
 async def get_gamemode(gamemode):
     """Translates the osu! gamemode names to their respective values"""
 
@@ -46,8 +43,7 @@ async def rank_role(rank: int, role_list):
     if rank < 1 or rank > 999999:
         return 'no rank role'
 
-    x = floor(log10(rank))
-    return role_list[x]
+    return role_list[len(str(rank)) - 1]
 
 
 async def remove_old_roles(user, lst, do_not_remove):
