@@ -31,7 +31,7 @@ class RoleManager(commands.Cog):
             data = get(url).json()
             user_id = data[0]['user_id']
             country = data[0]['country'].lower()
-        except KeyError:
+        except (IndexError, KeyError):
             invalid_user_msg = await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
             await sleep(120)
             try:
@@ -214,7 +214,7 @@ class RoleManager(commands.Cog):
             user_id = data[0]['user_id']
             country = data[0]['country'].lower()
             username = data[0]['username']
-        except KeyError:
+        except (IndexError, KeyError):
             return await Defaults.error_warning_send(ctx, text='Kunne ikke finne brukeren!')
 
         dansk, svensk, country_roles = await OsuUtils.get_country_roles(self, ctx.guild)
@@ -332,7 +332,7 @@ class RoleManager(commands.Cog):
             })
             data = get(url).json()
             osu_user_id = data[0]['user_id']
-        except IndexError:
+        except (IndexError, KeyError):
             return await Defaults.error_fatal_send(ctx, text='osu!brukeren finnes ikke!')
 
         query = {'osu_user_id': osu_user_id}
