@@ -42,6 +42,25 @@ class RoleManager(commands.Cog):
                       f'{invalid_user_msg.id}, {ctx.message.id}')
             return
 
+        query = {'osu_user_id': user_id}
+        try:
+            db_user = self.bot.blacklist.find_one(query)
+        except pymongo.errors.ServerSelectionTimeoutError:
+            return await Defaults.error_fatal_send(ctx, text='Jeg har ikke tilkobling til databasen\n\n' +
+                                                             'Be båtteier om å fikse dette')
+
+        if db_user is not None:
+            invalid_user_msg = await Defaults.error_warning_send(ctx, text='Brukeren din er svartelistet!')
+            await sleep(10)
+            await ctx.guild.kick(ctx.author, reason='Svartelistet bruker!')
+            try:
+                await invalid_user_msg.delete()
+                await ctx.message.delete()
+            except (discord.errors.Forbidden, discord.errors.NotFound):
+                print('Could not delete one or more of the following messages: ' +
+                      f'{invalid_user_msg.id}, {ctx.message.id}')
+            return
+
         dansk, svensk, country_roles = await OsuUtils.get_country_roles(self, ctx.guild)
         accepted_countries = {
             'dk': dansk,

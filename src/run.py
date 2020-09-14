@@ -27,6 +27,7 @@ class Bot(commands.Bot):
         self.osu_api_key = config['osu_api_key']
         self.database_plain = pymongo.MongoClient(config['database'])
         self.database = self.database_plain['osu-rank-tracker']['users']
+        self.blacklist = self.database_plain['osu-rank-tracker']['blacklist']
 
         self.guild = config['guild']
         self.set_channel = config['set_channel']
