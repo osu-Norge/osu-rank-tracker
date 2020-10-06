@@ -15,10 +15,16 @@ locale.setlocale(locale.LC_ALL, '')
 with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
 
+intents = discord.Intents.default()
+intents.guilds = True
+intents.members = True
+intents.messages = True
+
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or(config['bot']['prefix']), case_insensitive=True)
+        super().__init__(command_prefix=commands.when_mentioned_or(config['bot']['prefix']),
+                         case_insensitive=True, intents=intents)
 
         self.prefix = config['bot']['prefix']
         self.presence = config['bot']['presence']
