@@ -91,7 +91,7 @@ We want to thank the following people:
 
 * [Roxedus](https://github.com/Roxedus) for adding Docker support
 
-and these people for their indirect contributions to the project. Their code is not necessary in order for the bot to operate however their code is used in the production version of the bot and they deserve credit nonetheless:
+and these people for their indirect contributions to the project. Their code is not necessary in order for the bot to operate however their code is used in the production version of the bot aswell as being featured in this repo:
 
 * [nitros12](https://github.com/nitros12) for writing the [Eval.py](src/cogs/Eval.py) cog - ([original code](https://gist.github.com/nitros12/2c3c265813121492655bc95aa54da6b9))
 * [EvieePy](https://github.com/EvieePy) for writing a template for the [Errors.py](src/cogs/Errors.py) cog - ([original code](https://gist.github.com/EvieePy/7822af90858ef65012ea500bcecf1612))
