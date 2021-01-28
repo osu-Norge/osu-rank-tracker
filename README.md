@@ -81,7 +81,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 <h2 align="center">License</h2>
 
-Mozilla Public License 2.0 - Please read [LICENSE](LICENSE) for details.
+[Mozilla Public License 2.0](LICENSE)
 
 <br>
 
