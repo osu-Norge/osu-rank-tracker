@@ -13,9 +13,7 @@
 * [Getting Started](#getting-started)
   * [Prerequisites](#prerequisites)
   * [Setup](#setup)
-* [Built With](#built-with)
 * [Contributing](#contributing)
-* [Authors](#authors)
 * [License](#license)
 * [Acknowledgments](#acknowledgments)
 
@@ -75,26 +73,9 @@ NOTE: `config.yaml` needs to exist on the host as a file
   
 </details>
 
-<h2 align="center">Built With</h2>
-
-* [Discord.py](https://github.com/Rapptz/discord.py)
-* [PyMongo](https://github.com/mongodb/mongo-python-driver)
-<br><br>
-...and all the other modules listed in the [requirements.txt](requirements.txt) file.
-
-<br>
-
 <h2 align="center">Contributing</h2>
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-<br>
-
-<h2 align="center">Authors</h2>
-
-* [LBlend](https://github.com/LBlend) - *Initial work*
-
-Click [here](https://github.com/osu-Norge/osu-rank-tracker/contributors) to see the full list of contributors.
 
 <br>
 
