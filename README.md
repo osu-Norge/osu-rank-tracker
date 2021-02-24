@@ -1,4 +1,5 @@
 <div align="center">
+  <p>This project contains a lot of poorly written code and needs to be rewritten. Please keep that in mind while looking at the code!</p>
   <h1>osu! Rank Tracker</h1>
 
 <p>A Discord bot that keeps track of members' osu! ranks and updates their roles accordingly.</p>
