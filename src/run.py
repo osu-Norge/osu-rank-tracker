@@ -3,7 +3,6 @@ import discord
 
 from codecs import open
 import yaml
-import pymongo
 
 from os import listdir
 import locale
@@ -19,6 +18,8 @@ intents = discord.Intents.default()
 intents.guilds = True
 intents.members = True
 intents.messages = True
+intents.presences = True
+intents.emojis = True
 
 
 class Bot(commands.Bot):
@@ -27,17 +28,10 @@ class Bot(commands.Bot):
                          case_insensitive=True, intents=intents)
 
         self.prefix = config['bot']['prefix']
-        self.presence = config['bot']['presence']
-        self.presence_activity = config['bot']['presence_activity']
+        self.presence = config['bot'].get('presence', {})
 
-        self.osu_api_key = config['osu_api_key']
-        self.database_plain = pymongo.MongoClient(config['database'])
-        self.database = self.database_plain['osu-rank-tracker']['users']
-        self.blacklist = self.database_plain['osu-rank-tracker']['blacklist']
-
-        self.guild = config['guild']
-        self.set_channel = config['set_channel']
-        self.roles = config.get('roles', {})
+        self.osu_v1 = config['api'].get('osu_v1', {})
+        self.osu_v2 = config['api'].get('osu_v2', {})
 
         self.emoji = config.get('emoji', {})
         self.misc = config.get('misc', {})
@@ -51,8 +45,8 @@ activities = {
     'listening': 2,
     'watching': 3
 }
-if bot.presence_activity.lower() in activities:
-    activity_type = activities[bot.presence_activity]
+if bot.presence['activity'].lower() in activities:
+    activity_type = activities[bot.presence['activity']]
 else:
     activity_type = 0
 
@@ -62,17 +56,19 @@ async def on_ready():
     if not hasattr(bot, 'uptime'):
         bot.uptime = time()
 
-    for file in listdir('src/cogs'):
+    for file in listdir('./src/cogs'):
         if file.endswith('.py'):
             name = file[:-3]
             bot.load_extension(f'cogs.{name}')
 
-    print(f'\nUsername:      {bot.user.name}')
+    print(f'Username:        {bot.user.name}')
     print(f'ID:              {bot.user.id}')
     print(f'Version:         {discord.__version__}')
-    print('...............................................................\n')
-    await bot.change_presence(activity=discord.Activity(type=activity_type, name=bot.presence),
-                              status=discord.Status.online)
+    print('.' * 50 + '\n')
+    await bot.change_presence(
+        activity=discord.Activity(type=activity_type, name=bot.presence['message']),
+        status=discord.Status.online
+    )
 
 
 bot.run(config['bot']['token'], bot=True, reconnect=True)

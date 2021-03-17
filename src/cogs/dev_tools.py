@@ -6,9 +6,8 @@ from sys import exit
 from os import listdir, system
 import socket
 from requests import get
-from math import ceil
 
-from cogs.utils import Defaults
+from cogs.utils import misc_utils, embed_templates
 
 
 class DevTools(commands.Cog):
@@ -18,214 +17,207 @@ class DevTools(commands.Cog):
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
     @commands.command()
-    async def stopbot(self, ctx):
-        """Stopper båtten gjennom Discord-klienten"""
+    async def shutdown(self, ctx):
+        """
+        Log out and shut down the bot
+        """
 
-        embed = discord.Embed(color=ctx.me.color, description='Stopper bot...')
+        embed = discord.Embed(color=ctx.me.color, description='Shutting down...')
         await ctx.send(embed=embed)
         await self.bot.logout()
-        exit('Bot stoppet')
+        exit('Bot stopped through command')
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
     @commands.command()
-    async def custommsg(self, ctx, channel: int, *args):
-        """Sender melding til spesifisert kanal"""
+    async def custommsg(self, ctx, channel: int, *text):
+        """
+        Send a message to a specified channel
+        """
 
         channel = self.bot.get_channel(channel)
-        custommessage = ' '.join(args)
+        custommessage = ' '.join(text)
         await channel.send(custommessage)
 
         embed = discord.Embed(color=ctx.me.color)
-        embed.add_field(name='Sendte', value=custommessage)
+        embed.add_field(name='Sent', value=custommessage)
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
     @commands.command(aliases=['listservers'])
-    async def listguilds(self, ctx, *side: int):
-        """Sender en liste over guilds som båtten er medlem av"""
+    async def listguilds(self, ctx, page=0):
+        """
+        Lists all guilds the bot is a member of
+        """
 
-        guild_list = []
-        for guild in self.bot.guilds:
-            guild_list.append(f'{guild.name} - {guild.id}')
+        guild_list = [f'{guild.name} - {guild.id}' for guild in self.bot.guilds]
 
-        pagecount = ceil(len(guild_list) / 10)
-
-        if side == ():
-            side = 1
-        else:
-            side = side[0]
-
-        if side <= 0 or side > pagecount:
-            side = 1
-
-        start_index = (side - 1) * 10
-        end_index = side * 10
-
-        guilds = '\n'.join(guild_list[start_index:end_index])
+        page_data = misc_utils.paginator(guild_list, int(page))
+        page = page_data['page']
+        pagecount = page_data['pagecount']
+        guilds = '\n'.join(page_data['page_content'])
 
         embed = discord.Embed(color=ctx.me.color)
         embed.add_field(name='Guilds', value=guilds)
-        embed.set_footer(text=f'Side: {side}/{pagecount}')
+        embed.set_footer(text=f'page: {page}/{pagecount}')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
     @commands.command()
-    async def listusers(self, ctx, *side: int):
-        """Sender en liste over alle medlemmene båtten har tilgang til"""
+    async def listusers(self, ctx, page=0):
+        """
+        Lists all users the bot has access to
+        """
 
-        user_list = []
-        for guild in self.bot.guilds:
-            for member in guild.members:
-                if member.bot:
-                    continue
-                member_string = f'{member.name}#{member.discriminator} ' +\
-                    f'- {member.id}'
-                if member_string in user_list:
-                    continue
-                else:
-                    user_list.append(member_string)
+        user_list = [f'{user.name}#{user.discriminator} - {user.id}' for user in self.bot.users]
+        page_data = misc_utils.paginator(user_list, int(page))
 
-        pagecount = ceil(len(user_list) / 10)
-
-        if side == ():
-            side = 1
-        else:
-            side = side[0]
-
-        if side <= 0 or side > pagecount:
-            side = 1
-
-        start_index = (side - 1) * 10
-        end_index = side * 10
-
-        users = '\n'.join(user_list[start_index:end_index])
+        pagecount = page_data['pagecount']
+        page = page_data['page']
+        users = '\n'.join(page_data['page_content'])
 
         embed = discord.Embed(color=ctx.me.color)
-        embed.add_field(name='Brukere', value=users)
-        embed.set_footer(text=f'Side: {side}/{pagecount}')
+        embed.add_field(name='Users', value=users)
+        embed.set_footer(text=f'page: {page}/{pagecount}')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
-    @commands.command()
-    async def unload(self, ctx, cog):
-        """Slår av spesifisert cog"""
+    @commands.command(alises=['unloadcog', 'disablecog'])
+    async def unload(self, ctx, cog: str):
+        """
+        Disables a specified cog
+        """
 
-        for file in listdir('src/cogs'):
+        for file in listdir('./src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 if name == cog:
                     self.bot.unload_extension(f'cogs.{name}')
-
-                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt skrudd av')
+                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been disabled')
                     return await ctx.send(embed=embed)
 
-        await Defaults.error_fatal_send(ctx, text=f'{cog} er ikke en cog')
+        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
-    @commands.command(aliases=['disablecommand'])
-    async def unloadcommand(self, ctx, command: str):
-        """Slår av spesifisert command"""
-
-        command = self.bot.get_command(command)
-        command.enabled = False
-        await ctx.send(f'{command} har blitt skrudd på')
-
-    @commands.bot_has_permissions(embed_links=True)
-    @commands.is_owner()
-    @commands.command(aliases=['enablecommand'])
-    async def loadcommand(self, ctx, command: str):
-        """Slår på spesifisert command"""
-
-        command = self.bot.get_command(command)
-        command.enabled = True
-        await ctx.send(f'{command} har blitt skrudd på')
-
-    @commands.bot_has_permissions(embed_links=True)
-    @commands.is_owner()
-    @commands.command()
+    @commands.command(aliases=['loadcog', 'enablecog'])
     async def load(self, ctx, cog):
-        """Slår på spesifisert cog"""
+        """
+        Enables a speicifed cog
+        """
 
-        for file in listdir('src/cogs'):
+        for file in listdir('./src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 if name == cog:
                     self.bot.load_extension(f'cogs.{name}')
-                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt lastet inn!')
+                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} loaded')
                     return await ctx.send(embed=embed)
 
-        await Defaults.error_fatal_send(ctx, text=f'{cog} er ikke en cog')
+        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
-    @commands.command()
+    @commands.command(aliases=['reloadcog'])
     async def reload(self, ctx, cog):
-        """Laster inn spesifisert cog på nytt"""
+        """
+        Reloads a specified cog
+        """
 
-        for file in listdir('src/cogs'):
+        for file in listdir('./src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 if name == cog:
                     self.bot.reload_extension(f'cogs.{name}')
-                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} har blitt lastet inn på nytt!')
-                    await ctx.send(embed=embed)
+                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been reloaded')
+                    return await ctx.send(embed=embed)
 
-    @commands.bot_has_permissions(embed_links=True)
-    @commands.is_owner()
-    @commands.command()
-    async def reloadunloaded(self, ctx):
-        """laster inn alle cogs på nytt"""
-
-        for file in listdir('src/cogs'):
-            if file.endswith('.py'):
-                name = file[:-3]
-                self.bot.unload_extension(f'cogs.{name}')
-
-        for file in listdir('src/cogs'):
-            if file.endswith('.py'):
-                name = file[:-3]
-                self.bot.load_extension(f'cogs.{name}')
-
-        embed = discord.Embed(color=ctx.me.color, description='Lastet inn alle cogs!')
+        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
     @commands.command()
-    async def reloadall(self, ctx):
-        """laster inn alle cogs på nytt"""
+    async def reloadcommand(self, ctx, cog):
+        """
+        Reloads a specified cog
+        """
 
-        for file in listdir('src/cogs'):
+        for file in listdir('./src/cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                if name == cog:
+                    self.bot.reload_extension(f'cogs.{name}')
+                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been reloaded')
+                    return await ctx.send(embed=embed)
+
+        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        await ctx.send(embed=embed)
+
+    @commands.bot_has_permissions(embed_links=True)
+    @commands.is_owner()
+    @commands.command(aliases=['reloadunloadedcogs'])
+    async def reloadunloaded(self, ctx):
+        """
+        Reloads all cogs, including previously disabled ones
+        """
+
+        for file in listdir('./src/cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                self.bot.unload_extension(f'cogs.{name}')
+
+        for file in listdir('./src/cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                self.bot.load_extension(f'cogs.{name}')
+
+        embed = discord.Embed(color=ctx.me.color, description='Reloaded all cogs')
+        await ctx.send(embed=embed)
+
+    @commands.bot_has_permissions(embed_links=True)
+    @commands.is_owner()
+    @commands.command(aliases=['reloadallcogs'])
+    async def reloadall(self, ctx):
+        """
+        Reloads all previously enabled cogs
+        """
+
+        for file in listdir('./src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
                 self.bot.reload_extension(f'cogs.{name}')
 
-        embed = discord.Embed(color=ctx.me.color, description='Lastet inn alle cogs på nytt!')
+        embed = discord.Embed(color=ctx.me.color, description='Reloaded all previously enabled cogs')
         await ctx.send(embed=embed)
 
     @commands.is_owner()
     @commands.command()
     async def cmd(self, ctx, *, command: str):
-        """Execute terminal commands"""
+        """
+        Execute terminal commands
+        """
 
         system(command)
-        await ctx.send('Fullført!')
+        await ctx.send('Done!')
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
     @commands.command()
     async def localip(self, ctx):
-        """Sender den lokale ip-en til maskinen"""
+        """
+        Sends LAN IP-address
+        """
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 80))
         embed = discord.Embed(color=ctx.me.color)
-        embed.add_field(name='Lokal ip', value=s.getsockname()[0])
+        embed.add_field(name='LAN IP-address', value=s.getsockname()[0])
         await ctx.send(embed=embed)
         s.close()
 
@@ -233,7 +225,10 @@ class DevTools(commands.Cog):
     @commands.is_owner()
     @commands.command()
     async def publicip(self, ctx):
-        """inb4 lekker ip-en min"""
+        """
+        Sends WAN IP-address
+        inb4 I leak my IP-address
+        """
 
         data = get('https://wtfismyip.com/json').json()
         ip = data['YourFuckingIPAddress']
@@ -241,15 +236,17 @@ class DevTools(commands.Cog):
         isp = data['YourFuckingISP']
 
         embed = discord.Embed(color=ctx.me.color)
-        embed.add_field(name='Public ip', value=f'{ip}\n{location}\n{isp}')
+        embed.add_field(name='WAN IP-address', value=f'{ip}\n{location}\n{isp}')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
     @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.command()
-    async def changepresence(self, ctx, activity_type, message, *status_type):
-        """Endrer status"""
+    async def changepresence(self, ctx, activity_type, message, status_type):
+        """
+        Changes presence status
+        """
 
         activities = {
             'playing': 0,
@@ -267,12 +264,15 @@ class DevTools(commands.Cog):
             'idle': discord.Status.idle,
             'offline': discord.Status.offline
         }
+        if status_type in status_types:
+            status_types = status_types[status_type]
+        else:
+            status_type = status_types[status_type]
 
-        if not status_type:
-            status_type = status_types['online']
-
-        await self.bot.change_presence(status=status_type,
-                                       activity=discord.Activity(type=activity_type, name=message))
+        await self.bot.change_presence(
+            status=status_type,
+            activity=discord.Activity(type=activity_type, name=message)
+        )
         embed = discord.Embed(color=ctx.me.color, description='Endret Presence!')
         await ctx.send(embed=embed)
 
@@ -280,19 +280,22 @@ class DevTools(commands.Cog):
     @commands.is_owner()
     @commands.command()
     async def leave(self, ctx, *guild_id: int):
-        """Forlater spesifisert guild"""
+        """
+        Leaves a specified guild
+        """
 
         if guild_id == ():
-            guild_id = ctx.message.guild.id
+            guild_id = ctx.guild.id
         else:
-            guild_id = guild_id[0]
+            guild_id = guild_id
 
         try:
             guild = await self.bot.fetch_guild(guild_id)
         except discord.errors.Forbidden:
-            return await Defaults.error_fatal_send(ctx, text='Båtten er ikke i denne guilden')
+            embed = embed_templates.error_fatal(ctx, text='Bot is not a member of this guild')
+            return await ctx.send(embed=embed)
 
-        confirmation_msg = await ctx.send(f'Vil du virkelig forlate {guild.name} (`{guild.id}`)?')
+        confirmation_msg = await ctx.send(f'Do you want to leave {guild.name} (`{guild.id}`)?')
         await confirmation_msg.add_reaction('✅')
 
         def comfirm(reaction, user):
@@ -306,7 +309,7 @@ class DevTools(commands.Cog):
         else:
             await guild.leave()
             try:
-                embed = discord.Embed(color=ctx.me.color, description='Forlatt guild!')
+                embed = discord.Embed(color=ctx.me.color, description='Guild left!')
                 await ctx.send(embed=embed)
             except discord.errors.Forbidden:
                 pass
@@ -315,24 +318,28 @@ class DevTools(commands.Cog):
     @commands.is_owner()
     @commands.command()
     async def resetcooldown(self, ctx, command: str):
-        """Resetter nedkjøling for spesifisert kommando"""
+        """
+        Resets the cooldown period for a specified command
+        """
 
         try:
             self.bot.get_command(command).reset_cooldown(ctx)
         except AttributeError:
-            return await Defaults.error_fatal_send(ctx, text=f'{command} er ikke en command', mention=False)
+            embed = embed_templates.error_fatal(ctx, text=f'{command} is not a command')
+            return await ctx.send(embed=embed)
 
-        embed = discord.Embed(color=ctx.me.color, description='Fjernet cooldown!')
+        embed = discord.Embed(color=ctx.me.color, description='Cooldown reset!')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True, external_emojis=True)
     @commands.is_owner()
     @commands.command()
     async def allemoji(self, ctx):
-        """Se alle emoji båtten har tilgang til"""
+        """
+        Sends all emoji the bot has access to
+        """
 
         embed = discord.Embed(colour=ctx.me.color)
-        await Defaults.set_footer(ctx, embed)
 
         emoji_string = ''
         for guild in self.bot.guilds:
@@ -346,16 +353,6 @@ class DevTools(commands.Cog):
 
         embed.description = emoji_string
         await ctx.send(embed=embed)
-
-    @commands.bot_has_permissions()
-    @commands.is_owner()
-    @commands.command()
-    async def deletemsg(self, channel_id: int, message_id: int):
-        """Slett melding"""
-
-        channel = self.bot.get_channel(channel_id)
-        msg = await channel.fetch_message(message_id)
-        await msg.delete()
 
 
 def setup(bot):

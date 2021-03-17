@@ -2,33 +2,20 @@
 bot:
   token: 
   prefix: '-'
-  presence: Voldtekt av API-er
-  presence_activity: watching
+  presence:
+    message: Voldtekt av API-er
+    activity: watching
 
-# API Keys
-osu_api_key: 
+# API
+api:
+  osu_v1:
+    key:
+  osu_v2:
+    client_id:
+    redirect
 
 # Database
-database: mongodb://username:password@ip:port/osu-rank-tracker
-
-# Guild
-guild: 565230012366848000
-set_channel: 569615483184349193
-
-roles:
-  anti-server-pass: 570277507580952576
-  dansk: 570154443216125954
-  svensk: 570154387364642836
-  digit_1: 565270960077275146
-  digit_2: 565230048278347776
-  digit_3: 565230052380246046
-  digit_4: 565230057338044446
-  digit_5: 565230062010368010
-  digit_6: 565232469322760223
-  osu: 565270262614851615
-  mania: 565279322756087868
-  taiko: 565279360681115668
-  ctb: 565279393392361487
+database: 
 
 # Emoji
 emoji:
