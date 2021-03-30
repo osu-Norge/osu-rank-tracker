@@ -1,21 +1,25 @@
 # Bot settings
 bot:
   token: 
-  prefix: '-'
+  prefix: 'o!'
   presence:
-    message: Voldtekt av API-er
+    message: API Abuse
     activity: watching
 
 # API
 api:
   osu_v1:
-    key:
+    key: 
   osu_v2:
-    client_id:
-    redirect
+    client_id: 
+    redirect_uri: 
 
 # Database
-database: 
+database:
+  host: 127.0.0.1
+  dbname: 
+  username: 
+  password: 
 
 # Emoji
 emoji:
