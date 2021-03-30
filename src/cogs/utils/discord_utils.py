@@ -15,7 +15,10 @@ def get_user_color(user: discord.User) -> discord.Color:
 
     """
 
-    if str(user.color) != '#000000':
-        return user.color
+    try:
+        if str(user.color) != '#000000':
+            return user.color
+    except AttributeError:
+        pass
 
     return discord.Colour(0x99AAB5)
