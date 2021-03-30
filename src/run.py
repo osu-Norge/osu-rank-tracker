@@ -8,24 +8,29 @@ from os import listdir
 import locale
 from time import time
 
+from cogs.utils.database import Guild
+
 
 locale.setlocale(locale.LC_ALL, '')
 
 with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
 
-intents = discord.Intents.default()
-intents.guilds = True
-intents.members = True
-intents.messages = True
-intents.presences = True
-intents.emojis = True
+intents = discord.Intents.all()
+
+
+async def get_prefix(bot, message):
+    guild_prefix = Guild(message.guild.id).prefix
+    print(guild_prefix)
+    if guild_prefix:
+        return commands.when_mentioned_or(guild_prefix)(bot, message)
+    else:
+        return commands.when_mentioned_or(config['bot']['prefix'])(bot, message)
 
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or(config['bot']['prefix']),
-                         case_insensitive=True, intents=intents)
+        super().__init__(command_prefix=get_prefix, case_insensitive=True, intents=intents)
 
         self.prefix = config['bot']['prefix']
         self.presence = config['bot'].get('presence', {})
@@ -46,7 +51,7 @@ activities = {
     'watching': 3
 }
 if bot.presence['activity'].lower() in activities:
-    activity_type = activities[bot.presence['activity']]
+    activity_type = activities[bot.presence['activity'].lower()]
 else:
     activity_type = 0
 
