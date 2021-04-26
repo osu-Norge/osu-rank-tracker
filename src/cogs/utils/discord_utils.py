@@ -12,7 +12,6 @@ def get_user_color(user: discord.User) -> discord.Color:
     Returns
     -----------
     (discord.Color): The user's displayed color
-
     """
 
     try:
