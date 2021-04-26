@@ -5,9 +5,7 @@ import yaml
 class Database:
     def __init__(self) -> None:
         with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
-            config = yaml.load(f, Loader=yaml.SafeLoader)
-
-        self.db = config.get('database', {})
+            self.db = yaml.load(f, Loader=yaml.SafeLoader).get('database', {})
 
         connection = psycopg2.connect(
             host=self.db['host'],
@@ -15,7 +13,6 @@ class Database:
             user=self.db['username'],
             password=self.db['password']
         )
-
         self.cursor = connection.cursor()
 
 
