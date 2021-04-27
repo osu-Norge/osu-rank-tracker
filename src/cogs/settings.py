@@ -55,6 +55,11 @@ class Settings(commands.Cog):
         """
 
         guild = Guild(ctx.guild.id)
+
+        if await guild.is_country_whitelisted(country_code):
+            embed = await embed_templates.error_warning(ctx, text='Country is already in the whitelist')
+            return await ctx.send(embed=embed)
+
         await guild.whitelist_add(country_code)
 
         embed = discord.Embed(color=discord.Color.green())
@@ -68,6 +73,11 @@ class Settings(commands.Cog):
         """
 
         guild = Guild(ctx.guild.id)
+
+        if not await guild.is_country_whitelisted(country_code):
+            embed = await embed_templates.error_warning(ctx, text='Country is not in the whitelist')
+            return await ctx.send(embed=embed)
+
         await guild.whitelist_remove(country_code)
 
         embed = discord.Embed(color=discord.Color.green())
