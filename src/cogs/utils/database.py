@@ -53,6 +53,22 @@ class Guild(Database):
         if response:
             return response[0]
 
+    async def set_prefix(self, prefix: str) -> None:
+        """
+        Sets the guild prefix
+
+        Parameters
+        ----------
+        prefix (str): The desired prefix
+
+        Returns
+        -----------
+        str: The guild's prefix
+        """
+
+        self.cursor.execute('UPDATE guild SET prefix=(%s)  WHERE discord_id=%s', (prefix, self.id))
+        self.connection.commit()
+
     async def get_locale(self) -> str:
         """
         Fetches the guild's locale
