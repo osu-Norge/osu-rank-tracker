@@ -8,8 +8,8 @@ async def paginator(content: list, page: int) -> Dict[str, Union[int, str]]:
 
     Parameters
     -----------
-    content: A list of strings
-    page: The page
+    content (list): A list of strings
+    page (int): The page
 
     Returns
     -----------
