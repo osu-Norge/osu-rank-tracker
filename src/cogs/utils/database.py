@@ -1,6 +1,8 @@
 import psycopg2
 import yaml
 
+from cogs.utils.osu_utils import get_gamemode_id
+
 
 class Database:
     def __init__(self) -> None:
@@ -96,34 +98,95 @@ class Guild(Database):
             return True
 
 
-    class Channel(Database):
-        def __init__(self) -> None:
-            super().__init__()
-            self.id = id
-        
-        async def get_all(self) -> tuple:
-            """
-            Fetches all the info about a channel in the database
+class User(Database):
+    def __init__(self) -> None:
+        super().__init__()
+        self.id = id
+    
+    async def get_all(self) -> tuple:
+        """
+        Fetches all the info about a user in the database
 
-            Returns
-            -----------
-            tuple: Database row
-            """
+        Returns
+        -----------
+        tuple: Database row
+        """
 
-            self.cursor.execute('SELECT * FROM channel WHERE discord_id=%s', ([self.id]))
-            return self.cursor.fetchone()
+        self.cursor.execute('SELECT * FROM user WHERE discord_id=%s', ([self.id]))
+        return self.cursor.fetchone()
 
-        @property
-        async def clean_after_message_id(self) -> int:
-            """
-            Fetches the message id that the bot will remove all messages after in the specified channel
+    @property
+    async def osu_id(self) -> int:
+        """
+        Fetches the user's osu user id
 
-            Returns
-            -----------
-            int: The Discord message id that the bot will delete all messages after in the channel
-            """
+        Returns
+        -----------
+        int: The user's registered osu id
+        """
 
-            self.cursor.execute('SELECT clean_after_message_id FROM channel WHERE discord_id=%s', ([self.id]))
-            response = self.cursor.fetchone()
-            if response:
-                return response[0]
+        self.cursor.execute('SELECT osu_id FROM channel WHERE discord_id=%s', ([self.id]))
+        response = self.cursor.fetchone()
+        if response:
+            return response[0]
+
+    @property
+    async def gamemode(self) -> int:
+        """
+        Fetches the user's set osu gamemode id
+
+        Returns
+        -----------
+        int: The user's set gamemode
+        """
+
+        self.cursor.execute('SELECT gamemode FROM channel WHERE discord_id=%s', ([self.id]))
+        response = self.cursor.fetchone()
+        if response:
+            return response[0]
+
+    @property
+    async def gamemode_name(self) -> str:
+        """
+        Fetches the user's set osu gamemode and converts the id to a readable name
+
+        Returns
+        -----------
+        str: The user's set gamemode name
+        """
+
+        gamemode_id = await self.gamemode
+        return get_gamemode_id(gamemode_id)
+
+
+class Channel(Database):
+    def __init__(self) -> None:
+        super().__init__()
+        self.id = id
+    
+    async def get_all(self) -> tuple:
+        """
+        Fetches all the info about a channel in the database
+
+        Returns
+        -----------
+        tuple: Database row
+        """
+
+        self.cursor.execute('SELECT * FROM channel WHERE discord_id=%s', ([self.id]))
+        return self.cursor.fetchone()
+
+    @property
+    async def clean_after_message_id(self) -> int:
+        """
+        Fetches the message id that the bot will remove all messages after in the specified channel
+
+        Returns
+        -----------
+        int: The Discord message id that the bot will delete all messages after in the channel
+        """
+
+        self.cursor.execute('SELECT clean_after_message_id FROM channel WHERE discord_id=%s', ([self.id]))
+        response = self.cursor.fetchone()
+        if response:
+            return response[0]
