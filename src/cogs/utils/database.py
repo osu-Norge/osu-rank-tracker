@@ -21,7 +21,7 @@ class Guild(Database):
         super().__init__()
         self.id = id
 
-    async def get_all(self):
+    async def get_all(self) -> tuple:
         self.cursor.execute('SELECT * FROM guild WHERE discord_id=%s', ([self.id]))
         return self.cursor.fetchone()
 
