@@ -106,7 +106,7 @@ class Settings(commands.Cog):
             return await ctx.send(embed=embed)
 
         embed = discord.Embed()
-        embed.description = whitelist
+        embed.description = whitelist_string
         await ctx.send(embed=embed)
 
 
