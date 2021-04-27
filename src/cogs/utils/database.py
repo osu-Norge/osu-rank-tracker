@@ -9,19 +9,23 @@ class Database:
         with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
             self.db = yaml.load(f, Loader=yaml.SafeLoader).get('database', {})
 
-        connection = psycopg2.connect(
+        self.connection = psycopg2.connect(
             host=self.db['host'],
             dbname=self.db['dbname'],
             user=self.db['username'],
             password=self.db['password']
         )
-        self.cursor = connection.cursor()
-
+        self.cursor = self.connection.cursor()
 
 class Guild(Database):
     def __init__(self, id: int) -> None:
         super().__init__()
         self.id = id
+
+        try:
+            self.cursor.execute('INSERT INTO guild VALUES (%s)', (id,))
+        except psycopg2.errors.UniqueViolation:
+            self.connection.commit()
 
     async def get_all(self) -> tuple:
         """
