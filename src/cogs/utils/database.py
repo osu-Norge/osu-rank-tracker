@@ -63,7 +63,7 @@ class Guild(Database):
 
         Returns
         -----------
-        str: The guild's prefix
+        None
         """
 
         self.cursor.execute('UPDATE guild SET prefix=(%s)  WHERE discord_id=%s', (prefix, self.id))
