@@ -14,7 +14,11 @@ async def paginator(lst: list, page: int) -> Dict[str, Union[int, str]]:
     Returns
     -----------
     dict: A dictionay containing content and metadata
-        keys: pagecount, page, page_content
+        {
+            pagecount: int
+            page: int
+            page_content: str
+        }
     """
 
     pagecount = ceil(len(lst) / 10)
