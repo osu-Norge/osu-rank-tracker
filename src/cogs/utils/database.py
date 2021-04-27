@@ -97,6 +97,20 @@ class Guild(Database):
         if response:
             return response[0]
 
+    async def get_whitelist(self) -> tuple:
+        """
+        Fetches the list of whitelisted countries
+
+        Returns
+        -----------
+        tuple: The whitelisted countries
+        """
+
+        self.cursor.execute('SELECT whitelisted_countries FROM guild WHERE discord_id=%s', ([self.id]))
+        response = self.cursor.fetchone()
+        if response:
+            return response[0]
+
     async def is_country_whitelisted(self, country_code: str) -> bool:
         """
         Checks whether or not a specified country code is in the list of whitelisted countries
@@ -114,6 +128,48 @@ class Guild(Database):
         response = self.cursor.fetchone()
         if response and country_code in response:
             return True
+
+    async def whitelist_add(self, country_code: str) -> None:
+        """
+        Adds a country to the whitelist
+
+        Parameters
+        ----------
+        country_code (str): ISO 3166-1 Alpha-2 country code
+
+        Returns
+        -----------
+        None
+        """
+
+        self.cursor.execute(
+            'UPDATE guild ' +
+            'SET whitelisted_countries=array_append(whitelisted_countries, %s) ' + 
+            'WHERE discord_id=%s', 
+            (country_code, self.id)
+        )
+        self.connection.commit()
+
+    async def whitelist_remove(self, country_code: str) -> None:
+        """
+        Removes a country from the whitelist
+
+        Parameters
+        ----------
+        country_code (str): ISO 3166-1 Alpha-2 country code
+
+        Returns
+        -----------
+        None
+        """
+
+        self.cursor.execute(
+            'UPDATE guild ' +
+            'SET whitelisted_countries=array_remove(whitelisted_countries, %s) ' + 
+            'WHERE discord_id=%s', 
+            (country_code, self.id)
+        )
+        self.connection.commit()
 
 
 class User(Database):
