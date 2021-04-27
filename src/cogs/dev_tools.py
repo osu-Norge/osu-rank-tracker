@@ -53,7 +53,7 @@ class DevTools(commands.Cog):
 
         guild_list = [f'{guild.name} - {guild.id}' for guild in self.bot.guilds]
 
-        page_data = misc_utils.paginator(guild_list, int(page))
+        page_data = await misc_utils.paginator(guild_list, int(page))
         page = page_data['page']
         pagecount = page_data['pagecount']
         guilds = '\n'.join(page_data['page_content'])
@@ -72,7 +72,7 @@ class DevTools(commands.Cog):
         """
 
         user_list = [f'{user.name}#{user.discriminator} - {user.id}' for user in self.bot.users]
-        page_data = misc_utils.paginator(user_list, int(page))
+        page_data = await misc_utils.paginator(user_list, int(page))
 
         pagecount = page_data['pagecount']
         page = page_data['page']
