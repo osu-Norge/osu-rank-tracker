@@ -58,28 +58,28 @@ class Errors(commands.Cog):
 
         elif isinstance(error, commands.BotMissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            embed = embed_templates.error_warning(ctx, text='I require the following permissions:\n\n' +
+            embed = await embed_templates.error_warning(ctx, text='I require the following permissions:\n\n' +
                                                             f'```\n{permissions}\n```')
             return await ctx.send(embed=embed)
 
         elif isinstance(error, commands.MissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            embed = embed_templates.error_warning(ctx, text='You are missing permissions\n\n' +
+            embed = await embed_templates.error_warning(ctx, text='You are missing permissions\n\n' +
                                                             f'```\n{permissions}\n```')
             return await ctx.send(embed=embed)
 
         elif isinstance(error, commands.NotOwner):
-            embed = embed_templates.error_fatal(ctx, text='Only bot owners can execute this command')
+            embed = await embed_templates.error_fatal(ctx, text='Only bot owners can execute this command')
             return await ctx.send(embed=embed)
 
         elif isinstance(error, commands.CommandOnCooldown):
-            embed = embed_templates.error_warning(ctx, text='Command is currently on cooldown.' +
+            embed = await embed_templates.error_warning(ctx, text='Command is currently on cooldown.' +
                                                             f'Retry in `{error.retry_after:.1f}` seconds.')
             return await ctx.send(embed=embed)
 
         elif isinstance(error, commands.NoPrivateMessage):
             try:
-                embed = embed_templates.error_fatal(ctx, text='This command can only be used in guilds')
+                embed = await embed_templates.error_fatal(ctx, text='This command can only be used in guilds')
                 return await ctx.send(embed=embed)
             except discord.errors.Forbidden:  # Thrown if bot is blocked by the user or if the user has closed their DMs
                 print("DM Blocked!")
@@ -90,7 +90,7 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.CheckFailure):
             return
 
-        embed = embed_templates.error_fatal(ctx, text='An unknow error occured!')
+        embed = await embed_templates.error_fatal(ctx, text='An unknow error occured!')
         await ctx.send(embed=embed)
 
         # Print full exception to console

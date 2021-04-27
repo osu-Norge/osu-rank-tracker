@@ -2,7 +2,7 @@ from typing import Union, Dict
 from math import ceil
 
 
-def paginator(lst: list, page: int) -> Dict[str, Union[int, str]]:
+async def paginator(lst: list, page: int) -> Dict[str, Union[int, str]]:
     """
     Divides content into 10 element pages
 

@@ -1,4 +1,4 @@
-def get_gamemode_id(gamemode: str) -> str:
+async def get_gamemode_id(gamemode: str) -> str:
     """
     Translates the osu! gamemode names to their respective values
 
@@ -36,7 +36,7 @@ def get_gamemode_id(gamemode: str) -> str:
         return gamemodes[gamemode]
 
 
-def get_gamemode_name(gamemode: str) -> str:
+async def get_gamemode_name(gamemode: str) -> str:
     """
     Converts gamemode id to its name
 
@@ -58,7 +58,7 @@ def get_gamemode_name(gamemode: str) -> str:
     return gamemodes[gamemode]
 
 
-def get_gamemode_url(gamemode_id: int) -> str:
+async def get_gamemode_url(gamemode_id: int) -> str:
     """
     Converts gamemode id to url name
 
@@ -80,7 +80,7 @@ def get_gamemode_url(gamemode_id: int) -> str:
     return gamemode_url[gamemode_id]
 
 
-def validate_rank(pp_rank: str) -> int:
+async def validate_rank(pp_rank: str) -> int:
     """
     Checks whether or not the given rank is a int and in the correct range
 

@@ -65,7 +65,7 @@ class Info(commands.Cog):
         embed.set_author(name=dev.name, icon_url=dev.avatar_url)
         embed.set_thumbnail(url=self.bot.user.avatar_url)
         embed.add_field(name='Dev', value=f'{dev.mention}\n{dev.name}#{dev.discriminator}')
-        embed.add_field(name='Uptime', value=self.get_uptime())
+        embed.add_field(name='Uptime', value=await self.get_uptime())
         embed.add_field(name='Ping', value=f'Ekte ping: {ping} ms\nWebsocket ping: {int(self.bot.latency * 1000)} ms')
         embed.add_field(name='Guilds', value=len(self.bot.guilds))
         embed.add_field(name='Discord.py', value=discord.__version__)
@@ -81,7 +81,7 @@ class Info(commands.Cog):
                               f'{self.bot.emoji["offline"]}{len(offline_members)}')
         embed.add_field(name='Links', value=f'[Website]({self.bot.misc["website"]}) | ' +
                                             f'[Source code]({self.bot.misc["source_code"]})')
-        embed_templates.default_footer(ctx, embed)
+        await embed_templates.default_footer(ctx, embed)
         await status_msg.edit(embed=embed, content=None)
 
     @commands.bot_has_permissions(embed_links=True)
@@ -93,8 +93,8 @@ class Info(commands.Cog):
         """
 
         embed = discord.Embed(color=ctx.me.color)
-        embed.add_field(name='🔌 Uptime', value=self.get_uptime())
-        embed_templates.default_footer(ctx, embed)
+        embed.add_field(name='🔌 Uptime', value=await self.get_uptime())
+        await embed_templates.default_footer(ctx, embed)
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
@@ -115,7 +115,7 @@ class Info(commands.Cog):
             name='📶 Ping',
             value=f'**Ekte ping:** {ping} ms\n**Websocket ping:** {int(self.bot.latency * 1000)} ms'
         )
-        embed_templates.default_footer(ctx, embed)
+        await embed_templates.default_footer(ctx, embed)
         await status_msg.edit(embed=embed, content=None)
 
     @commands.is_owner()
@@ -125,7 +125,7 @@ class Info(commands.Cog):
         """Sjekk antall registrerte brukere og status til databasen"""
         pass
 
-    def get_uptime(self):
+    async def get_uptime(self):
         """
         Returns the current uptime of the bot in string format
         """

@@ -99,7 +99,7 @@ class DevTools(commands.Cog):
                     embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been disabled')
                     return await ctx.send(embed=embed)
 
-        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        embed = await embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
@@ -118,7 +118,7 @@ class DevTools(commands.Cog):
                     embed = discord.Embed(color=ctx.me.color, description=f'{cog} loaded')
                     return await ctx.send(embed=embed)
 
-        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        embed = await embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
@@ -137,7 +137,7 @@ class DevTools(commands.Cog):
                     embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been reloaded')
                     return await ctx.send(embed=embed)
 
-        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        embed = await embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
@@ -156,7 +156,7 @@ class DevTools(commands.Cog):
                     embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been reloaded')
                     return await ctx.send(embed=embed)
 
-        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        embed = await embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
         await ctx.send(embed=embed)
 
     @commands.bot_has_permissions(embed_links=True)
@@ -292,7 +292,7 @@ class DevTools(commands.Cog):
         try:
             guild = await self.bot.fetch_guild(guild_id)
         except discord.errors.Forbidden:
-            embed = embed_templates.error_fatal(ctx, text='Bot is not a member of this guild')
+            embed = await embed_templates.error_fatal(ctx, text='Bot is not a member of this guild')
             return await ctx.send(embed=embed)
 
         confirmation_msg = await ctx.send(f'Do you want to leave {guild.name} (`{guild.id}`)?')
@@ -325,7 +325,7 @@ class DevTools(commands.Cog):
         try:
             self.bot.get_command(command).reset_cooldown(ctx)
         except AttributeError:
-            embed = embed_templates.error_fatal(ctx, text=f'{command} is not a command')
+            embed = await embed_templates.error_fatal(ctx, text=f'{command} is not a command')
             return await ctx.send(embed=embed)
 
         embed = discord.Embed(color=ctx.me.color, description='Cooldown reset!')

@@ -1,7 +1,7 @@
 import discord
 
 
-def default_footer(ctx: discord.ext.commands.Context, embed: discord.Embed) -> discord.Embed:
+async def default_footer(ctx: discord.ext.commands.Context, embed: discord.Embed) -> discord.Embed:
     """
     Sets a footer containing the command invoker's name, discriminator and avatar
 
@@ -18,7 +18,7 @@ def default_footer(ctx: discord.ext.commands.Context, embed: discord.Embed) -> d
     return embed.set_footer(icon_url=ctx.author.avatar_url, text=f'{ctx.author.name}#{ctx.author.discriminator}')
 
 
-def error_warning(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
+async def error_warning(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
     """
     Creates an embed with a specified error message based on a warning template
 
@@ -33,12 +33,12 @@ def error_warning(ctx: discord.ext.commands.Context, text: str) -> discord.Embed
     """
 
     embed = discord.Embed(color=discord.Color.gold(), description=f'⚠️ {text}')
-    default_footer(ctx, embed)
+    await default_footer(ctx, embed)
 
     return embed
 
 
-def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
+async def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
     """
     Creates an embed with a specified error message based on a warning template
 
@@ -53,6 +53,6 @@ def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
     """
 
     embed = discord.Embed(color=discord.Color.red(), description=f'❌ {text}')
-    default_footer(ctx, embed)
+    await default_footer(ctx, embed)
 
     return embed

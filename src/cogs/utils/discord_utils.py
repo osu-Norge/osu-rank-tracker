@@ -1,7 +1,7 @@
 import discord
 
 
-def get_user_color(user: discord.User) -> discord.Color:
+async def get_user_color(user: discord.User) -> discord.Color:
     """
     Returns the user's top role color
 
