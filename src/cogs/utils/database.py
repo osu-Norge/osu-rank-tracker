@@ -102,7 +102,7 @@ class User(Database):
     def __init__(self) -> None:
         super().__init__()
         self.id = id
-    
+
     async def get_all(self) -> tuple:
         """
         Fetches all the info about a user in the database
@@ -163,7 +163,7 @@ class Channel(Database):
     def __init__(self) -> None:
         super().__init__()
         self.id = id
-    
+
     async def get_all(self) -> tuple:
         """
         Fetches all the info about a channel in the database
