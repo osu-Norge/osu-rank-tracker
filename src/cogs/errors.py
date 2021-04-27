@@ -59,13 +59,13 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.BotMissingPermissions):
             permissions = ', '.join(error.missing_perms)
             embed = await embed_templates.error_warning(ctx, text='I require the following permissions:\n\n' +
-                                                            f'```\n{permissions}\n```')
+                                                                  f'```\n{permissions}\n```')
             return await ctx.send(embed=embed)
 
         elif isinstance(error, commands.MissingPermissions):
             permissions = ', '.join(error.missing_perms)
             embed = await embed_templates.error_warning(ctx, text='You are missing permissions\n\n' +
-                                                            f'```\n{permissions}\n```')
+                                                                  f'```\n{permissions}\n```')
             return await ctx.send(embed=embed)
 
         elif isinstance(error, commands.NotOwner):
@@ -74,7 +74,7 @@ class Errors(commands.Cog):
 
         elif isinstance(error, commands.CommandOnCooldown):
             embed = await embed_templates.error_warning(ctx, text='Command is currently on cooldown.' +
-                                                            f'Retry in `{error.retry_after:.1f}` seconds.')
+                                                                  f'Retry in `{error.retry_after:.1f}` seconds.')
             return await ctx.send(embed=embed)
 
         elif isinstance(error, commands.NoPrivateMessage):
