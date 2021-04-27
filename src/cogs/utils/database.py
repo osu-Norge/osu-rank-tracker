@@ -94,3 +94,36 @@ class Guild(Database):
         response = self.cursor.fetchone()
         if response and country_code in response:
             return True
+
+
+    class Channel(Database):
+        def __init__(self) -> None:
+            super().__init__()
+            self.id = id
+        
+        async def get_all(self) -> tuple:
+            """
+            Fetches all the info about a channel in the database
+
+            Returns
+            -----------
+            tuple: Database row
+            """
+
+            self.cursor.execute('SELECT * FROM channel WHERE discord_id=%s', ([self.id]))
+            return self.cursor.fetchone()
+
+        @property
+        async def clean_after_message_id(self) -> int:
+            """
+            Fetches the message id that the bot will remove all messages after in the specified channel
+
+            Returns
+            -----------
+            int: The Discord message id that the bot will delete all messages after in the channel
+            """
+
+            self.cursor.execute('SELECT clean_after_message_id FROM channel WHERE discord_id=%s', ([self.id]))
+            response = self.cursor.fetchone()
+            if response:
+                return response[0]
