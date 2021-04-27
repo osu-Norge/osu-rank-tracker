@@ -8,7 +8,7 @@ async def get_gamemode_id(gamemode: str) -> str:
 
     Returns
     -----------
-    (int): gamemode id
+    int: gamemode id
     """
 
     if gamemode is None:
@@ -46,7 +46,7 @@ async def get_gamemode_name(gamemode: str) -> str:
 
     Returns
     -----------
-    (int): gamemode id
+    int: gamemode id
     """
 
     gamemodes = {
@@ -68,7 +68,7 @@ async def get_gamemode_url(gamemode_id: int) -> str:
 
     Returns
     -----------
-    (int): gamemode url name
+    int: gamemode url name
     """
 
     gamemode_url = {
@@ -90,7 +90,7 @@ async def validate_rank(pp_rank: str) -> int:
 
     Returns
     -----------
-    (int): The rank converted to integer
+    int: The rank converted to integer
     """
 
     try:

@@ -12,7 +12,7 @@ async def default_footer(ctx: discord.ext.commands.Context, embed: discord.Embed
 
     Returns
     -----------
-    (discord.Embed): The sent in embed + footer
+    discord.Embed: The sent in embed + footer
     """
 
     return embed.set_footer(icon_url=ctx.author.avatar_url, text=f'{ctx.author.name}#{ctx.author.discriminator}')
@@ -29,7 +29,7 @@ async def error_warning(ctx: discord.ext.commands.Context, text: str) -> discord
 
     Returns
     -----------
-    (discord.Embed): An embed object based on the template with the specified text
+    discord.Embed: An embed object based on the template with the specified text
     """
 
     embed = discord.Embed(color=discord.Color.gold(), description=f'⚠️ {text}')
@@ -49,7 +49,7 @@ async def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.E
 
     Returns
     -----------
-    (discord.Embed): An embed object based on the template with the specified text
+    discord.Embed: An embed object based on the template with the specified text
     """
 
     embed = discord.Embed(color=discord.Color.red(), description=f'❌ {text}')
