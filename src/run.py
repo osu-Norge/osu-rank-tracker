@@ -20,7 +20,7 @@ intents = discord.Intents.all()
 
 
 async def get_prefix(bot, message):
-    guild_prefix = await Guild(message.guild.id).prefix
+    guild_prefix = await Guild(message.guild.id).get_prefix()
     if guild_prefix:
         return commands.when_mentioned_or(guild_prefix)(bot, message)
     else:

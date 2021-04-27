@@ -35,8 +35,7 @@ class Guild(Database):
         self.cursor.execute('SELECT * FROM guild WHERE discord_id=%s', ([self.id]))
         return self.cursor.fetchone()
 
-    @property
-    async def prefix(self) -> str:
+    async def get_prefix(self) -> str:
         """
         Fetches the guild's prefix
 
@@ -50,8 +49,7 @@ class Guild(Database):
         if response:
             return response[0]
 
-    @property
-    async def locale(self) -> str:
+    async def get_locale(self) -> str:
         """
         Fetches the guild's locale
 
@@ -115,8 +113,7 @@ class User(Database):
         self.cursor.execute('SELECT * FROM user WHERE discord_id=%s', ([self.id]))
         return self.cursor.fetchone()
 
-    @property
-    async def osu_id(self) -> int:
+    async def get_osu_id(self) -> int:
         """
         Fetches the user's osu user id
 
@@ -130,8 +127,7 @@ class User(Database):
         if response:
             return response[0]
 
-    @property
-    async def gamemode(self) -> int:
+    async def get_gamemode(self) -> int:
         """
         Fetches the user's set osu gamemode id
 
@@ -145,8 +141,7 @@ class User(Database):
         if response:
             return response[0]
 
-    @property
-    async def gamemode_name(self) -> str:
+    async def get_gamemode_name(self) -> str:
         """
         Fetches the user's set osu gamemode and converts the id to a readable name
 
@@ -176,8 +171,7 @@ class Channel(Database):
         self.cursor.execute('SELECT * FROM channel WHERE discord_id=%s', ([self.id]))
         return self.cursor.fetchone()
 
-    @property
-    async def clean_after_message_id(self) -> int:
+    async def get_clean_after_message_id(self) -> int:
         """
         Fetches the message id that the bot will remove all messages after in the specified channel
 
