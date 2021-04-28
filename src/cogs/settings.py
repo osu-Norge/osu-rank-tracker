@@ -17,7 +17,7 @@ class Settings(commands.Cog):
         pass
 
     @commands.has_permissions(manage_guild=True)
-    @commands.group('settings')
+    @commands.group()
     async def settings(self, ctx):
         """
         Manage bot settings
