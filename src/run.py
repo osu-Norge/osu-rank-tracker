@@ -10,6 +10,8 @@ from time import time
 
 from cogs.utils.database import Guild, Database
 
+from typing import List
+
 
 locale.setlocale(locale.LC_ALL, '')
 
@@ -21,7 +23,19 @@ intents = discord.Intents.all()
 Database().init_db()
 
 
-async def get_prefix(bot, message):
+async def get_prefix(bot: commands.Bot, message: discord.Message) -> List[str]:
+    """
+    Fetches the on_message guild prefix from the database. If not found, it uses the default prefix.
+
+    Parameters
+    ----------
+    bot (commands.Bot): A bot instance
+    message (discord.Message): A Discord message object
+
+    Returns
+    ----------
+    list[str]: The list of prefixes. In this case the list contains a single prefix
+    """
     guild_prefix = await Guild(message.guild.id).get_prefix()
     if guild_prefix:
         return commands.when_mentioned_or(guild_prefix)(bot, message)
