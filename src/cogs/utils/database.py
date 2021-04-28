@@ -201,7 +201,7 @@ class Guild(Database):
             """
             UPDATE guilds
             SET whitelisted_countries=array_append(whitelisted_countries, %s) 
-            WHERE discord_id=%s'
+            WHERE discord_id=%s
             """,
             (country_code, self.id)
         )
@@ -224,7 +224,7 @@ class Guild(Database):
             """
             UPDATE guild
             SET whitelisted_countries=array_remove(whitelisted_countries, %s) 
-            WHERE discord_id=%s'
+            WHERE discord_id=%s
             """, 
             (country_code, self.id)
         )
