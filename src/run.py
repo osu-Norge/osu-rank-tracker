@@ -3,17 +3,13 @@ import discord
 
 from codecs import open
 import yaml
-
 from os import listdir
-import locale
 from time import time
 
 from cogs.utils.database import Guild, Database
 
 from typing import List
 
-
-locale.setlocale(locale.LC_ALL, '')
 
 with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
