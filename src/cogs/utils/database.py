@@ -40,10 +40,10 @@ class Database:
             CREATE TABLE IF NOT EXISTS guilds (
                 discord_id bigint NOT NULL PRIMARY KEY,
                 prefix varchar(255),
-                locale char[5],
+                locale char(5),
                 registration_channel bigint REFERENCES channels(discord_id),
                 oauth boolean,
-                whitelisted_countries text[],
+                whitelisted_countries char(2)[],
                 blacklisted_osu_users integer[],
                 role_moderator bigint,
                 role_1_digit bigint,
