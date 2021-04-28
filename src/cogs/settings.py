@@ -54,6 +54,8 @@ class Settings(commands.Cog):
         Add a country to the whitelist
         """
 
+        country_code = country_code.lower()
+
         guild = Guild(ctx.guild.id)
 
         if await guild.is_country_whitelisted(country_code):
@@ -71,6 +73,8 @@ class Settings(commands.Cog):
         """
         Remove a country from the whitelist
         """
+
+        country_code = country_code.lower()
 
         guild = Guild(ctx.guild.id)
 
