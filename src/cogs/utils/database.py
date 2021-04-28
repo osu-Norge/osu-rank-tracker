@@ -17,13 +17,68 @@ class Database:
         )
         self.cursor = self.connection.cursor()
 
+
+    def init_db(self) -> None:
+        """
+        Creates all the necessary tables in order for the bot to function
+
+        Returns
+        ----------
+        None
+        """
+
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS channels (
+                discord_id bigint NOT NULL PRIMARY KEY,
+                clean_after_message_id bigint
+            )
+            """
+        )
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS guilds (
+                discord_id bigint NOT NULL PRIMARY KEY,
+                prefix varchar(255),
+                locale char[5],
+                registration_channel bigint REFERENCES channels(discord_id),
+                oauth boolean,
+                whitelisted_countries text[],
+                blacklisted_osu_users integer[],
+                role_moderator bigint,
+                role_1_digit bigint,
+                role_2_digit bigint,
+                role_3_digit bigint,
+                role_4_digit bigint,
+                role_5_digit bigint,
+                role_6_digit bigint,
+                role_7_digit bigint,
+                role_standard bigint,
+                role_taiko bigint,
+                role_ctb bigint,
+                role_mania bigint
+            )
+            """
+        )
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                discord_id integer NOT NULL PRIMARY KEY,
+                osu_id integer,
+                gamemode smallint
+            )
+            """
+        )
+
+        self.connection.commit()
+
 class Guild(Database):
     def __init__(self, id: int) -> None:
         super().__init__()
         self.id = id
 
         try:
-            self.cursor.execute('INSERT INTO guild VALUES (%s)', (id,))
+            self.cursor.execute('INSERT INTO guilds VALUES (%s)', (id,))
         except psycopg2.errors.UniqueViolation:
             self.connection.commit()
 
@@ -36,7 +91,7 @@ class Guild(Database):
         tuple: Database row
         """
 
-        self.cursor.execute('SELECT * FROM guild WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT * FROM guilds WHERE discord_id=%s', ([self.id]))
         return self.cursor.fetchone()
 
     async def get_prefix(self) -> str:
@@ -48,7 +103,7 @@ class Guild(Database):
         str: The guild's prefix
         """
 
-        self.cursor.execute('SELECT prefix FROM guild WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT prefix FROM guilds WHERE discord_id=%s', ([self.id]))
         response = self.cursor.fetchone()
         if response:
             return response[0]
@@ -66,7 +121,7 @@ class Guild(Database):
         None
         """
 
-        self.cursor.execute('UPDATE guild SET prefix=(%s)  WHERE discord_id=%s', (prefix, self.id))
+        self.cursor.execute('UPDATE guilds SET prefix=(%s) WHERE discord_id=%s', (prefix, self.id))
         self.connection.commit()
 
     async def get_locale(self) -> str:
@@ -78,7 +133,7 @@ class Guild(Database):
         str: The guild's locale
         """
 
-        self.cursor.execute('SELECT locale FROM guild WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT locale FROM guilds WHERE discord_id=%s', ([self.id]))
         response = self.cursor.fetchone()
         if response:
             return response[0]
@@ -92,7 +147,7 @@ class Guild(Database):
         bool
         """
 
-        self.cursor.execute('SELECT oauth FROM guild WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT oauth FROM guilds WHERE discord_id=%s', ([self.id]))
         response = self.cursor.fetchone()
         if response:
             return response[0]
@@ -106,7 +161,7 @@ class Guild(Database):
         tuple: The whitelisted countries
         """
 
-        self.cursor.execute('SELECT whitelisted_countries FROM guild WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT whitelisted_countries FROM guilds WHERE discord_id=%s', ([self.id]))
         response = self.cursor.fetchone()
         if response:
             return response[0]
@@ -124,7 +179,7 @@ class Guild(Database):
         bool
         """
 
-        self.cursor.execute('SELECT whitelisted_countries FROM guild WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT whitelisted_countries FROM guilds WHERE discord_id=%s', ([self.id]))
         response = self.cursor.fetchone()
         if response and country_code in response:
             return True
@@ -143,9 +198,11 @@ class Guild(Database):
         """
 
         self.cursor.execute(
-            'UPDATE guild ' +
-            'SET whitelisted_countries=array_append(whitelisted_countries, %s) ' + 
-            'WHERE discord_id=%s', 
+            """
+            UPDATE guilds
+            SET whitelisted_countries=array_append(whitelisted_countries, %s) 
+            WHERE discord_id=%s'
+            """,
             (country_code, self.id)
         )
         self.connection.commit()
@@ -164,9 +221,11 @@ class Guild(Database):
         """
 
         self.cursor.execute(
-            'UPDATE guild ' +
-            'SET whitelisted_countries=array_remove(whitelisted_countries, %s) ' + 
-            'WHERE discord_id=%s', 
+            """
+            UPDATE guild
+            SET whitelisted_countries=array_remove(whitelisted_countries, %s) 
+            WHERE discord_id=%s'
+            """, 
             (country_code, self.id)
         )
         self.connection.commit()
@@ -186,7 +245,7 @@ class User(Database):
         tuple: Database row
         """
 
-        self.cursor.execute('SELECT * FROM user WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT * FROM users WHERE discord_id=%s', ([self.id]))
         return self.cursor.fetchone()
 
     async def get_osu_id(self) -> int:
@@ -198,7 +257,7 @@ class User(Database):
         int: The user's registered osu id
         """
 
-        self.cursor.execute('SELECT osu_id FROM channel WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT osu_id FROM users WHERE discord_id=%s', ([self.id]))
         response = self.cursor.fetchone()
         if response:
             return response[0]
@@ -212,7 +271,7 @@ class User(Database):
         int: The user's set gamemode
         """
 
-        self.cursor.execute('SELECT gamemode FROM channel WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT gamemode FROM users WHERE discord_id=%s', ([self.id]))
         response = self.cursor.fetchone()
         if response:
             return response[0]
@@ -244,7 +303,7 @@ class Channel(Database):
         tuple: Database row
         """
 
-        self.cursor.execute('SELECT * FROM channel WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT * FROM channels WHERE discord_id=%s', ([self.id]))
         return self.cursor.fetchone()
 
     async def get_clean_after_message_id(self) -> int:
@@ -256,7 +315,7 @@ class Channel(Database):
         int: The Discord message id that the bot will delete all messages after in the channel
         """
 
-        self.cursor.execute('SELECT clean_after_message_id FROM channel WHERE discord_id=%s', ([self.id]))
+        self.cursor.execute('SELECT clean_after_message_id FROM channels WHERE discord_id=%s', ([self.id]))
         response = self.cursor.fetchone()
         if response:
             return response[0]

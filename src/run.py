@@ -8,7 +8,7 @@ from os import listdir
 import locale
 from time import time
 
-from cogs.utils.database import Guild
+from cogs.utils.database import Guild, Database
 
 
 locale.setlocale(locale.LC_ALL, '')
@@ -17,6 +17,8 @@ with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
 
 intents = discord.Intents.all()
+
+Database().init_db()
 
 
 async def get_prefix(bot, message):
