@@ -97,16 +97,14 @@ class Settings(commands.Cog):
             embed = await embed_templates.error_warning(ctx, text='No countries are whitelisted!')
             return await ctx.send(embed=embed)
 
-        whitelist_string = ''
-        for country in whitelist:
-            whitelist_string += f'`{country}`\n'
+        whitelist = [f'`{country}`' for country in whitelist]
 
         if len(whitelist) > 2048:
             embed = await embed_templates.error_warning(ctx, text='Whitelist is too long to be displayed!')
             return await ctx.send(embed=embed)
 
         embed = discord.Embed()
-        embed.description = whitelist_string
+        embed.description = ', '.join(whitelist)
         await ctx.send(embed=embed)
 
 
