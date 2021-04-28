@@ -32,6 +32,10 @@ class Settings(commands.Cog):
         Set the serverprefix
         """
 
+        if len(prefix) > 255:
+            embed = await embed_templates.error_warning(ctx, text='Maximum prefix length is 255 characters')
+            return await ctx.send(embed=embed)
+
         guild = Guild(ctx.guild.id)
         await guild.set_prefix(prefix)
 
