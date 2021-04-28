@@ -58,6 +58,13 @@ class Settings(commands.Cog):
         Add a country to the whitelist
         """
 
+        if len(country_code) != 2:
+            embed = await embed_templates.error_warning(
+                ctx, text='Make sure the country code is in the correct format\n\n' +
+                          'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
+            )
+            return await ctx.send(embed=embed)
+
         country_code = country_code.lower()
 
         guild = Guild(ctx.guild.id)
