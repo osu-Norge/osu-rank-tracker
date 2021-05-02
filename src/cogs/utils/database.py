@@ -46,6 +46,8 @@ class Database:
                 whitelisted_countries char(2)[],
                 blacklisted_osu_users integer[],
                 role_moderator bigint,
+                role_remove bigint,
+                role_add bigint,
                 role_1_digit bigint,
                 role_2_digit bigint,
                 role_3_digit bigint,
