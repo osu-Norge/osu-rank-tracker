@@ -81,8 +81,10 @@ class Guild(Database):
 
         try:
             self.cursor.execute('INSERT INTO guilds VALUES (%s)', (id,))
-        except psycopg2.errors.UniqueViolation:
             self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+
 
     async def get_all(self) -> tuple:
         """
