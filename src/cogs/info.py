@@ -7,6 +7,7 @@ from os import getpid, environ
 from psutil import Process
 
 from cogs.utils import embed_templates
+from cogs.utils.database import Database
 
 
 class Info(commands.Cog):
@@ -122,8 +123,26 @@ class Info(commands.Cog):
     @commands.bot_has_permissions(embed_links=True)
     @commands.command(aliases=['databaseinfo', 'db', 'database'])
     async def dbinfo(self, ctx):
-        """Sjekk antall registrerte brukere og status til databasen"""
-        pass
+        """
+        Get information about the database and its contents
+        """
+
+        database = Database()
+
+        start = perf_counter()
+        guilds = await database.get_guilds()
+        users = await database.get_users()
+        end = perf_counter()
+
+        ping = round((end - start) * 1000, 2)
+        version = await database.get_version()
+
+        embed = discord.Embed(color=ctx.me.color)
+        embed.add_field(name='Database', value=version)
+        embed.add_field(name='Users & Guilds query time', value=f'{ping} ms', inline=False)
+        embed.add_field(name='Total users', value=len(users))
+        embed.add_field(name='Total guilds', value=len(guilds))
+        await ctx.send(embed=embed)
 
     async def get_uptime(self):
         """

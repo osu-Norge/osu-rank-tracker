@@ -76,6 +76,19 @@ class Database:
 
         self.connection.commit()
 
+    async def get_version(self) -> str:
+        """
+        Fetches the database server version number
+
+        Returns
+        ----------
+        str: The database driver name and its version number
+        """
+        
+        self.cursor.execute('SELECT VERSION()')
+        version = self.cursor.fetchone()[0].split(' ')[:2]
+        return ' '.join(version)
+
     async def get_guilds(self) -> List[tuple]:
         """
         Fetches all the entries in the guild table
