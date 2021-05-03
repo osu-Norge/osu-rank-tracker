@@ -3,6 +3,8 @@ import yaml
 
 from cogs.utils.osu_utils import get_gamemode_id
 
+from typing import List
+
 
 class Database:
     def __init__(self) -> None:
@@ -73,6 +75,43 @@ class Database:
         )
 
         self.connection.commit()
+
+    async def get_guilds(self) -> List[tuple]:
+        """
+        Fetches all the entries in the guild table
+
+        Returns
+        -----------
+        List[tuple]: Table rows
+        """
+
+        self.cursor.execute('SELECT * FROM guilds')
+        return self.cursor.fetchall()
+
+    async def get_users(self) -> List[tuple]:
+        """
+        Fetches all the entries in the users table
+
+        Returns
+        -----------
+        List[tuple]: Table rows
+        """
+
+        self.cursor.execute('SELECT * FROM users')
+        return self.cursor.fetchall()
+
+    async def get_channels(self) -> List[tuple]:
+        """
+        Fetches all the entries in the channels table
+
+        Returns
+        -----------
+        List[tuple]: Table rows
+        """
+
+        self.cursor.execute('SELECT * FROM channels')
+        return self.cursor.fetchall()
+
 
 class Guild(Database):
     def __init__(self, id: int) -> None:
