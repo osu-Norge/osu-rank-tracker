@@ -71,7 +71,8 @@ activities = {
 if bot.presence['activity'].lower() in activities:
     activity_type = activities[bot.presence['activity'].lower()]
 else:
-    print('Presence activity type is not valid. Check your config file! Falling back to default activity type (playing).')
+    print('Presence activity type is not valid. Check your config file! ' +
+          'Falling back to default activity type (playing).')
     activity_type = 0
 
 
