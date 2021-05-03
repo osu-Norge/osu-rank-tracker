@@ -15,6 +15,7 @@ with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
 
 intents = discord.Intents.all()
+mentions = discord.AllowedMentions(everyone=False)
 
 Database().init_db()
 
@@ -41,7 +42,12 @@ async def get_prefix(bot: commands.Bot, message: discord.Message) -> List[str]:
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=get_prefix, case_insensitive=True, intents=intents)
+        super().__init__(
+            command_prefix=get_prefix,
+            case_insensitive=True,
+            intents=intents,
+            allowed_mentions=mentions
+        )
 
         self.prefix = config['bot']['prefix']
         self.presence = config['bot'].get('presence', {})
