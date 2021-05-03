@@ -33,6 +33,7 @@ async def get_prefix(bot: commands.Bot, message: discord.Message) -> List[str]:
     ----------
     list[str]: The list of prefixes. In this case the list contains a single prefix
     """
+
     guild_prefix = await Guild(message.guild.id).get_prefix()
     if guild_prefix:
         return commands.when_mentioned_or(guild_prefix)(bot, message)
