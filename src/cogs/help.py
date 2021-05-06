@@ -28,6 +28,9 @@ class Help(commands.Cog):
 
     @commands.command(hidden=True)
     async def help(self, ctx, *commands):
+        """
+        Displays the bot help. Commands and how to use them.
+        """
 
         if not commands:
             for cog in self.bot.cogs.values():
