@@ -71,6 +71,15 @@ class HelpCommand(commands.MinimalHelpCommand):
         if embed.fields:
             await destination.send(embed=embed)
 
+    async def send_command_help(self, command):
+        destination = self.get_destination()
+
+        embed = discord.Embed(color=self.context.me.color)
+        embed.description = f'{command.help}\n```{self.get_command_signature(command)}```'
+        embed.set_author(name=self.context.me.name, icon_url=self.context.me.avatar_url)
+        await embed_templates.default_footer(self.context, embed)
+        await destination.send(embed=embed)
+
 
 class Help(commands.Cog):
     def __init__(self, bot):
