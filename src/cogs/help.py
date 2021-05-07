@@ -21,6 +21,10 @@ class HelpCommand(commands.MinimalHelpCommand):
         except commands.CommandError:
             return False
 
+    def get_command_signature(self, command):
+        signature = f' {command.signature}' if command.signature else ''
+        return f'{self.clean_prefix}{command.qualified_name}{signature}'
+
 
 class Help(commands.Cog):
     def __init__(self, bot):
