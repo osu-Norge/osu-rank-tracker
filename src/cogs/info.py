@@ -144,9 +144,13 @@ class Info(commands.Cog):
         embed.add_field(name='Total guilds', value=len(guilds))
         await ctx.send(embed=embed)
 
-    async def get_uptime(self):
+    async def get_uptime(self) -> str:
         """
         Returns the current uptime of the bot in string format
+
+        Returns
+        ----------
+        str: The current uptime
         """
 
         now = time()
