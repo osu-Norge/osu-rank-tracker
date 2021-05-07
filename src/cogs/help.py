@@ -57,6 +57,21 @@ class HelpCommand(commands.MinimalHelpCommand):
         if embed.fields:
             await destination.send(embed=embed)
 
+    async def send_group_help(self, group):
+        destination = self.get_destination()
+
+        embed = discord.Embed(color=self.context.me.color, title=group.qualified_name, description='Group')
+        embed.set_author(name=self.context.me.name, icon_url=self.context.me.avatar_url)
+        await embed_templates.default_footer(self.context, embed)
+
+        for command in group.commands:
+            if not command.hidden and await self.filter_command(command):
+                embed.add_field(name=command.name, value=f'{command.help}\n```{self.get_command_signature(command)}```', inline=False)
+
+        if embed.fields:
+            await destination.send(embed=embed)
+
+
 class Help(commands.Cog):
     def __init__(self, bot):
         self._original_help_command = bot.help_command
