@@ -43,6 +43,20 @@ class HelpCommand(commands.MinimalHelpCommand):
             if embed.fields:
                 await destination.send(embed=embed)
 
+    async def send_cog_help(self, cog):
+        destination = self.get_destination()
+
+        embed = discord.Embed(color=self.context.me.color, title=cog.qualified_name, description='Cog')
+        embed.set_author(name=self.context.me.name, icon_url=self.context.me.avatar_url)
+        await embed_templates.default_footer(self.context, embed)
+
+        for command in cog.get_commands():
+            if not command.hidden and await self.filter_command(command):
+                embed.add_field(name=command.name, value=command.help, inline=False)
+
+        if embed.fields:
+            await destination.send(embed=embed)
+
 class Help(commands.Cog):
     def __init__(self, bot):
         self._original_help_command = bot.help_command
