@@ -1,13 +1,8 @@
 from discord.ext import commands
-import discord
 
 
-class Help(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.bot.remove_command('help')
-
-    async def filter_command(self, ctx: commands.Context, command: commands.Command) -> bool:
+class HelpCommand(commands.MinimalHelpCommand):
+    async def filter_command(self, command: commands.Command) -> bool:
         """
         Filters commands that fails check decorators. Also filters disabled commands
 
@@ -22,27 +17,19 @@ class Help(commands.Cog):
         """
 
         try:
-            return await command.can_run(ctx)
+            return await command.can_run(self.context)
         except commands.CommandError:
             return False
 
-    @commands.command(hidden=True)
-    async def help(self, ctx, *commands):
-        """
-        Displays the bot help. Commands and how to use them.
-        """
 
-        if not commands:
-            for cog in self.bot.cogs.values():
-                embed = discord.Embed(color=ctx.me.color, title=cog.qualified_name)
-                embed.set_author(name=ctx.me.name, icon_url=ctx.me.avatar_url)
+class Help(commands.Cog):
+    def __init__(self, bot):
+        self._original_help_command = bot.help_command
+        bot.help_command = HelpCommand()
+        bot.help_command.cog = self
 
-                for command in cog.get_commands():
-                    if not command.hidden and await self.filter_command(ctx, command):
-                        embed.add_field(name=command.name, value=command.help, inline=False)
-
-                if embed.fields:
-                    await ctx.send(embed=embed)
+    def cog_unload(self):
+        self.bot.help_command = self._original_help_command
 
 
 def setup(bot):

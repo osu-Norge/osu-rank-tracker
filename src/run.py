@@ -47,7 +47,8 @@ class Bot(commands.Bot):
             command_prefix=get_prefix,
             case_insensitive=True,
             intents=intents,
-            allowed_mentions=mentions
+            allowed_mentions=mentions,
+            help_command=None
         )
 
         self.prefix = config['bot']['prefix']
