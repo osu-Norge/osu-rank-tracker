@@ -7,7 +7,7 @@ from typing import List
 
 
 class Database:
-    def __init__(self) -> None:
+    def __init__(self):
         with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
             self.db = yaml.load(f, Loader=yaml.SafeLoader).get('database', {})
 
@@ -127,7 +127,7 @@ class Database:
 
 
 class Guild(Database):
-    def __init__(self, id: int) -> None:
+    def __init__(self, id: int):
         super().__init__()
         self.id = id
 
@@ -288,7 +288,7 @@ class Guild(Database):
 
 
 class User(Database):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.id = id
 
@@ -346,7 +346,7 @@ class User(Database):
 
 
 class Channel(Database):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
         self.id = id
 
