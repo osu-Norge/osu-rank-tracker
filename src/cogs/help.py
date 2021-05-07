@@ -3,6 +3,7 @@ import discord
 
 from cogs.utils import embed_templates
 
+
 class HelpCommand(commands.MinimalHelpCommand):
     async def filter_command(self, command: commands.Command) -> bool:
         """
@@ -23,7 +24,19 @@ class HelpCommand(commands.MinimalHelpCommand):
         except commands.CommandError:
             return False
 
-    def get_command_signature(self, command):
+    def get_command_signature(self, command: commands.Command) -> str:
+        """
+        Documents what parameters are required and how to execute a command
+
+        Parameters
+        ----------
+        command (discord.ext.commands.Command): The Discord command object
+
+        Returns
+        ----------
+        str: A string showing command usage.
+        """
+
         signature = f' {command.signature}' if command.signature else ''
         return f'{self.clean_prefix}{command.qualified_name}{signature}'
 
@@ -88,6 +101,10 @@ class Help(commands.Cog):
         bot.help_command.cog = self
 
     def cog_unload(self):
+        """
+        Falls back to default discord.py help message when cog is unloaded.
+        """
+
         self.bot.help_command = self._original_help_command
 
 
