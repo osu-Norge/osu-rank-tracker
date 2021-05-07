@@ -1,5 +1,7 @@
 from discord.ext import commands
+import discord
 
+from cogs.utils import embed_templates
 
 class HelpCommand(commands.MinimalHelpCommand):
     async def filter_command(self, command: commands.Command) -> bool:
@@ -25,6 +27,21 @@ class HelpCommand(commands.MinimalHelpCommand):
         signature = f' {command.signature}' if command.signature else ''
         return f'{self.clean_prefix}{command.qualified_name}{signature}'
 
+    async def send_bot_help(self, mapping):
+        destination = self.get_destination()
+
+        for cog, commands in mapping.items():
+            if not commands or cog == self.cog:
+                continue
+            embed = discord.Embed(color=self.context.me.color, title=cog.qualified_name)
+            embed.set_author(name=self.context.me.name, icon_url=self.context.me.avatar_url)
+            await embed_templates.default_footer(self.context, embed)
+            for command in commands:
+                if not command.hidden and await self.filter_command(command):
+                    embed.add_field(name=command.name, value=command.help, inline=False)
+
+            if embed.fields:
+                await destination.send(embed=embed)
 
 class Help(commands.Cog):
     def __init__(self, bot):
