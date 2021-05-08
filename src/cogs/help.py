@@ -79,7 +79,11 @@ class HelpCommand(commands.MinimalHelpCommand):
 
         for command in group.commands:
             if not command.hidden and await self.filter_command(command):
-                embed.add_field(name=command.name, value=f'{command.help}\n```{self.get_command_signature(command)}```', inline=False)
+                embed.add_field(
+                    name=command.name,
+                    value=f'{command.help}\n```{self.get_command_signature(command)}```',
+                    inline=False
+                )
 
         if embed.fields:
             await destination.send(embed=embed)

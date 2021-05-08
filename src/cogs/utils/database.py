@@ -19,7 +19,6 @@ class Database:
         )
         self.cursor = self.connection.cursor()
 
-
     def init_db(self) -> None:
         """
         Creates all the necessary tables in order for the bot to function
@@ -84,7 +83,7 @@ class Database:
         ----------
         str: The database driver name and its version number
         """
-        
+
         self.cursor.execute('SELECT VERSION()')
         version = self.cursor.fetchone()[0].split(' ')[:2]
         return ' '.join(version)
@@ -136,7 +135,6 @@ class Guild(Database):
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
-
 
     async def get_all(self) -> tuple:
         """
@@ -256,7 +254,7 @@ class Guild(Database):
         self.cursor.execute(
             """
             UPDATE guilds
-            SET whitelisted_countries=array_append(whitelisted_countries, %s) 
+            SET whitelisted_countries=array_append(whitelisted_countries, %s)
             WHERE discord_id=%s
             """,
             (country_code, self.id)
@@ -279,9 +277,9 @@ class Guild(Database):
         self.cursor.execute(
             """
             UPDATE guild
-            SET whitelisted_countries=array_remove(whitelisted_countries, %s) 
+            SET whitelisted_countries=array_remove(whitelisted_countries, %s)
             WHERE discord_id=%s
-            """, 
+            """,
             (country_code, self.id)
         )
         self.connection.commit()
