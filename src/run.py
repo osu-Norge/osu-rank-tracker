@@ -6,7 +6,7 @@ import yaml
 from os import listdir
 from time import time
 
-from cogs.utils.database import Guild, Database
+from cogs.utils import database
 
 from typing import List
 
@@ -17,7 +17,7 @@ with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
 intents = discord.Intents.all()
 mentions = discord.AllowedMentions(everyone=False)
 
-Database().init_db()
+database.Database().init_db()
 
 
 async def get_prefix(bot: commands.Bot, message: discord.Message) -> List[str]:
@@ -34,7 +34,7 @@ async def get_prefix(bot: commands.Bot, message: discord.Message) -> List[str]:
     list[str]: The list of prefixes. In this case the list contains a single prefix
     """
 
-    guild_prefix = await Guild(message.guild.id).get_prefix()
+    guild_prefix = await database.Guild(message.guild.id).get_prefix()
     if guild_prefix:
         return commands.when_mentioned_or(guild_prefix)(bot, message)
     else:

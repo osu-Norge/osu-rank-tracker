@@ -1,7 +1,7 @@
 import psycopg2
 import yaml
 
-from cogs.utils.osu_utils import get_gamemode_id
+from cogs.utils import osu_utils
 
 from typing import List
 
@@ -342,7 +342,7 @@ class User(Database):
         """
 
         gamemode_id = await self.gamemode
-        return get_gamemode_id(gamemode_id)
+        return osu_utils.get_gamemode_id(gamemode_id)
 
 
 class Channel(Database):

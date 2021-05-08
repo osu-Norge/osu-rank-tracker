@@ -1,8 +1,7 @@
 from discord.ext import commands
 import discord
 
-from cogs.utils.database import Guild
-from cogs.utils import embed_templates
+from cogs.utils import embed_templates, database
 
 
 class Settings(commands.Cog):
@@ -36,7 +35,7 @@ class Settings(commands.Cog):
             embed = await embed_templates.error_warning(ctx, text='Maximum prefix length is 255 characters')
             return await ctx.send(embed=embed)
 
-        guild = Guild(ctx.guild.id)
+        guild = database.Guild(ctx.guild.id)
         await guild.set_prefix(prefix)
 
         embed = discord.Embed(color=discord.Color.green())
@@ -67,7 +66,7 @@ class Settings(commands.Cog):
 
         country_code = country_code.lower()
 
-        guild = Guild(ctx.guild.id)
+        guild = database.Guild(ctx.guild.id)
 
         if await guild.is_country_whitelisted(country_code):
             embed = await embed_templates.error_warning(ctx, text='Country is already in the whitelist')
@@ -87,7 +86,7 @@ class Settings(commands.Cog):
 
         country_code = country_code.lower()
 
-        guild = Guild(ctx.guild.id)
+        guild = database.Guild(ctx.guild.id)
 
         if not await guild.is_country_whitelisted(country_code):
             embed = await embed_templates.error_warning(ctx, text='Country is not in the whitelist')
@@ -105,7 +104,7 @@ class Settings(commands.Cog):
         Show the country whitelist
         """
 
-        guild = Guild(ctx.guild.id)
+        guild = database.Guild(ctx.guild.id)
         whitelist = await guild.get_whitelist()
 
         if not whitelist:
