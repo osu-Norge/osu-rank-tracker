@@ -288,7 +288,7 @@ class DevTools(commands.Cog):
         if guild_id == ():
             guild_id = ctx.guild.id
         else:
-            guild_id = guild_id
+            guild_id = guild_id[0]
 
         try:
             guild = await self.bot.fetch_guild(guild_id)
