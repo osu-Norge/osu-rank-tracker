@@ -286,7 +286,7 @@ class Guild(Database):
 
     async def set_moderator(self, role_id: int) -> None:
         """
-        Sets the guild prefix
+        Sets the moderator role
 
         Parameters
         ----------
