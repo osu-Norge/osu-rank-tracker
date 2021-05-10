@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 
-from cogs.utils.database import Guild
+from cogs.utils.database import Database, Guild
 from cogs.utils import embed_templates
 
 
@@ -120,6 +120,35 @@ class Settings(commands.Cog):
 
         embed = discord.Embed()
         embed.description = ', '.join(whitelist)
+        await ctx.send(embed=embed)
+
+    @settings.group()
+    async def role(self, ctx):
+        """
+        Manage roles
+        """
+
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help(ctx.command)
+
+    @role.command()
+    async def moderator(self, ctx, role):
+        """
+        Set the moderator role. Whoever has this role is able to change bot settings.
+        """
+
+        try:
+            role = await commands.RoleConverter().convert(ctx, role)
+        except commands.errors.RoleNotFound:
+            embed = await embed_templates.error_warning(ctx, text='You need to give me a valid role!')
+            return await ctx.send(embed=embed)
+
+        await Guild(ctx.guild.id).set_moderator(role.id)
+
+        embed = discord.Embed(
+            color=discord.Color.green(),
+            description=f'Moderator role has been set to {role.mention}'
+        )
         await ctx.send(embed=embed)
 
 

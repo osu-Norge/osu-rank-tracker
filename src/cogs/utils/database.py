@@ -284,6 +284,22 @@ class Guild(Database):
         )
         self.connection.commit()
 
+    async def set_moderator(self, role_id: int) -> None:
+        """
+        Sets the guild prefix
+
+        Parameters
+        ----------
+        role_id (int): The Discord role id
+
+        Returns
+        -----------
+        None
+        """
+
+        self.cursor.execute('UPDATE guilds SET role_moderator=(%s) WHERE discord_id=%s', (role_id, self.id))
+        self.connection.commit()
+
 
 class User(Database):
     def __init__(self):
