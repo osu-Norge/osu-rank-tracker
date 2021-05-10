@@ -2,7 +2,6 @@ from discord.ext import commands
 import discord
 
 from codecs import open
-from discord.ext.commands.core import guild_only
 import yaml
 from os import listdir
 from time import time
