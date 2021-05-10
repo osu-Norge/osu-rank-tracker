@@ -43,13 +43,13 @@ class HelpCommand(commands.MinimalHelpCommand):
     async def send_bot_help(self, mapping):
         destination = self.get_destination()
 
-        for cog, commands in mapping.items():
-            if not commands or cog == self.cog:
+        for cog, commandlist in mapping.items():
+            if not commandlist or cog == self.cog:
                 continue
             embed = discord.Embed(color=self.context.me.color, title=cog.qualified_name)
             embed.set_author(name=self.context.me.name, icon_url=self.context.me.avatar_url)
             await embed_templates.default_footer(self.context, embed)
-            for command in commands:
+            for command in commandlist:
                 if not command.hidden and await self.filter_command(command):
                     embed.add_field(name=command.name, value=command.help, inline=False)
 
@@ -79,7 +79,11 @@ class HelpCommand(commands.MinimalHelpCommand):
 
         for command in group.commands:
             if not command.hidden and await self.filter_command(command):
-                embed.add_field(name=command.name, value=f'{command.help}\n```{self.get_command_signature(command)}```', inline=False)
+                embed.add_field(
+                    name=command.name,
+                    value=f'{command.help}\n```{self.get_command_signature(command)}```',
+                    inline=False
+                )
 
         if embed.fields:
             await destination.send(embed=embed)
