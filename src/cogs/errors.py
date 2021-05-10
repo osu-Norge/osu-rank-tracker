@@ -18,11 +18,16 @@ class Errors(commands.Cog):
         Prints command execution metadata
         """
 
+        if ctx.guild:
+            command_source = f'{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}'
+        else:
+            command_source = 'DM'
+
         print(
             f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ' +
             f'{"❌ " if ctx.command_failed else "✔ "} {ctx.command} - ' +
             f'{ctx.author.name}#{ctx.author.discriminator} ({ctx.author.id}) | ' +
-            f'{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}'
+            command_source
         )
 
     @commands.Cog.listener()

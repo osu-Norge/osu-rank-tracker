@@ -2,6 +2,7 @@ from discord.ext import commands
 import discord
 
 from codecs import open
+from discord.ext.commands.core import guild_only
 import yaml
 from os import listdir
 from time import time
@@ -34,7 +35,11 @@ async def get_prefix(bot: commands.Bot, message: discord.Message) -> List[str]:
     list[str]: The list of prefixes. In this case the list contains a single prefix
     """
 
-    guild_prefix = await Guild(message.guild.id).get_prefix()
+    if message.guild:
+        guild_prefix = await Guild(message.guild.id).get_prefix()
+    else:
+        guild_prefix = None
+
     if guild_prefix:
         return commands.when_mentioned_or(guild_prefix)(bot, message)
     else:
@@ -47,8 +52,7 @@ class Bot(commands.Bot):
             command_prefix=get_prefix,
             case_insensitive=True,
             intents=intents,
-            allowed_mentions=mentions,
-            help_command=None
+            allowed_mentions=mentions
         )
 
         self.prefix = config['bot']['prefix']
