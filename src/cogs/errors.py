@@ -49,8 +49,7 @@ class Errors(commands.Cog):
 
         send_help = (
             commands.MissingRequiredArgument,
-            commands.TooManyArguments,
-            commands.BadArgument
+            commands.TooManyArguments
         )
         if isinstance(error, send_help):
             self.bot.get_command(f'{ctx.command}').reset_cooldown(ctx)
