@@ -276,8 +276,9 @@ class DevTools(commands.Cog):
         embed = discord.Embed(color=ctx.me.color, description='Endret Presence!')
         await ctx.send(embed=embed)
 
-    @commands.bot_has_permissions(embed_links=True, add_reactions=True)
     @commands.is_owner()
+    @commands.guild_only()
+    @commands.bot_has_permissions(embed_links=True, add_reactions=True)
     @commands.command()
     async def leave(self, ctx, *guild_id: int):
         """

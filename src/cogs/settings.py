@@ -9,6 +9,7 @@ class Settings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.guild_only()
     @commands.command()
     async def setup(self, ctx):
         """
@@ -16,6 +17,7 @@ class Settings(commands.Cog):
         """
         pass
 
+    @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     @commands.group()
     async def settings(self, ctx):
