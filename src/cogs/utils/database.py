@@ -90,7 +90,7 @@ class Database:
         List[tuple]: Table rows
         """
 
-        self.cursor.execute('SELECT * FROM guilds')
+        self.cursor.execute('SELECT * FROM guild')
         return self.cursor.fetchall()
 
     async def get_users(self) -> List[tuple]:
@@ -102,7 +102,7 @@ class Database:
         List[tuple]: Table rows
         """
 
-        self.cursor.execute('SELECT * FROM users')
+        self.cursor.execute('SELECT * FROM user')
         return self.cursor.fetchall()
 
     async def get_channels(self) -> List[tuple]:
@@ -114,7 +114,7 @@ class Database:
         List[tuple]: Table rows
         """
 
-        self.cursor.execute('SELECT * FROM channels')
+        self.cursor.execute('SELECT * FROM channel')
         return self.cursor.fetchall()
 
 @dataclasses.dataclass
