@@ -1,8 +1,7 @@
 import psycopg2
 import yaml
 
-from cogs.utils.osu_utils import get_gamemode_id
-
+import dataclasses
 from typing import List
 
 
@@ -22,15 +21,11 @@ class Database:
     def init_db(self) -> None:
         """
         Creates all the necessary tables in order for the bot to function
-
-        Returns
-        ----------
-        None
         """
 
         self.cursor.execute(
             """
-            CREATE TABLE IF NOT EXISTS channels (
+            CREATE TABLE IF NOT EXISTS public.channel (
                 discord_id bigint NOT NULL PRIMARY KEY,
                 clean_after_message_id bigint
             )
@@ -38,12 +33,10 @@ class Database:
         )
         self.cursor.execute(
             """
-            CREATE TABLE IF NOT EXISTS guilds (
+            CREATE TABLE IF NOT EXISTS public.guild (
                 discord_id bigint NOT NULL PRIMARY KEY,
                 prefix varchar(255),
-                locale char(5),
-                registration_channel bigint REFERENCES channels(discord_id),
-                oauth boolean,
+                registration_channel bigint REFERENCES channel(discord_id),
                 whitelisted_countries char(2)[],
                 blacklisted_osu_users integer[],
                 role_moderator bigint,
@@ -65,7 +58,7 @@ class Database:
         )
         self.cursor.execute(
             """
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS public.user (
                 discord_id integer NOT NULL PRIMARY KEY,
                 osu_id integer,
                 gamemode smallint
@@ -124,268 +117,228 @@ class Database:
         self.cursor.execute('SELECT * FROM channels')
         return self.cursor.fetchall()
 
+@dataclasses.dataclass
+class Guild:
+    discord_id: int
+    prefix: str
+    registration_channel: int
+    whitelisted_countries: List[str]
+    blacklisted_osu_users: List[int]
+    role_moderator: int
+    role_remove: int
+    role_add: int
+    role_1_digit: int
+    role_2_digit: int
+    role_3_digit: int
+    role_4_digit: int
+    role_5_digit: int
+    role_6_digit: int
+    role_7_digit: int
+    role_standard: int
+    role_taiko: int
+    role_ctb: int
+    role_mania: int
 
-class Guild(Database):
-    def __init__(self, id: int):
+
+class GuildTable(Database):
+    def __init__(self):
         super().__init__()
-        self.id = id
+
+    async def get(self, discord_id: int) -> Guild:
+        """
+        Fetches a guild and its data from the database
+
+        Parameters
+        ----------
+        discord_id (int): The Discord Guild ID
+
+        Returns
+        ----------
+        Guild: A guild object
+        """
 
         try:
-            self.cursor.execute('INSERT INTO guilds VALUES (%s)', (id,))
+            self.cursor.execute('INSERT INTO guild VALUES (%s)', (discord_id,))
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
 
-    async def get_all(self) -> tuple:
+        self.cursor.execute('SELECT * FROM guild WHERE discord_id=%s', ([discord_id]))
+        db_data = self.cursor.fetchone()
+
+        if db_data:
+            return Guild(*db_data)
+
+    async def save(self, guild: Guild) -> None:
         """
-        Fetches all the info about a guild in the database
-
-        Returns
-        -----------
-        tuple: Database row
-        """
-
-        self.cursor.execute('SELECT * FROM guilds WHERE discord_id=%s', ([self.id]))
-        return self.cursor.fetchone()
-
-    async def get_prefix(self) -> str:
-        """
-        Fetches the guild's prefix
-
-        Returns
-        -----------
-        str: The guild's prefix
-        """
-
-        self.cursor.execute('SELECT prefix FROM guilds WHERE discord_id=%s', ([self.id]))
-        response = self.cursor.fetchone()
-        if response:
-            return response[0]
-
-    async def set_prefix(self, prefix: str) -> None:
-        """
-        Sets the guild prefix
+        Save a guild object in the database
 
         Parameters
         ----------
-        prefix (str): The desired prefix
-
-        Returns
-        -----------
-        None
+        guild (Guild): A guild object
         """
 
-        self.cursor.execute('UPDATE guilds SET prefix=(%s) WHERE discord_id=%s', (prefix, self.id))
-        self.connection.commit()
+        try:
+            self.cursor.execute('INSERT INTO guild VALUES (%s)', (guild.discord_id,))
+            self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
 
-    async def get_locale(self) -> str:
-        """
-        Fetches the guild's locale
-
-        Returns
-        -----------
-        str: The guild's locale
-        """
-
-        self.cursor.execute('SELECT locale FROM guilds WHERE discord_id=%s', ([self.id]))
-        response = self.cursor.fetchone()
-        if response:
-            return response[0]
-
-    async def is_oauth(self) -> bool:
-        """
-        Checks whether or not oAuth is enabled
-
-        Returns
-        -----------
-        bool
-        """
-
-        self.cursor.execute('SELECT oauth FROM guilds WHERE discord_id=%s', ([self.id]))
-        response = self.cursor.fetchone()
-        if response:
-            return response[0]
-
-    async def get_whitelist(self) -> tuple:
-        """
-        Fetches the list of whitelisted countries
-
-        Returns
-        -----------
-        tuple: The whitelisted countries
-        """
-
-        self.cursor.execute('SELECT whitelisted_countries FROM guilds WHERE discord_id=%s', ([self.id]))
-        response = self.cursor.fetchone()
-        if response:
-            return response[0]
-
-    async def is_country_whitelisted(self, country_code: str) -> bool:
-        """
-        Checks whether or not a specified country code is in the list of whitelisted countries
-
-        Parameters
-        ----------
-        country_code (str): ISO 3166-1 Alpha-2 country code
-
-        Returns
-        -----------
-        bool
-        """
-
-        self.cursor.execute('SELECT whitelisted_countries FROM guilds WHERE discord_id=%s', ([self.id]))
-        response = self.cursor.fetchone()
-        if response and country_code in response:
-            return True
-
-    async def whitelist_add(self, country_code: str) -> None:
-        """
-        Adds a country to the whitelist
-
-        Parameters
-        ----------
-        country_code (str): ISO 3166-1 Alpha-2 country code
-
-        Returns
-        -----------
-        None
-        """
+        values =  dataclasses.astuple(guild) + (guild.discord_id,)
 
         self.cursor.execute(
             """
-            UPDATE guilds
-            SET whitelisted_countries=array_append(whitelisted_countries, %s)
-            WHERE discord_id=%s
+            UPDATE guild SET
+            discord_id = %s,
+            prefix = %s,
+            registration_channel = %s,
+            whitelisted_countries = %s,
+            blacklisted_osu_users = %s,
+            role_moderator = %s,
+            role_remove = %s,
+            role_add = %s,
+            role_1_digit = %s,
+            role_2_digit = %s,
+            role_3_digit = %s,
+            role_4_digit = %s,
+            role_5_digit = %s,
+            role_6_digit = %s,
+            role_7_digit = %s,
+            role_standard = %s,
+            role_taiko = %s,
+            role_ctb = %s,
+            role_mania = %s
+            WHERE discord_id = %s
             """,
-            (country_code, self.id)
+            values
         )
         self.connection.commit()
 
-    async def whitelist_remove(self, country_code: str) -> None:
+
+@dataclasses.dataclass
+class User:
+    discord_id: int
+    osu_id: int
+    gamemode: int
+
+
+class UserTable(Database):
+    def __init__(self):
+        super().__init__()
+
+    async def get(self, discord_id: int) -> User:
         """
-        Removes a country from the whitelist
+        Fetches a user and its data from the database
 
         Parameters
         ----------
-        country_code (str): ISO 3166-1 Alpha-2 country code
+        discord_id (int): The Discord User ID
 
         Returns
-        -----------
-        None
+        ----------
+        User: A user object
         """
+
+        try:
+            self.cursor.execute('INSERT INTO user VALUES (%s)', (discord_id,))
+            self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+
+        self.cursor.execute('SELECT * FROM user WHERE discord_id=%s', ([discord_id]))
+        db_data = self.cursor.fetchone()
+
+        return Guild(*db_data)
+
+    async def save(self, user: User) -> None:
+        """
+        Save a user object in the database
+
+        Parameters
+        ----------
+        user (User): A user object
+        """
+
+        try:
+            self.cursor.execute('INSERT INTO user VALUES (%s)', (user.discord_id,))
+            self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+
+        try:
+            self.cursor.execute('INSERT INTO user VALUES (%s)', (id,))
+            self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+
+        values =  dataclasses.astuple(user) + (user.discord_id,)
 
         self.cursor.execute(
             """
-            UPDATE guild
-            SET whitelisted_countries=array_remove(whitelisted_countries, %s)
-            WHERE discord_id=%s
+            UPDATE user SET
+            discord_id = %s,
+            osu_id = %s,
+            gamemode = %s,
+            WHERE discord_id = %s
             """,
-            (country_code, self.id)
+            values
         )
         self.connection.commit()
 
-    async def set_moderator(self, role_id: int) -> None:
+
+@dataclasses.dataclass
+class Channel:
+    discord_id: int
+    clean_after_message_id: int
+
+
+class ChannelTable(Database):
+    def __init__(self):
+        super().__init__()
+
+    async def get(self, discord_id: int) -> Channel:
         """
-        Sets the moderator role
+        Fetches a channel and its data from the database
 
         Parameters
         ----------
-        role_id (int): The Discord role id
+        discord_id (int): The Discord Channel ID
 
         Returns
-        -----------
-        None
+        ----------
+        Channel: A channel object
         """
 
-        self.cursor.execute('UPDATE guilds SET role_moderator=(%s) WHERE discord_id=%s', (role_id, self.id))
+        try:
+            self.cursor.execute('INSERT INTO guild VALUES (%s)', (discord_id,))
+            self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+
+        try:
+            self.cursor.execute('INSERT INTO channel VALUES (%s)', (discord_id,))
+            self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+
+    async def save(self, channel: Channel) -> None:
+        """
+        Save a channel object in the database
+
+        Parameters
+        ----------
+        channel (Channel): A user object
+        """
+
+        values =  dataclasses.astuple(channel) + (channel.discord_id,)
+
+        self.cursor.execute(
+            """
+            UPDATE channel SET
+            discord_id = %s,
+            clean_after_message_id = %s,
+            WHERE discord_id = %s
+            """,
+            values
+        )
         self.connection.commit()
-
-
-class User(Database):
-    def __init__(self):
-        super().__init__()
-        self.id = id
-
-    async def get_all(self) -> tuple:
-        """
-        Fetches all the info about a user in the database
-
-        Returns
-        -----------
-        tuple: Database row
-        """
-
-        self.cursor.execute('SELECT * FROM users WHERE discord_id=%s', ([self.id]))
-        return self.cursor.fetchone()
-
-    async def get_osu_id(self) -> int:
-        """
-        Fetches the user's osu user id
-
-        Returns
-        -----------
-        int: The user's registered osu id
-        """
-
-        self.cursor.execute('SELECT osu_id FROM users WHERE discord_id=%s', ([self.id]))
-        response = self.cursor.fetchone()
-        if response:
-            return response[0]
-
-    async def get_gamemode(self) -> int:
-        """
-        Fetches the user's set osu gamemode id
-
-        Returns
-        -----------
-        int: The user's set gamemode
-        """
-
-        self.cursor.execute('SELECT gamemode FROM users WHERE discord_id=%s', ([self.id]))
-        response = self.cursor.fetchone()
-        if response:
-            return response[0]
-
-    async def get_gamemode_name(self) -> str:
-        """
-        Fetches the user's set osu gamemode and converts the id to a readable name
-
-        Returns
-        -----------
-        str: The user's set gamemode name
-        """
-
-        gamemode_id = await self.gamemode
-        return get_gamemode_id(gamemode_id)
-
-
-class Channel(Database):
-    def __init__(self):
-        super().__init__()
-        self.id = id
-
-    async def get_all(self) -> tuple:
-        """
-        Fetches all the info about a channel in the database
-
-        Returns
-        -----------
-        tuple: Database row
-        """
-
-        self.cursor.execute('SELECT * FROM channels WHERE discord_id=%s', ([self.id]))
-        return self.cursor.fetchone()
-
-    async def get_clean_after_message_id(self) -> int:
-        """
-        Fetches the message id that the bot will remove all messages after in the specified channel
-
-        Returns
-        -----------
-        int: The Discord message id that the bot will delete all messages after in the channel
-        """
-
-        self.cursor.execute('SELECT clean_after_message_id FROM channels WHERE discord_id=%s', ([self.id]))
-        response = self.cursor.fetchone()
-        if response:
-            return response[0]

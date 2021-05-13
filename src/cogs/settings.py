@@ -1,7 +1,7 @@
 from discord.ext import commands
 import discord
 
-from cogs.utils.database import Database, Guild
+import cogs.utils.database as database
 from cogs.utils import embed_templates
 
 
@@ -38,8 +38,10 @@ class Settings(commands.Cog):
             embed = await embed_templates.error_warning(ctx, text='Maximum prefix length is 255 characters')
             return await ctx.send(embed=embed)
 
-        guild = Guild(ctx.guild.id)
-        await guild.set_prefix(prefix)
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
+        guild.prefix = prefix
+        await guild_table.save(guild)
 
         embed = discord.Embed(color=discord.Color.green())
         embed.description = f'Prefix is now set to `{prefix}`'
@@ -69,13 +71,18 @@ class Settings(commands.Cog):
 
         country_code = country_code.lower()
 
-        guild = Guild(ctx.guild.id)
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
 
-        if await guild.is_country_whitelisted(country_code):
+        if not guild.whitelisted_countries:
+            guild.whitelisted_countries = []
+
+        if country_code in guild.whitelisted_countries:
             embed = await embed_templates.error_warning(ctx, text='Country is already in the whitelist')
             return await ctx.send(embed=embed)
 
-        await guild.whitelist_add(country_code)
+        guild.whitelisted_countries.append(country_code)
+        await guild_table.save(guild)
 
         embed = discord.Embed(color=discord.Color.green())
         embed.description = f'`{country_code}` has been added to the whitelist'
@@ -89,13 +96,15 @@ class Settings(commands.Cog):
 
         country_code = country_code.lower()
 
-        guild = Guild(ctx.guild.id)
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
 
-        if not await guild.is_country_whitelisted(country_code):
+        if not guild.whitelisted_countries or country_code not in guild.whitelisted_countries:
             embed = await embed_templates.error_warning(ctx, text='Country is not in the whitelist')
             return await ctx.send(embed=embed)
 
-        await guild.whitelist_remove(country_code)
+        guild.whitelisted_countries.remove(country_code)
+        await guild_table.save(guild)
 
         embed = discord.Embed(color=discord.Color.green())
         embed.description = f'`{country_code}` has been removed from the whitelist'
@@ -107,21 +116,21 @@ class Settings(commands.Cog):
         Show the country whitelist
         """
 
-        guild = Guild(ctx.guild.id)
-        whitelist = await guild.get_whitelist()
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
 
-        if not whitelist:
+        if not guild.whitelisted_countries:
             embed = await embed_templates.error_warning(ctx, text='No countries are whitelisted!')
             return await ctx.send(embed=embed)
 
-        whitelist = [f'`{country}`' for country in whitelist]
+        guild.whitelisted_countries = [f'`{country}`' for country in guild.whitelisted_countries]
 
-        if len(whitelist) > 2048:
+        if len(guild.whitelisted_countries) > 2048:
             embed = await embed_templates.error_warning(ctx, text='Whitelist is too long to be displayed!')
             return await ctx.send(embed=embed)
 
         embed = discord.Embed()
-        embed.description = ', '.join(whitelist)
+        embed.description = ', '.join(guild.whitelisted_countries)
         await ctx.send(embed=embed)
 
     @settings.group()
@@ -134,24 +143,12 @@ class Settings(commands.Cog):
             await ctx.send_help(ctx.command)
 
     @role.command()
-    async def moderator(self, ctx, role):
+    async def moderator(self, ctx, name):
         """
         Set the moderator role. Whoever has this role is able to change bot settings.
         """
 
-        try:
-            role = await commands.RoleConverter().convert(ctx, role)
-        except commands.errors.RoleNotFound:
-            embed = await embed_templates.error_warning(ctx, text='You need to give me a valid role!')
-            return await ctx.send(embed=embed)
-
-        await Guild(ctx.guild.id).set_moderator(role.id)
-
-        embed = discord.Embed(
-            color=discord.Color.green(),
-            description=f'Moderator role has been set to {role.mention}'
-        )
-        await ctx.send(embed=embed)
+        pass
 
 
 def setup(bot):
