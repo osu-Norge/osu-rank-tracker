@@ -248,7 +248,8 @@ class UserTable(Database):
         self.cursor.execute('SELECT * FROM user WHERE discord_id=%s', ([discord_id]))
         db_data = self.cursor.fetchone()
 
-        return Guild(*db_data)
+        if db_data:
+            return User(*db_data)
 
     async def save(self, user: User) -> None:
         """
@@ -310,16 +311,16 @@ class ChannelTable(Database):
         """
 
         try:
-            self.cursor.execute('INSERT INTO guild VALUES (%s)', (discord_id,))
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
-
-        try:
             self.cursor.execute('INSERT INTO channel VALUES (%s)', (discord_id,))
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
+
+        self.cursor.execute('SELECT * FROM channel WHERE discord_id=%s', ([discord_id]))
+        db_data = self.cursor.fetchone()
+
+        if db_data:
+            return Channel(*db_data)
 
     async def save(self, channel: Channel) -> None:
         """
