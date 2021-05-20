@@ -72,7 +72,7 @@ async def success(ctx: discord.ext.commands.Context, text: str) -> discord.Embed
     discord.Embed: An embed object based on the template with the specified text
     """
 
-    embed = discord.Embed(color=discord.Color.green(), description=f'❌ {text}')
+    embed = discord.Embed(color=discord.Color.green(), description=f'✅ {text}')
     await default_footer(ctx, embed)
 
     return embed
