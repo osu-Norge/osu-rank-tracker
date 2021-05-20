@@ -159,7 +159,7 @@ class Settings(commands.Cog):
         embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the moderator role!')
         await ctx.send(embed=embed)
 
-    @role.command()
+    @role.command(aliases=['osu!standard', 'std', 'osu', 'osu!'])
     async def standard(self, ctx, role: str):
         """
         Set the standard gamemode role
@@ -179,7 +179,7 @@ class Settings(commands.Cog):
         embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the standard gamemode role!')
         await ctx.send(embed=embed)
 
-    @role.command()
+    @role.command(aliases=['osu!taiko'])
     async def taiko(self, ctx, role: str):
         """
         Set the taiko gamemode role
@@ -199,7 +199,7 @@ class Settings(commands.Cog):
         embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the taiko gamemode role!')
         await ctx.send(embed=embed)
 
-    @role.command(aliases=['catch'])
+    @role.command(aliases=['osu!catch', 'catch', 'fruits'])
     async def ctb(self, ctx, role: str):
         """
         Set the catch the beat gamemode role
