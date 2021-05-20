@@ -43,8 +43,7 @@ class Settings(commands.Cog):
         guild.prefix = prefix
         await guild_table.save(guild)
 
-        embed = discord.Embed(color=discord.Color.green())
-        embed.description = f'Prefix is now set to `{prefix}`'
+        embed = await embed_templates.success(ctx, text=f'Prefix is now set to `{prefix}`')
         await ctx.send(embed=embed)
 
     @settings.group()
@@ -84,8 +83,7 @@ class Settings(commands.Cog):
         guild.whitelisted_countries.append(country_code)
         await guild_table.save(guild)
 
-        embed = discord.Embed(color=discord.Color.green())
-        embed.description = f'`{country_code}` has been added to the whitelist'
+        embed = await embed_templates.success(ctx, text=f'`{country_code}` has been added to the whitelist')
         await ctx.send(embed=embed)
 
     @whitelist.command()
@@ -106,8 +104,7 @@ class Settings(commands.Cog):
         guild.whitelisted_countries.remove(country_code)
         await guild_table.save(guild)
 
-        embed = discord.Embed(color=discord.Color.green())
-        embed.description = f'`{country_code}` has been removed from the whitelist'
+        embed = await embed_templates.success(ctx, text=f'`{country_code}` has been removed from the whitelist')
         await ctx.send(embed=embed)
 
     @whitelist.command()
@@ -159,8 +156,7 @@ class Settings(commands.Cog):
         guild.role_moderator = role.id
         await guild_table.save(guild)
 
-        embed = discord.Embed(color=discord.Color.green())
-        embed.description = f'{role.mention} has been set as the moderator role!'
+        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the moderator role!')
         await ctx.send(embed=embed)
 
 
