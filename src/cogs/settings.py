@@ -199,6 +199,26 @@ class Settings(commands.Cog):
         embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the taiko gamemode role!')
         await ctx.send(embed=embed)
 
+    @role.command(aliases=['catch'])
+    async def ctb(self, ctx, role: str):
+        """
+        Set the catch the beat gamemode role
+        """
+
+        try:
+            role = await commands.RoleConverter().convert(ctx, role)
+        except commands.errors.RoleNotFound:
+            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
+            return await ctx.send(embed=embed)
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
+        guild.role_ctb = role.id
+        await guild_table.save(guild)
+
+        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the catch the beat gamemode role!')
+        await ctx.send(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Settings(bot))
