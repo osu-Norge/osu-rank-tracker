@@ -56,3 +56,23 @@ async def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.E
     await default_footer(ctx, embed)
 
     return embed
+
+
+async def success(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
+    """
+    Creates an embed with a specified message using a template signifying success. 
+
+    Parameters
+    -----------
+    ctx (discord.ext.commands.Context): The current Discord context
+    text (str): The message
+
+    Returns
+    -----------
+    discord.Embed: An embed object based on the template with the specified text
+    """
+
+    embed = discord.Embed(color=discord.Color.green(), description=f'❌ {text}')
+    await default_footer(ctx, embed)
+
+    return embed
