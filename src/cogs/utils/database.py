@@ -117,6 +117,7 @@ class Database:
         self.cursor.execute('SELECT * FROM channel')
         return self.cursor.fetchall()
 
+
 @dataclasses.dataclass
 class Guild:
     discord_id: int
@@ -184,7 +185,7 @@ class GuildTable(Database):
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
 
-        values =  dataclasses.astuple(guild) + (guild.discord_id,)
+        values = dataclasses.astuple(guild) + (guild.discord_id,)
 
         self.cursor.execute(
             """
@@ -272,7 +273,7 @@ class UserTable(Database):
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
 
-        values =  dataclasses.astuple(user) + (user.discord_id,)
+        values = dataclasses.astuple(user) + (user.discord_id,)
 
         self.cursor.execute(
             """
@@ -331,7 +332,7 @@ class ChannelTable(Database):
         channel (Channel): A user object
         """
 
-        values =  dataclasses.astuple(channel) + (channel.discord_id,)
+        values = dataclasses.astuple(channel) + (channel.discord_id,)
 
         self.cursor.execute(
             """
