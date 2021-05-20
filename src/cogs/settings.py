@@ -143,12 +143,25 @@ class Settings(commands.Cog):
             await ctx.send_help(ctx.command)
 
     @role.command()
-    async def moderator(self, ctx, name):
+    async def moderator(self, ctx, role: str):
         """
         Set the moderator role. Whoever has this role is able to change bot settings.
         """
 
-        pass
+        try:
+            role = await commands.RoleConverter().convert(ctx, role)
+        except commands.errors.RoleNotFound:
+            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
+            return await ctx.send(embed=embed)
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
+        guild.role_moderator = role.id
+        await guild_table.save(guild)
+
+        embed = discord.Embed(color=discord.Color.green())
+        embed.description = f'{role.mention} has been set as the moderator role!'
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
