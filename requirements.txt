@@ -4,4 +4,5 @@ requests
 psycopg2
 asyncio
 psutil
+iso3166
 

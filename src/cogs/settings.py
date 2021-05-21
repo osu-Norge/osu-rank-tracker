@@ -1,6 +1,8 @@
 from discord.ext import commands
 import discord
 
+from iso3166 import countries
+
 import cogs.utils.database as database
 from cogs.utils import embed_templates
 
@@ -134,14 +136,16 @@ class Settings(commands.Cog):
         Add a country to the whitelist
         """
 
-        if len(country_code) != 2:
+        try:
+            country = countries.get(country_code)
+        except KeyError:
             embed = await embed_templates.error_warning(
-                ctx, text='Make sure the country code is in the correct format\n\n' +
+                ctx, text='Invalid country! Make you enter a valid country or country code\n\n' +
                           'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
             )
             return await ctx.send(embed=embed)
 
-        country_code = country_code.lower()
+        country_code = country.alpha2
 
         guild_table = database.GuildTable()
         guild = await guild_table.get(ctx.guild.id)
