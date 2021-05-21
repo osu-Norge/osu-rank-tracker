@@ -77,6 +77,48 @@ class Settings(commands.Cog):
         embed = await embed_templates.success(ctx, text=f'Prefix is now set to `{prefix}`')
         await ctx.send(embed=embed)
 
+    @settings.command()
+    async def regchannel(self, ctx, channel: str, remove_after_message: str = None):
+        """
+        Set the registration channel
+        """
+
+        try:
+            channel = await commands.TextChannelConverter().convert(ctx, channel)
+        except commands.errors.ChannelNotFound:
+            embed = await embed_templates.error_warning(ctx, text='Invalid channel given!')
+            return await ctx.send(embed=embed)
+
+        channel_table = database.ChannelTable()
+        db_channel = await channel_table.get(channel.id)
+
+        if remove_after_message:
+            db_channel.clean_after_message_id = remove_after_message
+
+            try:
+                remove_after_message = await commands.MessageConverter().convert(ctx, remove_after_message)
+            except commands.errors.MessageNotFound:
+                embed = await embed_templates.error_warning(ctx, text='Invalid message given!')
+                return await ctx.send(embed=embed)
+
+            embed = await embed_templates.success(
+                ctx,
+                text=f'Registration channel has been set to {channel.mention} & all messages in the channel after ' +
+                     f'[this message]({remove_after_message.jump_url}) will be deleted on registration'
+            )
+        else:
+            db_channel.clean_after_message_id = None
+            embed = await embed_templates.success(ctx, text=f'Registration channel has been set to {channel.mention}')
+
+        await channel_table.save(db_channel)
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
+        guild.registration_channel = channel.id
+        await guild_table.save(guild)
+
+        await ctx.send(embed=embed)
+
     @settings.group()
     async def whitelist(self, ctx):
         """
