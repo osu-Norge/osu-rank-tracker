@@ -31,10 +31,8 @@ class Settings(commands.Cog):
         guild_table = database.GuildTable()
         guild = await guild_table.get(ctx.guild.id)
 
-        try:
-            vars(guild).get(role_variable)
-        except KeyError:
-            return
+        if not hasattr(guild, role_variable):
+            raise commands.CommandError
 
         setattr(guild, role_variable, role.id)
         await guild_table.save(guild)
