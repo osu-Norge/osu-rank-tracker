@@ -204,6 +204,38 @@ class Settings(commands.Cog):
 
         await self.role_setter(ctx, role=role, role_variable='role_3_digit', role_name='3 digit')
 
+    @role.command(name='4digit')
+    async def digit4(self, ctx, role: str):
+        """
+        Set the 4 digit role
+        """
+
+        await self.role_setter(ctx, role=role, role_variable='role_4_digit', role_name='4 digit')
+
+    @role.command(name='5digit')
+    async def digit5(self, ctx, role: str):
+        """
+        Set the 5 digit role
+        """
+
+        await self.role_setter(ctx, role=role, role_variable='role_5_digit', role_name='5 digit')
+
+    @role.command(name='6digit')
+    async def digit6(self, ctx, role: str):
+        """
+        Set the 6 digit role
+        """
+
+        await self.role_setter(ctx, role=role, role_variable='role_6_digit', role_name='6 digit')
+
+    @role.command(name='7digit')
+    async def digit7(self, ctx, role: str):
+        """
+        Set the 7 digit role
+        """
+
+        await self.role_setter(ctx, role=role, role_variable='role_7_digit', role_name='7 digit')
+
     @role.command(aliases=['osu!standard', 'std', 'osu', 'osu!'])
     async def standard(self, ctx, role: str):
         """
