@@ -188,6 +188,14 @@ class Settings(commands.Cog):
 
         await self.role_setter(ctx, role=role, role_variable='role_1_digit', role_name='1 digit')
 
+    @role.command(name='2digit')
+    async def digit2(self, ctx, role: str):
+        """
+        Set the 2 digit role
+        """
+
+        await self.role_setter(ctx, role=role, role_variable='role_2_digit', role_name='2 digit')
+
     @role.command(aliases=['osu!standard', 'std', 'osu', 'osu!'])
     async def standard(self, ctx, role: str):
         """
