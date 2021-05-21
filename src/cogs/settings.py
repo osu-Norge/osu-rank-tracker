@@ -9,6 +9,39 @@ class Settings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def role_setter(self, ctx: commands.context, role: str, role_variable: str, role_name: str):
+        """
+        Validates a role and puts it into the database. Sends confirmation message to Discord
+
+        Parameters
+        ----------
+        ctx (discord.ext.commands.Context): The current Discord context
+        role (str): The user inputted role name, id or mention
+        role_variable (str): The database column name
+        role_name (str): The role name that will be displayed in the confirmation message on Discord
+        """
+
+        try:
+            role = await commands.RoleConverter().convert(ctx, role)
+        except commands.errors.RoleNotFound:
+            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
+            await ctx.send(embed=embed)
+            return
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
+
+        try:
+            vars(guild).get(role_variable)
+        except KeyError:
+            return
+
+        setattr(guild, role_variable, role.id)
+        await guild_table.save(guild)
+
+        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the {role_name} role!')
+        await ctx.send(embed=embed)
+
     @commands.guild_only()
     @commands.command()
     async def setup(self, ctx):
@@ -145,19 +178,7 @@ class Settings(commands.Cog):
         Set the moderator role. Whoever has this role is able to change bot settings.
         """
 
-        try:
-            role = await commands.RoleConverter().convert(ctx, role)
-        except commands.errors.RoleNotFound:
-            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
-            return await ctx.send(embed=embed)
-
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
-        guild.role_moderator = role.id
-        await guild_table.save(guild)
-
-        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the moderator role!')
-        await ctx.send(embed=embed)
+        await self.role_setter(ctx, role=role, role_variable='role_moderator', role_name='moderator')
 
     @role.command(aliases=['osu!standard', 'std', 'osu', 'osu!'])
     async def standard(self, ctx, role: str):
@@ -165,19 +186,7 @@ class Settings(commands.Cog):
         Set the standard gamemode role
         """
 
-        try:
-            role = await commands.RoleConverter().convert(ctx, role)
-        except commands.errors.RoleNotFound:
-            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
-            return await ctx.send(embed=embed)
-
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
-        guild.role_standard = role.id
-        await guild_table.save(guild)
-
-        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the standard gamemode role!')
-        await ctx.send(embed=embed)
+        await self.role_setter(ctx, role=role, role_variable='role_standard', role_name='standard')
 
     @role.command(aliases=['osu!taiko'])
     async def taiko(self, ctx, role: str):
@@ -185,19 +194,7 @@ class Settings(commands.Cog):
         Set the taiko gamemode role
         """
 
-        try:
-            role = await commands.RoleConverter().convert(ctx, role)
-        except commands.errors.RoleNotFound:
-            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
-            return await ctx.send(embed=embed)
-
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
-        guild.role_taiko = role.id
-        await guild_table.save(guild)
-
-        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the taiko gamemode role!')
-        await ctx.send(embed=embed)
+        await self.role_setter(ctx, role=role, role_variable='role_taiko', role_name='taiko')
 
     @role.command(aliases=['osu!catch', 'catch', 'fruits'])
     async def ctb(self, ctx, role: str):
@@ -205,19 +202,7 @@ class Settings(commands.Cog):
         Set the catch the beat gamemode role
         """
 
-        try:
-            role = await commands.RoleConverter().convert(ctx, role)
-        except commands.errors.RoleNotFound:
-            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
-            return await ctx.send(embed=embed)
-
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
-        guild.role_ctb = role.id
-        await guild_table.save(guild)
-
-        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the catch the beat gamemode role!')
-        await ctx.send(embed=embed)
+        await self.role_setter(ctx, role=role, role_variable='role_ctb', role_name='catch the beat')
 
     @role.command(aliases=['osu!mania'])
     async def mania(self, ctx, role: str):
@@ -225,19 +210,7 @@ class Settings(commands.Cog):
         Set the mania gamemode role
         """
 
-        try:
-            role = await commands.RoleConverter().convert(ctx, role)
-        except commands.errors.RoleNotFound:
-            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
-            return await ctx.send(embed=embed)
-
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
-        guild.role_mania = role.id
-        await guild_table.save(guild)
-
-        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as mania gamemode role!')
-        await ctx.send(embed=embed)
+        await self.role_setter(ctx, role=role, role_variable='role_mania', role_name='mania')
 
 
 def setup(bot):
