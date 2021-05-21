@@ -178,6 +178,14 @@ class Settings(commands.Cog):
 
         await self.role_setter(ctx, role=role, role_variable='role_moderator', role_name='moderator')
 
+    @role.command()
+    async def regadd(self, ctx, role: str):
+        """
+        Set a role that will be given when a user registers their account.
+        """
+
+        await self.role_setter(ctx, role=role, role_variable='role_add', role_name='registration add')
+
     @role.command(name='1digit')
     async def digit1(self, ctx, role: str):
         """
