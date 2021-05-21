@@ -60,7 +60,7 @@ async def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.E
 
 async def success(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
     """
-    Creates an embed with a specified message using a template signifying success. 
+    Creates an embed with a specified message using a template signifying success.
 
     Parameters
     -----------
