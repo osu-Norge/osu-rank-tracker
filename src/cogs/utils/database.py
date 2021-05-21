@@ -280,7 +280,7 @@ class UserTable(Database):
             UPDATE user SET
             discord_id = %s,
             osu_id = %s,
-            gamemode = %s,
+            gamemode = %s
             WHERE discord_id = %s
             """,
             values
@@ -338,7 +338,7 @@ class ChannelTable(Database):
             """
             UPDATE channel SET
             discord_id = %s,
-            clean_after_message_id = %s,
+            clean_after_message_id = %s
             WHERE discord_id = %s
             """,
             values
