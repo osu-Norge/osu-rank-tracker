@@ -228,7 +228,10 @@ class Settings(commands.Cog):
         guild.blacklisted_osu_users.append(user_id)
         await guild_table.save(guild)
 
-        await embed_templates.success(ctx, text=f'[{username} ({user_id})](https://osu.ppy.sh/users/{user_id}) is now blacklisted!')
+        await embed_templates.success(
+            ctx,
+            text=f'[{username} ({user_id})](https://osu.ppy.sh/users/{user_id}) is now blacklisted!'
+        )
 
     @settings.group()
     async def role(self, ctx):
