@@ -158,18 +158,24 @@ class Settings(commands.Cog):
         Remove a country from the whitelist
         """
 
-        country_code = country_code.lower()
+        try:
+            country = countries.get(country_code)
+        except KeyError:
+            return await embed_templates.error_warning(
+                ctx, text='Invalid country! Make you enter a valid country or country code\n\n' +
+                          'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
+            )
 
         guild_table = database.GuildTable()
         guild = await guild_table.get(ctx.guild.id)
 
-        if not guild.whitelisted_countries or country_code not in guild.whitelisted_countries:
+        if not guild.whitelisted_countries or country.alpha2 not in guild.whitelisted_countries:
             return await embed_templates.error_warning(ctx, text='Country is not in the whitelist')
 
-        guild.whitelisted_countries.remove(country_code)
+        guild.whitelisted_countries.remove(country.alpha2)
         await guild_table.save(guild)
 
-        await embed_templates.success(ctx, text=f'`{country_code}` has been removed from the whitelist')
+        await embed_templates.success(ctx, text=f'`{country.name}` has been removed from the whitelist')
 
     @whitelist.command(name='show')
     async def whitelist_show(self, ctx):
