@@ -138,21 +138,19 @@ class Settings(commands.Cog):
                           'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
             )
 
-        country_code = country.alpha2
-
         guild_table = database.GuildTable()
         guild = await guild_table.get(ctx.guild.id)
 
         if not guild.whitelisted_countries:
             guild.whitelisted_countries = []
 
-        if country_code in guild.whitelisted_countries:
+        if country.alpha2 in guild.whitelisted_countries:
             return await embed_templates.error_warning(ctx, text='Country is already in the whitelist')
 
-        guild.whitelisted_countries.append(country_code)
+        guild.whitelisted_countries.append(country.alpha2)
         await guild_table.save(guild)
 
-        await embed_templates.success(ctx, text=f'`{country_code}` has been added to the whitelist')
+        await embed_templates.success(ctx, text=f'`{country.name}` has been added to the whitelist')
 
     @whitelist.command(name='remove')
     async def whitelist_remove(self, ctx, country_code: str):
