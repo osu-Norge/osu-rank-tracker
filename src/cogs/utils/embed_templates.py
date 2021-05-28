@@ -20,7 +20,7 @@ async def default_footer(ctx: discord.ext.commands.Context, embed: discord.Embed
 
 async def error_warning(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
     """
-    Creates an embed with a specified error message based on a warning template
+    Sends an embed with a specified error message based on a warning template
 
     Parameters
     -----------
@@ -34,13 +34,12 @@ async def error_warning(ctx: discord.ext.commands.Context, text: str) -> discord
 
     embed = discord.Embed(color=discord.Color.gold(), description=f'⚠️ {text}')
     await default_footer(ctx, embed)
-
-    return embed
+    await ctx.send(embed=embed)
 
 
 async def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
     """
-    Creates an embed with a specified error message based on a warning template
+    Sends an embed with a specified error message based on a warning template
 
     Parameters
     -----------
@@ -54,8 +53,7 @@ async def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.E
 
     embed = discord.Embed(color=discord.Color.red(), description=f'❌ {text}')
     await default_footer(ctx, embed)
-
-    return embed
+    await ctx.send(embed=embed)
 
 
 async def success(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
@@ -74,5 +72,4 @@ async def success(ctx: discord.ext.commands.Context, text: str) -> discord.Embed
 
     embed = discord.Embed(color=discord.Color.green(), description=f'✅ {text}')
     await default_footer(ctx, embed)
-
-    return embed
+    await ctx.send(embed=embed)

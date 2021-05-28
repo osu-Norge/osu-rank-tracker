@@ -27,9 +27,7 @@ class Settings(commands.Cog):
         try:
             role = await commands.RoleConverter().convert(ctx, role)
         except commands.errors.RoleNotFound:
-            embed = await embed_templates.error_warning(ctx, text='Invalid role given!')
-            await ctx.send(embed=embed)
-            return
+            return await embed_templates.error_warning(ctx, text='Invalid role given!')
 
         guild_table = database.GuildTable()
         guild = await guild_table.get(ctx.guild.id)
@@ -40,8 +38,7 @@ class Settings(commands.Cog):
         setattr(guild, role_variable, role.id)
         await guild_table.save(guild)
 
-        embed = await embed_templates.success(ctx, text=f'{role.mention} has been set as the {role_name} role!')
-        await ctx.send(embed=embed)
+        await embed_templates.success(ctx, text=f'{role.mention} has been set as the {role_name} role!')
 
     @commands.guild_only()
     @commands.command()
@@ -69,16 +66,14 @@ class Settings(commands.Cog):
         """
 
         if len(prefix) > 255:
-            embed = await embed_templates.error_warning(ctx, text='Maximum prefix length is 255 characters')
-            return await ctx.send(embed=embed)
+            return await embed_templates.error_warning(ctx, text='Maximum prefix length is 255 characters')
 
         guild_table = database.GuildTable()
         guild = await guild_table.get(ctx.guild.id)
         guild.prefix = prefix
         await guild_table.save(guild)
 
-        embed = await embed_templates.success(ctx, text=f'Prefix is now set to `{prefix}`')
-        await ctx.send(embed=embed)
+        await embed_templates.success(ctx, text=f'Prefix is now set to `{prefix}`')
 
     @settings.command()
     async def regchannel(self, ctx, channel: str, remove_after_message: str = None):
@@ -89,29 +84,20 @@ class Settings(commands.Cog):
         try:
             channel = await commands.TextChannelConverter().convert(ctx, channel)
         except commands.errors.ChannelNotFound:
-            embed = await embed_templates.error_warning(ctx, text='Invalid channel given!')
-            return await ctx.send(embed=embed)
+            return await embed_templates.error_warning(ctx, text='Invalid channel given!')
 
         channel_table = database.ChannelTable()
         db_channel = await channel_table.get(channel.id)
 
         if remove_after_message:
-            db_channel.clean_after_message_id = remove_after_message
-
             try:
                 remove_after_message = await commands.MessageConverter().convert(ctx, remove_after_message)
             except commands.errors.MessageNotFound:
-                embed = await embed_templates.error_warning(ctx, text='Invalid message given!')
-                return await ctx.send(embed=embed)
+                return await embed_templates.error_warning(ctx, text='Invalid message given!')
 
-            embed = await embed_templates.success(
-                ctx,
-                text=f'Registration channel has been set to {channel.mention} & all messages in the channel after ' +
-                     f'[this message]({remove_after_message.jump_url}) will be deleted on registration'
-            )
+            db_channel.clean_after_message_id = remove_after_message.id
         else:
             db_channel.clean_after_message_id = None
-            embed = await embed_templates.success(ctx, text=f'Registration channel has been set to {channel.mention}')
 
         await channel_table.save(db_channel)
 
@@ -120,7 +106,14 @@ class Settings(commands.Cog):
         guild.registration_channel = channel.id
         await guild_table.save(guild)
 
-        await ctx.send(embed=embed)
+        if remove_after_message:
+            await embed_templates.success(
+                ctx,
+                text=f'Registration channel has been set to {channel.mention} & all messages in the channel after ' +
+                     f'[this message]({remove_after_message.jump_url}) will be deleted on registration'
+            )
+        else:
+            await embed_templates.success(ctx, text=f'Registration channel has been set to {channel.mention}')
 
     @settings.group()
     async def whitelist(self, ctx):
@@ -140,11 +133,10 @@ class Settings(commands.Cog):
         try:
             country = countries.get(country_code)
         except KeyError:
-            embed = await embed_templates.error_warning(
+            return await embed_templates.error_warning(
                 ctx, text='Invalid country! Make you enter a valid country or country code\n\n' +
                           'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
             )
-            return await ctx.send(embed=embed)
 
         country_code = country.alpha2
 
@@ -155,14 +147,12 @@ class Settings(commands.Cog):
             guild.whitelisted_countries = []
 
         if country_code in guild.whitelisted_countries:
-            embed = await embed_templates.error_warning(ctx, text='Country is already in the whitelist')
-            return await ctx.send(embed=embed)
+            return await embed_templates.error_warning(ctx, text='Country is already in the whitelist')
 
         guild.whitelisted_countries.append(country_code)
         await guild_table.save(guild)
 
-        embed = await embed_templates.success(ctx, text=f'`{country_code}` has been added to the whitelist')
-        await ctx.send(embed=embed)
+        await embed_templates.success(ctx, text=f'`{country_code}` has been added to the whitelist')
 
     @whitelist.command()
     async def remove(self, ctx, country_code: str):
@@ -176,14 +166,12 @@ class Settings(commands.Cog):
         guild = await guild_table.get(ctx.guild.id)
 
         if not guild.whitelisted_countries or country_code not in guild.whitelisted_countries:
-            embed = await embed_templates.error_warning(ctx, text='Country is not in the whitelist')
-            return await ctx.send(embed=embed)
+            return await embed_templates.error_warning(ctx, text='Country is not in the whitelist')
 
         guild.whitelisted_countries.remove(country_code)
         await guild_table.save(guild)
 
-        embed = await embed_templates.success(ctx, text=f'`{country_code}` has been removed from the whitelist')
-        await ctx.send(embed=embed)
+        await embed_templates.success(ctx, text=f'`{country_code}` has been removed from the whitelist')
 
     @whitelist.command()
     async def show(self, ctx):
@@ -195,14 +183,12 @@ class Settings(commands.Cog):
         guild = await guild_table.get(ctx.guild.id)
 
         if not guild.whitelisted_countries:
-            embed = await embed_templates.error_warning(ctx, text='No countries are whitelisted!')
-            return await ctx.send(embed=embed)
+            return await embed_templates.error_warning(ctx, text='No countries are whitelisted!')
 
         guild.whitelisted_countries = [f'`{country}`' for country in guild.whitelisted_countries]
 
         if len(guild.whitelisted_countries) > 2048:
-            embed = await embed_templates.error_warning(ctx, text='Whitelist is too long to be displayed!')
-            return await ctx.send(embed=embed)
+            return await embed_templates.error_warning(ctx, text='Whitelist is too long to be displayed!')
 
         embed = discord.Embed()
         embed.description = ', '.join(guild.whitelisted_countries)
@@ -228,8 +214,7 @@ class Settings(commands.Cog):
         username = user.get('username')
 
         if not user:
-            embed = await embed_templates.error_warning(ctx, text='Invalid osu! user')
-            return await ctx.send(embed=embed)
+            return await embed_templates.error_warning(ctx, text='Invalid osu! user')
 
         guild_table = database.GuildTable()
         guild = await guild_table.get(ctx.guild.id)
@@ -238,14 +223,12 @@ class Settings(commands.Cog):
             guild.blacklisted_osu_users = []
 
         if user.get('id') in guild.blacklisted_osu_users:
-            embed = await embed_templates.error_warning(ctx, text='User is already blacklisted!')
-            return await ctx.send(embed=embed)
+            return await embed_templates.error_warning(ctx, text='User is already blacklisted!')
 
         guild.blacklisted_osu_users.append(user_id)
         await guild_table.save(guild)
 
-        embed = await embed_templates.success(ctx, text=f'[{username} ({user_id})](https://osu.ppy.sh/users/{user_id}) is now blacklisted!')
-        await ctx.send(embed=embed)
+        await embed_templates.success(ctx, text=f'[{username} ({user_id})](https://osu.ppy.sh/users/{user_id}) is now blacklisted!')
 
     @settings.group()
     async def role(self, ctx):
