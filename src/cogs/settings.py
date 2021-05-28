@@ -4,6 +4,7 @@ import discord
 from iso3166 import countries
 
 import cogs.utils.database as database
+from cogs.utils.osu_api import OsuApi
 from cogs.utils import embed_templates
 
 
@@ -205,6 +206,45 @@ class Settings(commands.Cog):
 
         embed = discord.Embed()
         embed.description = ', '.join(guild.whitelisted_countries)
+        await ctx.send(embed=embed)
+
+    @settings.group()
+    async def blacklist(self, ctx):
+        """
+        Manage osu user blacklist
+        """
+
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help(ctx.command)
+
+    @blacklist.command()
+    async def add(self, ctx, osu_user: str):
+        """
+        Add an osu user to the blacklist
+        """
+
+        user = await OsuApi.get_user(osu_user, 'standard')
+        user_id = user.get('id')
+        username = user.get('username')
+
+        if not user:
+            embed = await embed_templates.error_warning(ctx, text='Invalid osu! user')
+            return await ctx.send(embed=embed)
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(ctx.guild.id)
+
+        if not guild.blacklisted_osu_users:
+            guild.blacklisted_osu_users = []
+
+        if user.get('id') in guild.blacklisted_osu_users:
+            embed = await embed_templates.error_warning(ctx, text='User is already blacklisted!')
+            return await ctx.send(embed=embed)
+
+        guild.blacklisted_osu_users.append(user_id)
+        await guild_table.save(guild)
+
+        embed = await embed_templates.success(ctx, text=f'[{username} ({user_id})](https://osu.ppy.sh/users/{user_id}) is now blacklisted!')
         await ctx.send(embed=embed)
 
     @settings.group()
