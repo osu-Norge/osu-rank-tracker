@@ -124,8 +124,8 @@ class Settings(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
 
-    @whitelist.command()
-    async def add(self, ctx, country_code: str):
+    @whitelist.command(name='add')
+    async def whitelist_add(self, ctx, country_code: str):
         """
         Add a country to the whitelist
         """
@@ -154,8 +154,8 @@ class Settings(commands.Cog):
 
         await embed_templates.success(ctx, text=f'`{country_code}` has been added to the whitelist')
 
-    @whitelist.command()
-    async def remove(self, ctx, country_code: str):
+    @whitelist.command(name='remove')
+    async def whitelist_remove(self, ctx, country_code: str):
         """
         Remove a country from the whitelist
         """
@@ -173,8 +173,8 @@ class Settings(commands.Cog):
 
         await embed_templates.success(ctx, text=f'`{country_code}` has been removed from the whitelist')
 
-    @whitelist.command()
-    async def show(self, ctx):
+    @whitelist.command(name='show')
+    async def whitelist_show(self, ctx):
         """
         Show the country whitelist
         """
@@ -203,8 +203,8 @@ class Settings(commands.Cog):
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
 
-    @blacklist.command()
-    async def add(self, ctx, osu_user: str):
+    @blacklist.command(name='add')
+    async def blacklist_add(self, ctx, osu_user: str):
         """
         Add an osu user to the blacklist
         """
