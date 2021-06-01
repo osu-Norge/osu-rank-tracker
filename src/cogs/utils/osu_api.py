@@ -110,7 +110,7 @@ class Gamemode:
         """
 
         id = await cls.name_to_id(name)
-        name = await cls.id_to_name(id)  # Esnure name is correct
+        name = await cls.id_to_name(id)  # Ensure name is correct
         url_name = await cls.id_to_url_name(id)
         return cls(id, name, url_name)
 
@@ -130,7 +130,7 @@ class Gamemode:
 
         id = await Gamemode.url_name_to_id(url_name)
         name = await Gamemode.id_to_name(id)
-        url_name = await Gamemode.id_to_url_name(id)  # Esnure name is correct
+        url_name = await Gamemode.id_to_url_name(id)  # Ensure name is correct
         return cls(id, name, url_name)
 
     @staticmethod
