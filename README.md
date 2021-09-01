@@ -6,4 +6,4 @@
 
 ## Update
 
-Discord has decided to restrict what bots can and cannot do. This branch is the WIP of the rewrite that will never finish due to Discord being stupid.
+Discord has decided to restrict what bots can and cannot do. This branch is the WIP of the rewrite that I will never finish due to Discord being stupid.
