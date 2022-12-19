@@ -253,7 +253,10 @@ class Settings(commands.Cog):
 
         embed = embed_templates.success(
             interaction,
-            text=f'[{username} ({user_id})](https://osu.ppy.sh/users/{user_id}) is now blacklisted!'
+            text=f'[{username}](https://osu.ppy.sh/users/{user_id}) ({user_id}) is now blacklisted!'
+        )
+        await interaction.response.send_message(embed=embed)
+
         )
         await interaction.response.send_message(embed=embed)
 
