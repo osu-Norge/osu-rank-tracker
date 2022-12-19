@@ -292,6 +292,33 @@ class Settings(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
+    @blacklist_group.command(name='show')
+    async def blacklist_show(self, interaction: discord.Interaction):
+        """
+        Show the osu user blacklist
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        """
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(interaction.guild.id)
+
+        if not guild.blacklisted_osu_users:
+            embed = embed_templates.error_warning(interaction, text='No users are blacklisted!')
+            return await interaction.response.send_message(embed=embed)
+
+        guild.blacklisted_osu_users = [f'[{user}](https://osu.ppy.sh/users/{user})' for user in guild.blacklisted_osu_users]
+
+        if len(guild.blacklisted_osu_users) > 2048:
+            embed = embed_templates.error_warning(interaction, text='Blacklist is too long to be displayed!')
+            return await interaction.response.send_message(embed=embed)
+
+        embed = discord.Embed(title='Blacklisted users (IDs)')
+        embed.description = ', '.join(guild.blacklisted_osu_users)
+        await interaction.response.send_message(embed=embed)
+
 
     class Roles(Enum):
         """
