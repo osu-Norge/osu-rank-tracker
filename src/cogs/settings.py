@@ -64,6 +64,18 @@ class Settings(commands.Cog):
         pass
 
     @settings_group.command()
+    async def show(self, interaction: discord.Interaction):
+        """
+        Show all bot settings for the guild
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        """
+
+        pass
+
+    @settings_group.command()
     async def reset(self, interaction: discord.Interaction):
         """
         Reset all settings to default
