@@ -257,6 +257,38 @@ class Settings(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
+    @blacklist_group.command(name='remove')
+    async def blacklist_remove(self, interaction: discord.Interaction, osu_user: str):
+        """
+        Remove an osu user from the blacklist
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        osu_user (str): The osu! user to remove from the blacklist
+        """
+        
+        user = await OsuApi.get_user(osu_user, 'standard')
+        user_id = user.get('id')
+        username = user.get('username')
+
+        if not user:
+            embed = embed_templates.error_warning(interaction, text='Invalid osu! user')
+            return await interaction.response.send_message(embed=embed)
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(interaction.guild.id)
+
+        if not guild.blacklisted_osu_users or user_id not in guild.blacklisted_osu_users:
+            embed = embed_templates.error_warning(interaction, text='User is not blacklisted!')
+            return await interaction.response.send_message(embed=embed)
+
+        guild.blacklisted_osu_users.remove(user_id)
+        await guild_table.save(guild)
+
+        embed = embed_templates.success(
+            interaction,
+            text=f'[{username}](https://osu.ppy.sh/users/{user_id}) ({user_id}) is no longer blacklisted!'
         )
         await interaction.response.send_message(embed=embed)
 
