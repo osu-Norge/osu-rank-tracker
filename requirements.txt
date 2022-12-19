@@ -1,8 +1,8 @@
+asyncio
 discord.py
+expiringdict
+iso3166
+psycopg2
 pyyaml
 requests
-psycopg2
-asyncio
 psutil
-iso3166
-

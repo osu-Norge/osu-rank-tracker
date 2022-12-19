@@ -1,75 +1,74 @@
 import discord
 
 
-async def default_footer(ctx: discord.ext.commands.Context, embed: discord.Embed) -> discord.Embed:
+def default_footer(interaction: discord.Interaction, embed: discord.Embed) -> discord.Embed:
     """
     Sets a footer containing the command invoker's name, discriminator and avatar
-
     Parameters
     -----------
-    ctx (discord.ext.commands.Context): The current Discord context
+    interaction (discord.Interaction): Slash command context object
     embed (discord.Embed): An embed object to add the footer to
-
     Returns
     -----------
-    discord.Embed: The sent in embed + footer
+    (discord.Embed): The passed in embed + footer
     """
 
-    return embed.set_footer(icon_url=ctx.author.avatar_url, text=f'{ctx.author.name}#{ctx.author.discriminator}')
+    return embed.set_footer(
+        icon_url=interaction.user.avatar,
+        text=f'{interaction.user.name}#{interaction.user.discriminator}'
+    )
 
 
-async def error_warning(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
+def error_warning(interaction: discord.Interaction, text: str) -> discord.Embed:
     """
-    Sends an embed with a specified error message based on a warning template
-
+    Creates an embed with a specified error message based on a warning template
     Parameters
     -----------
-    ctx (discord.ext.commands.Context): The current Discord context
+    interaction (discord.Interaction): Slash command context object
     text (str): The error message
-
     Returns
     -----------
-    discord.Embed: An embed object based on the template with the specified text
+    (discord.Embed): An embed object based on the template with the specified text
     """
 
     embed = discord.Embed(color=discord.Color.gold(), description=f'⚠️ {text}')
-    await default_footer(ctx, embed)
-    await ctx.send(embed=embed)
+    default_footer(interaction, embed)
+
+    return embed
 
 
-async def error_fatal(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
+def error_fatal(interaction: discord.Interaction, text: str) -> discord.Embed:
     """
-    Sends an embed with a specified error message based on a warning template
-
+    Creates an embed with a specified error message based on a warning template
     Parameters
     -----------
-    ctx (discord.ext.commands.Context): The current Discord context
+    interaction (discord.Interaction): Slash command context object
     text (str): The error message
-
     Returns
     -----------
-    discord.Embed: An embed object based on the template with the specified text
+    (discord.Embed): An embed object based on the template with the specified text
     """
 
     embed = discord.Embed(color=discord.Color.red(), description=f'❌ {text}')
-    await default_footer(ctx, embed)
-    await ctx.send(embed=embed)
+    default_footer(interaction, embed)
+
+    return embed
 
 
-async def success(ctx: discord.ext.commands.Context, text: str) -> discord.Embed:
+def success(interaction: discord.Interaction, text: str) -> discord.Embed:
     """
     Creates an embed with a specified message using a template signifying success.
-
     Parameters
     -----------
-    ctx (discord.ext.commands.Context): The current Discord context
+    interaction (discord.Interaction): Slash command context object
     text (str): The message
-
     Returns
     -----------
     discord.Embed: An embed object based on the template with the specified text
     """
 
     embed = discord.Embed(color=discord.Color.green(), description=f'✅ {text}')
-    await default_footer(ctx, embed)
-    await ctx.send(embed=embed)
+    default_footer(interaction, embed)
+
+    return embed
+

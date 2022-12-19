@@ -1,8 +1,7 @@
+import dataclasses
+
 import psycopg2
 import yaml
-
-import dataclasses
-from typing import List
 
 
 class Database:
@@ -35,7 +34,6 @@ class Database:
             """
             CREATE TABLE IF NOT EXISTS public.guild (
                 discord_id bigint NOT NULL PRIMARY KEY,
-                prefix varchar(255),
                 registration_channel bigint REFERENCES channel(discord_id),
                 whitelisted_countries char(2)[],
                 blacklisted_osu_users integer[],
@@ -81,37 +79,37 @@ class Database:
         version = self.cursor.fetchone()[0].split(' ')[:2]
         return ' '.join(version)
 
-    async def get_guilds(self) -> List[tuple]:
+    async def get_guilds(self) -> list[tuple]:
         """
         Fetches all the entries in the guild table
 
         Returns
         -----------
-        List[tuple]: Table rows
+        list[tuple]: Table rows
         """
 
         self.cursor.execute('SELECT * FROM guild')
         return self.cursor.fetchall()
 
-    async def get_users(self) -> List[tuple]:
+    async def get_users(self) -> list[tuple]:
         """
         Fetches all the entries in the users table
 
         Returns
         -----------
-        List[tuple]: Table rows
+        list[tuple]: Table rows
         """
 
         self.cursor.execute('SELECT * FROM user')
         return self.cursor.fetchall()
 
-    async def get_channels(self) -> List[tuple]:
+    async def get_channels(self) -> list[tuple]:
         """
         Fetches all the entries in the channels table
 
         Returns
         -----------
-        List[tuple]: Table rows
+        list[tuple]: Table rows
         """
 
         self.cursor.execute('SELECT * FROM channel')
@@ -121,10 +119,9 @@ class Database:
 @dataclasses.dataclass
 class Guild:
     discord_id: int
-    prefix: str
     registration_channel: int
-    whitelisted_countries: List[str]
-    blacklisted_osu_users: List[int]
+    whitelisted_countries: list[str]
+    blacklisted_osu_users: list[int]
     role_moderator: int
     role_remove: int
     role_add: int
@@ -191,7 +188,6 @@ class GuildTable(Database):
             """
             UPDATE guild SET
             discord_id = %s,
-            prefix = %s,
             registration_channel = %s,
             whitelisted_countries = %s,
             blacklisted_osu_users = %s,

@@ -1,3 +1,6 @@
+config_mode: prod
+dev_guild_id:
+
 # Bot settings
 bot:
   token: 
@@ -5,6 +8,7 @@ bot:
   presence:
     message: API Abuse
     activity: watching
+    type: dnd
 
 # API
 api:

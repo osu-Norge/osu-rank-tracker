@@ -1,18 +1,32 @@
-from discord.ext import commands
-import discord
+from enum import Enum
+from typing import Literal
 
+import discord
+from discord import app_commands
+from discord.ext import commands
 from iso3166 import countries
 
+from cogs.utils import embed_templates
 import cogs.utils.database as database
 from cogs.utils.osu_api import OsuApi
-from cogs.utils import embed_templates
 
 
 class Settings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def role_setter(self, ctx: commands.context, role: str, role_variable: str, role_name: str):
+    settings_group = app_commands.Group(
+        name='settings',
+        description='Manage bot settings',
+        guild_only=True,
+        default_permissions=discord.Permissions(manage_guild=True)
+    )
+
+    #role_group = app_commands.Group(name='role', description='Manage role settings', parent=settings_group)
+    whitelist_group = app_commands.Group(name='whitelist', description='Manage country whitelist', parent=settings_group)
+    blacklist_group = app_commands.Group(name='blacklist', description='Manage user blacklist', parent=settings_group)
+
+    async def __role_setter(self, interaction: discord.Interaction, role: discord.Role, role_variable: str, role_name: str):
         """
         Validates a role and puts it into the database. Sends confirmation message to Discord
 
@@ -24,13 +38,8 @@ class Settings(commands.Cog):
         role_name (str): The role name that will be displayed in the confirmation message on Discord
         """
 
-        try:
-            role = await commands.RoleConverter().convert(ctx, role)
-        except commands.errors.RoleNotFound:
-            return await embed_templates.error_warning(ctx, text='Invalid role given!')
-
         guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
+        guild = await guild_table.get(interaction.guild.id)
 
         if not hasattr(guild, role_variable):
             raise commands.CommandError
@@ -38,63 +47,29 @@ class Settings(commands.Cog):
         setattr(guild, role_variable, role.id)
         await guild_table.save(guild)
 
-        await embed_templates.success(ctx, text=f'{role.mention} has been set as the {role_name} role!')
+        embed = embed_templates.success(interaction, text=f'{role.mention} has been set as the {role_name}!')
+        await interaction.response.send_message(embed=embed)
 
-    @commands.guild_only()
-    @commands.command()
-    async def setup(self, ctx):
+    @app_commands.guild_only()
+    @app_commands.command()
+    async def setup(self, interaction: discord.Interaction):
         """
         Automatic setup wizard for the bot
         """
         pass
 
-    @commands.guild_only()
-    @commands.has_permissions(manage_guild=True)
-    @commands.group()
-    async def settings(self, ctx):
-        """
-        Manage bot settings
-        """
-
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(ctx.command)
-
-    @settings.command()
-    async def prefix(self, ctx, prefix: str):
-        """
-        Set the serverprefix
-        """
-
-        if len(prefix) > 255:
-            return await embed_templates.error_warning(ctx, text='Maximum prefix length is 255 characters')
-
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
-        guild.prefix = prefix
-        await guild_table.save(guild)
-
-        await embed_templates.success(ctx, text=f'Prefix is now set to `{prefix}`')
-
-    @settings.command()
-    async def regchannel(self, ctx, channel: str, remove_after_message: str = None):
+    @settings_group.command()
+    async def regchannel(self, interaction: discord.Interaction, channel: discord.TextChannel, *, remove_after_message: str = None):
         """
         Set the registration channel
         """
 
-        try:
-            channel = await commands.TextChannelConverter().convert(ctx, channel)
-        except commands.errors.ChannelNotFound:
-            return await embed_templates.error_warning(ctx, text='Invalid channel given!')
+        # TODO: remove_after_message
 
         channel_table = database.ChannelTable()
         db_channel = await channel_table.get(channel.id)
 
         if remove_after_message:
-            try:
-                remove_after_message = await commands.MessageConverter().convert(ctx, remove_after_message)
-            except commands.errors.MessageNotFound:
-                return await embed_templates.error_warning(ctx, text='Invalid message given!')
-
             db_channel.clean_after_message_id = remove_after_message.id
         else:
             db_channel.clean_after_message_id = None
@@ -102,30 +77,23 @@ class Settings(commands.Cog):
         await channel_table.save(db_channel)
 
         guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
+        guild = await guild_table.get(interaction.guild.id)
         guild.registration_channel = channel.id
         await guild_table.save(guild)
 
         if remove_after_message:
-            await embed_templates.success(
-                ctx,
+            embed = embed_templates.success(
+                interaction,
                 text=f'Registration channel has been set to {channel.mention} & all messages in the channel after ' +
                      f'[this message]({remove_after_message.jump_url}) will be deleted on registration'
             )
+            await interaction.response.send_message(embed=embed)
         else:
-            await embed_templates.success(ctx, text=f'Registration channel has been set to {channel.mention}')
+            embed = embed_templates.success(interaction, text=f'Registration channel has been set to {channel.mention}')
+            await interaction.response.send_message(embed=embed)
 
-    @settings.group()
-    async def whitelist(self, ctx):
-        """
-        Manage country whitelist
-        """
-
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(ctx.command)
-
-    @whitelist.command(name='add')
-    async def whitelist_add(self, ctx, country_code: str):
+    @whitelist_group.command(name='add')
+    async def whitelist_add(self, interaction: discord.Interaction, country_code: str):
         """
         Add a country to the whitelist
         """
@@ -133,27 +101,30 @@ class Settings(commands.Cog):
         try:
             country = countries.get(country_code)
         except KeyError:
-            return await embed_templates.error_warning(
-                ctx, text='Invalid country! Make you enter a valid country or country code\n\n' +
+            embed = embed_templates.error_warning(
+                interaction, text='Invalid country! Make you enter a valid country or country code\n\n' +
                           'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
             )
+            return await interaction.response.send_message(embed=embed)
 
         guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
+        guild = await guild_table.get(interaction.guild.id)
 
         if not guild.whitelisted_countries:
             guild.whitelisted_countries = []
 
         if country.alpha2 in guild.whitelisted_countries:
-            return await embed_templates.error_warning(ctx, text='Country is already in the whitelist')
+            embed = embed_templates.error_warning(interaction, text='Country is already in the whitelist')
+            return await interaction.response.send_message(embed=embed)
 
         guild.whitelisted_countries.append(country.alpha2)
         await guild_table.save(guild)
 
-        await embed_templates.success(ctx, text=f'`{country.name}` has been added to the whitelist')
+        embed = embed_templates.success(interaction, text=f'`{country.name}` has been added to the whitelist')
+        await interaction.response.send_message(embed=embed)
 
-    @whitelist.command(name='remove')
-    async def whitelist_remove(self, ctx, country_code: str):
+    @whitelist_group.command(name='remove')
+    async def whitelist_remove(self, interaction: discord.Interaction, country_code: str):
         """
         Remove a country from the whitelist
         """
@@ -161,54 +132,50 @@ class Settings(commands.Cog):
         try:
             country = countries.get(country_code)
         except KeyError:
-            return await embed_templates.error_warning(
-                ctx, text='Invalid country! Make you enter a valid country or country code\n\n' +
-                          'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
+            embed = embed_templates.error_warning(
+                interaction, text='Invalid country! Make you enter a valid country or country code\n\n' +
+                                  'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
             )
+            return await interaction.response.send_message(embed=embed)
 
         guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
+        guild = await guild_table.get(interaction.guild.id)
 
         if not guild.whitelisted_countries or country.alpha2 not in guild.whitelisted_countries:
-            return await embed_templates.error_warning(ctx, text='Country is not in the whitelist')
+            embed = embed_templates.error_warning(interaction, text='Country is not in the whitelist')
+            return await interaction.response.send_message(embed=embed)
 
         guild.whitelisted_countries.remove(country.alpha2)
         await guild_table.save(guild)
 
-        await embed_templates.success(ctx, text=f'`{country.name}` has been removed from the whitelist')
+        embed = embed_templates.success(interaction, text=f'`{country.name}` has been removed from the whitelist')
+        await interaction.response.send_message(embed=embed)
 
-    @whitelist.command(name='show')
-    async def whitelist_show(self, ctx):
+    @whitelist_group.command(name='show')
+    async def whitelist_show(self, interaction: discord.Interaction):
         """
         Show the country whitelist
         """
 
         guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
+        guild = await guild_table.get(interaction.guild.id)
 
         if not guild.whitelisted_countries:
-            return await embed_templates.error_warning(ctx, text='No countries are whitelisted!')
+            embed = embed_templates.error_warning(interaction, text='No countries are whitelisted!')
+            return await interaction.response.send_message(embed=embed)
 
         guild.whitelisted_countries = [f'`{country}`' for country in guild.whitelisted_countries]
 
         if len(guild.whitelisted_countries) > 2048:
-            return await embed_templates.error_warning(ctx, text='Whitelist is too long to be displayed!')
+            embed = embed_templates.error_warning(interaction, text='Whitelist is too long to be displayed!')
+            return await interaction.response.send_message(embed=embed)
 
-        embed = discord.Embed()
+        embed = discord.Embed(title='Whitelisted countries')
         embed.description = ', '.join(guild.whitelisted_countries)
-        await ctx.send(embed=embed)
-
-    @settings.group()
-    async def blacklist(self, ctx):
-        """
-        Manage osu user blacklist
-        """
-
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(ctx.command)
-
-    @blacklist.command(name='add')
-    async def blacklist_add(self, ctx, osu_user: str):
+        await interaction.response.send_message(embed=embed)
+    
+    @blacklist_group.command(name='add')
+    async def blacklist_add(self, interaction: discord.Interaction, osu_user: str):
         """
         Add an osu user to the blacklist
         """
@@ -218,146 +185,52 @@ class Settings(commands.Cog):
         username = user.get('username')
 
         if not user:
-            return await embed_templates.error_warning(ctx, text='Invalid osu! user')
+            embed = embed_templates.error_warning(interaction, text='Invalid osu! user')
+            return await interaction.response.send_message(embed=embed)
 
         guild_table = database.GuildTable()
-        guild = await guild_table.get(ctx.guild.id)
+        guild = await guild_table.get(interaction.guild.id)
 
         if not guild.blacklisted_osu_users:
             guild.blacklisted_osu_users = []
 
         if user.get('id') in guild.blacklisted_osu_users:
-            return await embed_templates.error_warning(ctx, text='User is already blacklisted!')
+            embed = embed_templates.error_warning(interaction, text='User is already blacklisted!')
+            return await interaction.response.send_message(embed=embed)
 
         guild.blacklisted_osu_users.append(user_id)
         await guild_table.save(guild)
 
-        await embed_templates.success(
-            ctx,
+        embed = embed_templates.success(
+            interaction,
             text=f'[{username} ({user_id})](https://osu.ppy.sh/users/{user_id}) is now blacklisted!'
         )
+        await interaction.response.send_message(embed=embed)
 
-    @settings.group()
-    async def role(self, ctx):
-        """
-        Manage roles
-        """
 
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(ctx.command)
+    class Roles(Enum):
+        moderator = 'role_moderator', 'Moderator role'
+        on_registration_add = 'role_add', 'role that is added when a user registers'
+        on_registration_remove = 'role_remove', 'role that is removed when a user registers'
+        digit_1 = 'role_digit_1', '1 digit role'
+        digit_2 = 'role_digit_2', '2 digit role'
+        digit_3 = 'role_digit_3', '3 digit role'
+        digit_4 = 'role_digit_4', '4 digit role'
+        digit_5 = 'role_digit_5', '5 digit role'
+        digit_6 = 'role_digit_6', '6 digit role'
+        digit_7 = 'role_digit_7', '7 digit role'
+        gamemode_standard = 'role_standard', 'osu!standard role'
+        gamemode_taiko = 'role_taiko', 'osu!taiko role'
+        gamemode_ctb = 'role_ctb', 'osu!catch role'
 
-    @role.command()
-    async def moderator(self, ctx, role: str):
+    @settings_group.command()
+    async def role(self, interaction: discord.Interaction, type: Roles, role: discord.Role):
         """
-        Set the moderator role. Whoever has this role is able to change bot settings.
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_moderator', role_name='moderator')
-
-    @role.command()
-    async def regadd(self, ctx, role: str):
-        """
-        Set a role that will be given when a user registers their account.
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_add', role_name='registration add')
-
-    @role.command()
-    async def regremove(self, ctx, role: str):
-        """
-        Set a role that will be removed when a user registers their account.
+        Set what roles should be assigned
         """
 
-        await self.role_setter(ctx, role=role, role_variable='role_remove', role_name='registration remove')
-
-    @role.command(name='1digit')
-    async def digit1(self, ctx, role: str):
-        """
-        Set the 1 digit role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_1_digit', role_name='1 digit')
-
-    @role.command(name='2digit')
-    async def digit2(self, ctx, role: str):
-        """
-        Set the 2 digit role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_2_digit', role_name='2 digit')
-
-    @role.command(name='3digit')
-    async def digit3(self, ctx, role: str):
-        """
-        Set the 3 digit role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_3_digit', role_name='3 digit')
-
-    @role.command(name='4digit')
-    async def digit4(self, ctx, role: str):
-        """
-        Set the 4 digit role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_4_digit', role_name='4 digit')
-
-    @role.command(name='5digit')
-    async def digit5(self, ctx, role: str):
-        """
-        Set the 5 digit role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_5_digit', role_name='5 digit')
-
-    @role.command(name='6digit')
-    async def digit6(self, ctx, role: str):
-        """
-        Set the 6 digit role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_6_digit', role_name='6 digit')
-
-    @role.command(name='7digit')
-    async def digit7(self, ctx, role: str):
-        """
-        Set the 7 digit role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_7_digit', role_name='7 digit')
-
-    @role.command(aliases=['osu!standard', 'std', 'osu', 'osu!'])
-    async def standard(self, ctx, role: str):
-        """
-        Set the standard gamemode role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_standard', role_name='standard')
-
-    @role.command(aliases=['osu!taiko'])
-    async def taiko(self, ctx, role: str):
-        """
-        Set the taiko gamemode role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_taiko', role_name='taiko')
-
-    @role.command(aliases=['osu!catch', 'catch', 'fruits'])
-    async def ctb(self, ctx, role: str):
-        """
-        Set the catch the beat gamemode role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_ctb', role_name='catch the beat')
-
-    @role.command(aliases=['osu!mania'])
-    async def mania(self, ctx, role: str):
-        """
-        Set the mania gamemode role
-        """
-
-        await self.role_setter(ctx, role=role, role_variable='role_mania', role_name='mania')
+        await self.__role_setter(interaction, role=role, role_variable=type.value[0], role_name=type.value[1])
 
 
-def setup(bot):
-    bot.add_cog(Settings(bot))
+async def setup(bot):
+    await bot.add_cog(Settings(bot))

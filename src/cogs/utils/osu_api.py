@@ -1,11 +1,11 @@
-from __future__ import annotations  # Remove after upgrading to Python 3.10
+from __future__ import annotations
+from codecs import open
+import dataclasses
 
 import aiohttp
 from expiringdict import ExpiringDict
-
-from codecs import open
 import yaml
-import dataclasses
+
 
 
 class OsuApi:

@@ -1,39 +1,39 @@
-from typing import Union, Dict
-from math import ceil
 
 
-async def paginator(content: list, page: int) -> Dict[str, Union[int, str]]:
+from contextlib import contextmanager
+import discord
+
+
+@contextmanager
+def ignore_exception(*exceptions: Exception):
     """
-    Divides content into 10 element pages
+    Ignores the given exceptions
+    Parameters
+    ----------
+    *exceptions tuple[Exception]: The exceptions you want to ignore
+    """
+
+    try:
+        yield
+    except exceptions:
+        pass
+
+
+def get_color(discord_object: discord.User | discord.Member | discord.Role) -> discord.Color:
+    """
+    Returns the user's top role color
 
     Parameters
     -----------
-    content (list): A list of strings
-    page (int): The page
+    discord_object (discord.User|discord.Member|discord.Role): A discord object that has a color attribute
 
     Returns
     -----------
-    dict: A dictionay containing content and metadata
-        {
-            pagecount: int
-            page: int
-            page_content: str
-        }
+    (discord.Color): The user's displayed color
     """
 
-    pagecount = ceil(len(content) / 10)
+    if hasattr(discord_object, 'color') and str(discord_object.color) != '#000000':
+        return discord_object.color
 
-    if not page or page <= 0 or page > pagecount:
-        page = 1
+    return discord.Colour(0x99AAB5)
 
-    start_index = (page - 1) * 10
-    end_index = page * 10
-
-    page_content = content[start_index:end_index]
-
-    page_data = {
-        'pagecount': pagecount,
-        'page': page,
-        'page_content': page_content
-    }
-    return page_data

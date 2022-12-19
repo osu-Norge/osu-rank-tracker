@@ -1,23 +1,18 @@
 import discord
 
 
-async def get_user_color(user: discord.User) -> discord.Color:
+def get_color(discord_object: discord.User | discord.Member | discord.Role) -> discord.Color:
     """
     Returns the user's top role color
-
     Parameters
     -----------
-    user (discord.User): A discord user or member object
-
+    discord_object (discord.User|discord.Member|discord.Role): A discord object that has a color attribute
     Returns
     -----------
-    discord.Color: The user's displayed color
+    (discord.Color): The user's displayed color
     """
 
-    try:
-        if str(user.color) != '#000000':
-            return user.color
-    except AttributeError:
-        pass
+    if hasattr(discord_object, 'color') and str(discord_object.color) != '#000000':
+        return discord_object.color
 
     return discord.Colour(0x99AAB5)

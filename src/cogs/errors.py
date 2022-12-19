@@ -1,46 +1,73 @@
-from discord.ext import commands
-import discord
-
 import traceback
-import sys
-from datetime import datetime
+
+import discord
+from discord import app_commands
+from discord.ext import commands
 
 from cogs.utils import embed_templates
+from cogs.utils.misc_utils import ignore_exception
 
 
 class Errors(commands.Cog):
-    def __init__(self, bot):
+    """Error handlers for commands"""
+
+    def __init__(self, bot: commands.Bot):
+        """
+        Parameters
+        ----------
+        bot (commands.Bot): The bot instance
+        """
+
         self.bot = bot
+        bot.tree.on_error = self.on_app_command_error  # Set error handler for slash commands
 
     @commands.Cog.listener()
-    async def on_command(self, ctx):
+    async def on_command(self, ctx: commands.Context):
         """
-        Prints command execution metadata
+        Logs prefix command execution metadata
+
+        Parameters
+        ----------
+        ctx (commands.Context): Context object
         """
 
-        if ctx.guild:
-            command_source = f'{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}'
-        else:
-            command_source = 'DM'
-
-        print(
-            f'{datetime.now().strftime("%Y-%m-%d %H:%M:%S")} | ' +
-            f'{"❌ " if ctx.command_failed else "✔ "} {ctx.command} - ' +
+        self.bot.logger.info(
+            f'{"❌ " if ctx.command_failed else "✔ "} {ctx.command} | ' +
             f'{ctx.author.name}#{ctx.author.discriminator} ({ctx.author.id}) | ' +
-            command_source
+            f'{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}'
         )
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_app_command_completion(self, interaction: discord.Interaction, command: app_commands.Command | app_commands.ContextMenu):
         """
-        Returns something based on the type of command error
+        Logs slash command execution metadata
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        command (app_commands.Command | app_commands.ContextMenu): Command object
         """
 
-        # Reset cooldown if command throws an error
-        try:
+        self.bot.logger.info(
+            f'{"❌ " if interaction.command_failed else "✔ "} {command.name} | ' +
+            f'{interaction.user.name}#{interaction.user.discriminator} ({interaction.user.id}) | ' +
+            f'{interaction.guild_id}-{interaction.channel_id}-{interaction.id}'
+        )
+
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        """
+        Handle prefix command errors
+
+        Parameters
+        ----------
+        ctx (commands.Context): Context object
+        error (commands.CommandError): Eror context object
+        """
+
+        # Reset cooldown if command throws AttributeError
+        with ignore_exception(AttributeError):
             self.bot.get_command(f'{ctx.command}').reset_cooldown(ctx)
-        except AttributeError:
-            pass
 
         # Ignore command's own error handling
         if hasattr(ctx.command, 'on_error'):
@@ -54,7 +81,8 @@ class Errors(commands.Cog):
 
         send_help = (
             commands.MissingRequiredArgument,
-            commands.TooManyArguments
+            commands.TooManyArguments,
+            commands.BadArgument
         )
         if isinstance(error, send_help):
             self.bot.get_command(f'{ctx.command}').reset_cooldown(ctx)
@@ -62,26 +90,31 @@ class Errors(commands.Cog):
 
         elif isinstance(error, commands.BotMissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            return await embed_templates.error_warning(ctx, text='I require the following permissions:\n\n' +
-                                                                 f'```\n{permissions}\n```')
+            text = 'I miss the following permissions:\n\n' + \
+                   f'```\n{permissions}\n```'
+            return await ctx.reply(text)
 
         elif isinstance(error, commands.MissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            return await embed_templates.error_warning(ctx, text='You are missing permissions\n\n' +
-                                                                 f'```\n{permissions}\n```')
+            text = 'You miss the following permissions\n\n' + \
+                   f'```\n{permissions}\n```'
+            return await ctx.reply(text)
 
         elif isinstance(error, commands.NotOwner):
-            return await embed_templates.error_fatal(ctx, text='Only bot owners can execute this command')
+            text = 'Only the bot owner can use this command'
+            return await ctx.reply(text)
 
         elif isinstance(error, commands.CommandOnCooldown):
-            return await embed_templates.error_warning(ctx, text='Command is currently on cooldown.' +
-                                                                 f'Retry in `{error.retry_after:.1f}` seconds.')
+            text = 'Commands has just been invoked' + \
+                   f'Try again in`{error.retry_after:.1f}` seconds.'
+            return await ctx.reply(text)
 
         elif isinstance(error, commands.NoPrivateMessage):
             try:
-                return await embed_templates.error_fatal(ctx, text='This command can only be used in guilds')
+                text = 'This command is only invokable in guilds'
+                return await ctx.reply(text)
             except discord.errors.Forbidden:  # Thrown if bot is blocked by the user or if the user has closed their DMs
-                print("DM Blocked!")
+                print('DM Blocked!')
 
         elif isinstance(error, commands.DisabledCommand):
             pass
@@ -89,17 +122,61 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.CheckFailure):
             return
 
-        await embed_templates.error_fatal(ctx, text='An unknow error occured!')
+        embed = embed_templates.error_fatal(ctx, text='An unknown error occurred')
+        await ctx.reply(embed=embed)
 
-        # Print full exception to console
-        print(f'Ignoring exception in command {ctx.command}:', file=sys.stderr)
-        traceback.print_exception(
-            type(error),
-            error,
-            error.__traceback__,
-            file=sys.stderr
-        )
+        # Log full exception to file
+        self.bot.logger.error(''.join(traceback.format_exception(type(error), error, error.__traceback__)))
+
+    async def on_app_command_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        """
+        Handle slash command errors
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        error (app_commands.AppCommandError): Eror context object
+        """
+
+        # Log command usage, just in case
+        await self.on_app_command_completion(interaction, interaction.command)
+
+        if isinstance(error, commands.BotMissingPermissions):
+            permissions = ', '.join(error.missing_perms)
+            embed = embed_templates.error_warning(interaction, text='I\'m missing the following permissions:\n\n' +
+                                                                    f'```\n{permissions}\n```')
+            return await interaction.response.send_message(embed=embed)
+
+        elif isinstance(error, commands.MissingPermissions):
+            permissions = ', '.join(error.missing_perms)
+            embed = embed_templates.error_warning(interaction, text='You\'re missing the following permissions:\n\n' +
+                                                                    f'```\n{permissions}\n```')
+            return await interaction.response.send_message(embed=embed)
+
+        elif isinstance(error, commands.NotOwner):
+            embed = embed_templates.error_fatal(interaction, text='Only the bot owner can do this')
+            return await interaction.response.send_message(embed=embed)
+
+        elif isinstance(error, commands.CommandOnCooldown):
+            embed = embed_templates.error_warning(interaction, text='The command has just been invoked\n' +
+                                                                    f'Try again in `{error.retry_after:.1f}` seconds.')
+            return await interaction.response.send_message(embed=embed)
+
+        embed = embed_templates.error_fatal(interaction, text='An unknown error occurred!')
+        await interaction.response.send_message(embed=embed)
+
+        # Log full exception to file
+        self.bot.logger.error(''.join(traceback.format_exception(type(error), error, error.__traceback__)))
 
 
-def setup(bot):
-    bot.add_cog(Errors(bot))
+async def setup(bot: commands.Bot):
+    """
+    Add the cog to the bot on extension load
+
+    Parameters
+    ----------
+    bot (commands.Bot): Bot instance
+    """
+
+    await bot.add_cog(Errors(bot))
+
