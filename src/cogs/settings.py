@@ -64,6 +64,26 @@ class Settings(commands.Cog):
         pass
 
     @settings_group.command()
+    async def reset(self, interaction: discord.Interaction):
+        """
+        Reset all settings to default
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        """
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(interaction.guild.id)
+        for attribute in dir(guild):
+            if not attribute.startswith('__') and not callable(getattr(guild, attribute)) and attribute != 'discord_id':
+                setattr(guild, attribute, None)
+        await guild_table.save(guild)
+
+        embed = embed_templates.success(interaction, text='All settings have been reset!')
+        await interaction.response.send_message(embed=embed)
+
+    @settings_group.command()
     async def regchannel(self, interaction: discord.Interaction, channel: discord.TextChannel, *, remove_after_message: str = None):
         """
         Set the registration channel
