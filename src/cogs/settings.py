@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Literal
 
 import discord
 from discord import app_commands
@@ -22,7 +21,6 @@ class Settings(commands.Cog):
         default_permissions=discord.Permissions(manage_guild=True)
     )
 
-    #role_group = app_commands.Group(name='role', description='Manage role settings', parent=settings_group)
     whitelist_group = app_commands.Group(name='whitelist', description='Manage country whitelist', parent=settings_group)
     blacklist_group = app_commands.Group(name='blacklist', description='Manage user blacklist', parent=settings_group)
 
