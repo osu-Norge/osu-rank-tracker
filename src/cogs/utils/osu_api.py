@@ -2,11 +2,13 @@ from __future__ import annotations
 from codecs import open
 import dataclasses
 from enum import Enum
+import uuid
 
 import aiohttp
 from expiringdict import ExpiringDict
 import yaml
 
+from . import database
 
 
 class OsuApi:
@@ -83,6 +85,26 @@ class OsuApi:
                 if r.status == 200:
                     data = await r.json()
                     return data
+
+    @classmethod
+    async def generate_auth_link(cls, discord_user_id: int, gamemode: int) -> str:
+        """
+        Generates an authorization link for the osu!api v2
+
+        Returns
+        -----------
+        str: The authorization link
+        """
+
+        uuid = uuid.uuid1()
+        state = f'{discord_user_id}:{gamemode}:{uuid}'
+
+        verficiation = database.Verification(discord_id=discord_user_id, token=uuid)
+        await database.VerificationTable().insert(verficiation)
+
+        return f'https://osu.ppy.sh/oauth/authorize?client_id={cls.base_payload.get("client_id")}' + \
+               f'&redirect_uri={cls.user_payload.get("redirect_uri")}' + \
+               f'&state={state}&response_type=code&scope=identify'
 
 
 @dataclasses.dataclass
