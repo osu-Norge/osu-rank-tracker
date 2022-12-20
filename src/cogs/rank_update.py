@@ -146,7 +146,8 @@ class User(commands.Cog):
         guild (discord.Guild): Guild instance
         """
 
-        pass
+        guild = database.Guild(discord_id=guild.id)
+        await database.GuildTable().save(guild)
 
     @commands.Cog.listener('on_member_join')
     async def on_member_join(self, member: discord.Member):
