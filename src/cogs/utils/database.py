@@ -63,6 +63,14 @@ class Database:
             )
             """
         )
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS public.verification (
+                discord_id integer NOT NULL,
+                uuid TEXT NOT NULL
+            )
+            """
+        )
 
         self.connection.commit()
 
@@ -351,4 +359,70 @@ class ChannelTable(Database):
             """,
             values
         )
+        self.connection.commit()
+
+
+@dataclasses.dataclass
+class Verification:
+    discord_id: int
+    uuid: str
+
+
+class VerificationTable(Database):
+    def __init__(self):
+        super().__init__()
+
+    async def get(self, discord_id: int) -> Verification:
+        """
+        Fetches a user and its data from the database
+
+        Parameters
+        ----------
+        discord_id (int): The Discord User ID
+
+        Returns
+        ----------
+        VerificationTable: A user object
+        """
+
+        self.cursor.execute('SELECT * FROM verification WHERE discord_id=%s', ([discord_id]))
+        db_data = self.cursor.fetchone()
+
+        if db_data:
+            return Verification(*db_data)
+
+    async def insert(self, verification: Verification) -> None:
+        """
+        Insert a new pending verification into the database
+
+        Parameters
+        ----------
+        verification (Verification): A verification object
+        """
+
+        values = dataclasses.astuple(verification) + (verification.discord_id,)
+
+        try:
+            self.cursor.execute(
+                """
+                UPDATE verification SET
+                discord_id = %s,
+                uuid = %s
+                WHERE discord_id = %s
+                """, values
+            )
+            self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+
+    async def delete(self, discord_id: int):
+        """
+        Delete a user from the database
+
+        Parameters
+        ----------
+        discord_id (int): The Discord User ID
+        """
+
+        self.cursor.execute('DELETE FROM verification WHERE discord_id=%s', ([discord_id]))
         self.connection.commit()
