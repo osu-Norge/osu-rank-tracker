@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 import discord
@@ -14,6 +15,72 @@ class User(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.update_ranks.start()
+        self.rank_cache = {}
+
+    async def __update_user_rank(self, guild: database.Guild, member: discord.Member, rank: int, gamemode_id: int, reason: str = None):
+        """
+        Update a user's rank
+
+        Parameters
+        ----------
+        guild (database.GuildTable): A fetched guild from the database
+        member (discord.Member): A Discord member object
+        rank (int): The user's osu! rank
+        gamemode (Gamemode): The user's gamemode
+        reason (str): The reason for the rank update
+        """
+
+        # Rank roles
+        # This is terrible, I know :P
+        if rank < 10:
+            roles_to_add = set(['role_1_digit'])
+            roles_to_remove = set(['role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 100:
+            roles_to_add = set(['role_2_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 1000:
+            roles_to_add = set(['role_3_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 10000:
+            roles_to_add = set(['role_4_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 100000:
+            roles_to_add = set(['role_5_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 1000000:
+            roles_to_add = set(['role_6_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_7_digit'])
+        else:
+            roles_to_add = set(['role_7_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit'])
+
+        # Gamemode roles
+        match gamemode_id:
+            case 0:
+                roles_to_add.add('role_standard')
+                roles_to_remove.add(['role_taiko', 'role_ctb', 'role_mania'])
+            case 1:
+                roles_to_add.add('role_taiko')
+                roles_to_remove.add(['role_standard', 'role_ctb', 'role_mania'])
+            case 2:
+                roles_to_add.add('role_ctb')
+                roles_to_remove.add(['role_standard', 'role_taiko', 'role_mania'])
+            case 3:
+                roles_to_add.add('role_mania')
+                roles_to_remove.add(['role_standard', 'role_taiko', 'role_ctb'])
+
+        # Add and remove any additional roles
+        if guild.role_remove:
+            roles_to_remove.append(guild.role_remove)
+        if guild.role_add:
+            roles_to_add.append(guild.role_add)
+
+        # Convert role strings to Role objects
+        roles_to_add = [member.guild.get_role(getattr(guild, attr)) for attr in roles_to_add if getattr(guild, attr)]
+        roles_to_remove = [member.guild.get_role(getattr(guild, attr)) for attr in roles_to_remove if getattr(guild, attr)]
+
+        await member.remove_roles(*roles_to_remove, reason=reason)
+        await member.add_roles(*roles_to_add, reason=reason)
 
     @tasks.loop(hours=24)
     async def update_ranks(self):
