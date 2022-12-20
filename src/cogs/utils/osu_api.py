@@ -71,6 +71,19 @@ class OsuApi:
                     data = await r.json()
                     return data
 
+    @classmethod
+    async def get_me_user(cls, code: str, gamemode: Gamemode):
+        """
+        Fetch user info from the v2 API
+        """
+
+        async with aiohttp.ClientSession() as session:
+            header = {'Authorization': f'Bearer {code}'}
+            async with session.get(f'https://osu.ppy.sh/api/v2/users/me/{gamemode.url_name}', headers=header) as r:
+                if r.status == 200:
+                    data = await r.json()
+                    return data
+
 
 @dataclasses.dataclass
 class Gamemode:
