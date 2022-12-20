@@ -159,7 +159,10 @@ class User(commands.Cog):
         guild (discord.Guild): Guild instance
         """
 
-        pass
+        guild = await database.GuildTable().get(member.guild.id)
+        user = await database.UserTable().get(member.id)
+        if user:
+            await self.__update_user_rank(guild, member, user.gamemode, reason='User joined guild')
 
     @app_commands.checks.cooldown(1, 60*60*12)  # 12 hours
     @app_commands.command(name='force_update')
