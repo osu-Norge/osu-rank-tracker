@@ -1,6 +1,7 @@
 from __future__ import annotations
 from codecs import open
 import dataclasses
+from enum import Enum
 
 import aiohttp
 from expiringdict import ExpiringDict
@@ -233,3 +234,15 @@ class Gamemode:
             'osu!mania': 3
         }
         return gamemode_ids.get(name.lower())
+
+
+# class GamemodeOptions(Enum):
+#     STANDARD = Gamemode.from_id(0)
+#     TAIKO = Gamemode.from_id(1)
+#     CATCH_THE_BEAT = Gamemode.from_id(2)
+#     MANIA = Gamemode.from_id(3)
+class GamemodeOptions(Enum):
+    standard = 0
+    taiko = 1
+    ctb = 2
+    mania = 3

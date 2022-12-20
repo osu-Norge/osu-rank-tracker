@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from cogs.utils import embed_templates
 import cogs.utils.database as database
-from cogs.utils.osu_api import OsuApi
+from cogs.utils.osu_api import GamemodeOptions, OsuApi
 
 
 class User(commands.Cog):
@@ -102,6 +102,33 @@ class User(commands.Cog):
         embed.add_field(name='Joined', value=joined_timestamp)
         embed.set_thumbnail(url=osu_user.avatar_url)
         await interaction.response.send_message(embed=embed)
+
+    @user_group.command(name='gamemode')
+    async def set_gamemode(self, interaction: discord.Interaction, gamemode: GamemodeOptions):
+        """
+        Set your osu! gamemode
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        gamemode (GamemodeOptions): Gamemode to set
+        """
+
+        user_table = database.UserTable()
+        user = await user_table.get_user(interaction.user.id)
+
+        if not user:
+            return await interaction.response.send_message(
+                embed=embed_templates.error_warning('You are not registered with the bot'),
+                ephemeral=True
+            )
+
+        user_table.gamemode = gamemode.value.id
+
+        await interaction.response.send_message(
+            embed=embed_templates.success(f'Gamemode set to {gamemode.value}'),
+            ephemeral=True
+        )
 
 
 async def setup(bot: commands.Bot):
