@@ -283,6 +283,18 @@ class UserTable(Database):
         )
         self.connection.commit()
 
+    async def delete(self, discord_id: int) -> None:
+        """
+        Delete a user from the database
+
+        Parameters
+        ----------
+        discord_id (int): The Discord User ID
+        """
+
+        self.cursor.execute('DELETE FROM user WHERE discord_id=%s', ([discord_id]))
+        self.connection.commit()
+
 
 @dataclasses.dataclass
 class Channel:
