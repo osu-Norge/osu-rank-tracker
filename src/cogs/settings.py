@@ -385,6 +385,30 @@ class Settings(commands.Cog):
 
         await self.__role_setter(interaction, role=None, role_variable=type.value[0], role_name=type.value[1])
 
+    @role_group.command(name='show')
+    async def role_show(self, interaction: discord.Interaction):
+        """
+        Show all role associations to database
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        """
+
+        guild_table = database.GuildTable()
+        guild = await guild_table.get(interaction.guild.id)
+
+        print(guild)
+
+        embed = discord.Embed(title='Role associations')
+        for role in self.Roles:
+            role_id = getattr(guild, role.value[0])
+            if role_id:
+                discord_role = interaction.guild.get_role(role_id)
+                embed.add_field(name=role.value[1], value=discord_role.mention)
+        
+        await interaction.response.send_message(embed=embed)
+
 
 async def setup(bot: commands.Bot):
     """
