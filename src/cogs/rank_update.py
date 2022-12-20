@@ -29,7 +29,7 @@ class User(commands.Cog):
         guild (database.GuildTable): A fetched guild from the database
         member (discord.Member): A Discord member object
         rank (int): The user's osu! rank
-        gamemode (Gamemode): The user's gamemode
+        gamemode (int): The user's osu! gamemode
         reason (str): The reason for the rank update
         """
 
@@ -159,7 +159,7 @@ class User(commands.Cog):
 
         Parameters
         ----------
-        guild (discord.Guild): Guild instance
+        member (discord.Member): Member instance
         """
 
         guild = await database.GuildTable().get(member.guild.id)
