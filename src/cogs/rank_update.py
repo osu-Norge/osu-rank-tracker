@@ -9,8 +9,8 @@ import cogs.utils.database as database
 from cogs.utils.osu_api import OsuApi
 
 
-class User(commands.Cog):
-    """User commands cog"""
+class RankUpdate(commands.Cog):
+    """Cog for handling rank updates"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -193,4 +193,4 @@ async def setup(bot: commands.Bot):
     bot (commands.Bot): Bot instance
     """
 
-    await bot.add_cog(User(bot))
+    await bot.add_cog(RankUpdate(bot))
