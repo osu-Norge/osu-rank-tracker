@@ -10,6 +10,10 @@ bot:
     activity: watching
     type: dnd
 
+# Verification server settings
+server:
+  port: 
+
 # API
 api:
   osu_v1:

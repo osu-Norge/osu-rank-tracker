@@ -32,6 +32,7 @@ class Bot(commands.Bot):
         self.osu_v2 = config['api'].get('osu_v2', {})
         self.emoji = config.get('emoji', {})
         self.misc = config.get('misc', {})
+        self.server_port = config['server'].get('port', 80)
 
     async def setup_hook(self):
         # Load cogs
