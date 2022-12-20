@@ -17,6 +17,9 @@ class User(commands.Cog):
         self.update_ranks.start()
         self.rank_cache = {}
 
+    def cog_unload(self):
+        self.update_ranks.cancel()
+
     async def __update_user_rank(self, guild: database.Guild, member: discord.Member, rank: int, gamemode_id: int, reason: str = None):
         """
         Update a user's rank
