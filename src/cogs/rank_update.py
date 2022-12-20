@@ -175,7 +175,10 @@ class User(commands.Cog):
         interaction (discord.Interaction): Slash command context object
         """
 
-        pass
+        guild = database.GuildTable().get(interaction.guild.id)
+        user = database.UserTable().get(interaction.author.id)
+        if user:
+            self.__update_user_rank(guild, interaction.author, user.gamemmode, reason='User forced rank update through command')
 
 
 async def setup(bot: commands.Bot):
