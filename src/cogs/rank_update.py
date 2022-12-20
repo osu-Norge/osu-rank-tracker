@@ -88,7 +88,35 @@ class User(commands.Cog):
         Update the ranks of all users in the database
         """
 
-        pass
+        user_table = database.UserTable()
+        guild_table = database.GuildTable()
+
+        guilds = guild_table.get_all()
+
+        user_count = user_table.count()
+        sleep_time = user_count / 60  # TODO: calculate optimal sleep time based on user count and ratelimit
+
+        for guild in guilds:
+            for member in guild.members:
+                if member.bot:
+                    continue
+
+                if not (user := user_table.get(member.id)):
+                    continue
+
+                if not (rank := self.rank_cache.get(user.id)):
+                    osu_user = OsuApi.get_user(user.osu_id)
+                    if not osu_user:
+                        continue
+                    rank = osu_user["statistics"]["global_rank"]
+                    self.rank_cache[user.id] = rank
+
+                # Update the user's rank
+                await self.__update_user_rank(guild, member, rank, user.gamemode, reason='Automatic rank update based on osu! rank')
+
+                await asyncio.sleep(sleep_time)
+
+        self.rank_cache = {}  # Clear the rank cache
 
     @update_ranks.before_loop
     async def before_update_ranks(self):
