@@ -25,6 +25,7 @@ class Settings(commands.Cog):
 
     whitelist_group = app_commands.Group(name='whitelist', description='Manage country whitelist', parent=settings_group)
     blacklist_group = app_commands.Group(name='blacklist', description='Manage user blacklist', parent=settings_group)
+    role_group = app_commands.Group(name='role', description='Manage role settings', parent=settings_group)
 
     async def __role_setter(self, interaction: discord.Interaction, role: discord.Role, role_variable: str, role_name: str):
         """
@@ -352,8 +353,8 @@ class Settings(commands.Cog):
         gamemode_ctb = 'role_ctb', 'osu!catch'
         gamemode_mania = 'role_mania', 'osu!mania'
 
-    @settings_group.command()
-    async def role(self, interaction: discord.Interaction, type: Roles, role: discord.Role):
+    @role_group.command(name='set')
+    async def role_set(self, interaction: discord.Interaction, type: Roles, role: discord.Role):
         """
         Associate discord role with a role type in the database
 
