@@ -27,7 +27,7 @@ class Settings(commands.Cog):
     blacklist_group = app_commands.Group(name='blacklist', description='Manage user blacklist', parent=settings_group)
     role_group = app_commands.Group(name='role', description='Manage role settings', parent=settings_group)
 
-    async def __role_setter(self, interaction: discord.Interaction, role: discord.Role, role_variable: str, role_name: str):
+    async def __role_setter(self, interaction: discord.Interaction, role: discord.Role | None, role_variable: str, role_name: str):
         """
         Validates a role and puts it into the database. Sends confirmation message to Discord
 
@@ -42,13 +42,18 @@ class Settings(commands.Cog):
         guild_table = database.GuildTable()
         guild = await guild_table.get(interaction.guild.id)
 
-        if not hasattr(guild, role_variable):
-            raise commands.CommandError
+        if role:
+            setattr(guild, role_variable, role.id)
+        else:
+            setattr(guild, role_variable, None)
 
-        setattr(guild, role_variable, role.id)
         await guild_table.save(guild)
 
-        embed = embed_templates.success(interaction, text=f'{role.mention} has been set as the {role_name}!')
+        if not role:
+            embed = embed_templates.success(interaction, text=f'The {role_name} role has been reset!')
+            return await interaction.response.send_message(embed=embed)
+
+        embed = embed_templates.success(interaction, text=f'{role.mention} has been set as the {role_name} role!')
         await interaction.response.send_message(embed=embed)
 
     @app_commands.guild_only()
@@ -366,6 +371,19 @@ class Settings(commands.Cog):
         """
 
         await self.__role_setter(interaction, role=role, role_variable=type.value[0], role_name=type.value[1])
+
+    @role_group.command(name='remove')
+    async def role_remove(self, interaction: discord.Interaction, type: Roles):
+        """
+        Remove a role from the database
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        type (Roles): The type of role to remove
+        """
+
+        await self.__role_setter(interaction, role=None, role_variable=type.value[0], role_name=type.value[1])
 
 
 async def setup(bot: commands.Bot):
