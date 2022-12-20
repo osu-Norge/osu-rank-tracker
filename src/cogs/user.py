@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 import discord
@@ -21,7 +22,7 @@ class User(commands.Cog):
     )
 
     @user_group.command()
-    async def register(self, interaction: discord.Interaction):
+    async def register(self, interaction: discord.Interaction, gamemode: GamemodeOptions = GamemodeOptions.standard):
         """
         Connect your osu! account to the bot
 
@@ -30,7 +31,34 @@ class User(commands.Cog):
         interaction (discord.Interaction): Slash command context object
         """
 
-        pass
+        # Check if user is already registered
+        user_table = database.UserTable()
+        user = await user_table.get_user(interaction.author.id)
+        if user:
+            return await interaction.response.send_message(
+                embed=embed_templates.error_warning('You are already registered with the bot'),
+                ephemeral=True
+            )
+
+        # Check if user is already pending verification
+        verification_table = database.VerificationTable()
+        verification = await verification_table.get(interaction.author.id)
+        if not verification:
+            return await interaction.response.send_message(
+                embed=embed_templates.error_warning('You are already pending verification'),
+                ephemeral=True
+            )
+
+        # Generate auth link
+        auth_link = OsuApi.generate_auth_link(interaction.author.id)
+        await interaction.response.send_message(
+            embed=embed_templates.success(f'Click the link to verify your osu! account:\n{auth_link}\n\nYou\'ve got 2 minutes to complete this verifcation'),
+            ephemeral=True
+        )
+
+        await asyncio.sleep(120)
+        database.VerificationTable().delete(interaction.author.id)
+
 
     @user_group.command()
     async def remove(self, interaction: discord.Interaction):
