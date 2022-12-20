@@ -1,10 +1,15 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from ..src.cogs.utils import database
-from ..src.cogs.utils.osu_api import Gamemode, OsuApi
+from ..cogs.utils import database
+from ..cogs.utils.osu_api import Gamemode, OsuApi
 
 app = FastAPI()
+
+
+class VerificationServer:
+    def __init__(self, port=80) -> None:
+        app.run(host="0.0.0.0", port=port, debug=False)
 
 
 @app.get('/')
