@@ -337,19 +337,20 @@ class Settings(commands.Cog):
         List of roles that can be set in the database. Serves as autocomplete for the role command
         """
 
-        moderator = 'role_moderator', 'Moderator role'
-        on_registration_add = 'role_add', 'role that is added when a user registers'
-        on_registration_remove = 'role_remove', 'role that is removed when a user registers'
-        digit_1 = 'role_digit_1', '1 digit role'
-        digit_2 = 'role_digit_2', '2 digit role'
-        digit_3 = 'role_digit_3', '3 digit role'
-        digit_4 = 'role_digit_4', '4 digit role'
-        digit_5 = 'role_digit_5', '5 digit role'
-        digit_6 = 'role_digit_6', '6 digit role'
-        digit_7 = 'role_digit_7', '7 digit role'
-        gamemode_standard = 'role_standard', 'osu!standard role'
-        gamemode_taiko = 'role_taiko', 'osu!taiko role'
-        gamemode_ctb = 'role_ctb', 'osu!catch role'
+        moderator = 'role_moderator', 'moderator'
+        on_registration_add = 'role_add', 'addrole'
+        on_registration_remove = 'role_remove', 'removerole'
+        digit_1 = 'role_1_digit', '1 digit'
+        digit_2 = 'role_2_digit', '2 digit'
+        digit_3 = 'role_3_digit', '3 digit'
+        digit_4 = 'role_4_digit', '4 digit'
+        digit_5 = 'role_5_digit', '5 digit'
+        digit_6 = 'role_6_digit', '6 digit'
+        digit_7 = 'role_7_digit', '7 digit'
+        gamemode_standard = 'role_standard', 'osu!standard'
+        gamemode_taiko = 'role_taiko', 'osu!taiko'
+        gamemode_ctb = 'role_ctb', 'osu!catch'
+        gamemode_mania = 'role_mania', 'osu!mania'
 
     @settings_group.command()
     async def role(self, interaction: discord.Interaction, type: Roles, role: discord.Role):
