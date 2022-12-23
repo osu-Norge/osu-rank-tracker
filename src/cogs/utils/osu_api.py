@@ -213,9 +213,9 @@ class OsuApi:
 
         # Add and remove any additional roles
         if guild.role_remove:
-            roles_to_remove.add(guild.role_remove)
+            roles_to_remove.add(str(guild.role_remove))
         if guild.role_add:
-            roles_to_add.add(guild.role_add)
+            roles_to_add.add(str(guild.role_add))
 
         # Convert role strings to Role objects
         roles_to_add = [member.guild.get_role(getattr(guild, attr)) for attr in roles_to_add if getattr(guild, attr)]
