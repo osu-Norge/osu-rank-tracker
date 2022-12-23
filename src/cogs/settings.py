@@ -270,8 +270,7 @@ class Settings(commands.Cog):
         await guild_table.save(guild)
 
         embed = embed_templates.success(
-            interaction,
-            text=f'[{username}](https://osu.ppy.sh/users/{user_id}) ({user_id}) is now blacklisted!'
+            f'[{username}](https://osu.ppy.sh/users/{user_id}) ({user_id}) is now blacklisted!'
         )
         await interaction.response.send_message(embed=embed)
 
@@ -305,8 +304,7 @@ class Settings(commands.Cog):
         await guild_table.save(guild)
 
         embed = embed_templates.success(
-            interaction,
-            text=f'[{username}](https://osu.ppy.sh/users/{user_id}) ({user_id}) is no longer blacklisted!'
+            f'[{username}](https://osu.ppy.sh/users/{user_id}) ({user_id}) is no longer blacklisted!'
         )
         await interaction.response.send_message(embed=embed)
 
