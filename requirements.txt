@@ -1,8 +1,10 @@
 asyncio
 discord.py
 expiringdict
+fastapi
 iso3166
 psycopg2
 pyyaml
-requests
 psutil
+requests
+uvicorn
