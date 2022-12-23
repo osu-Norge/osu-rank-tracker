@@ -106,8 +106,82 @@ class OsuApi:
                f'&redirect_uri={cls.user_payload.get("redirect_uri")}' + \
                f'&state={state}&response_type=code&scope=identify'
 
+    @staticmethod
+    async def update_user_rank(guild: database.Guild, member: discord.Member, osu_user: dict, gamemode: Gamemode, reason: str = None):
+        """
+        Update a user's rank in a guild (if they're not blacklisted or from a non-whitelisted country)
 
-@dataclasses.dataclass
+        Parameters
+        ----------
+        guild (database.GuildTable): A fetched guild from the database
+        member (discord.Member): A Discord member object
+        osu_user (dict): userinfo from the osu! API
+        gamemode (Gamemode): The gamemode the rank is for
+        reason (str): The reason for the rank update
+        """
+
+        # Check if the user is blacklisted
+        if member.id in guild.blacklist:
+            return
+
+        # Check if the user is from a whitelisted country
+        if guild.whitelisted_countries and osu_user['country']['code'] not in guild.whitelisted_countries:
+            return
+
+        rank = osu_user['statistics']['global_rank']
+
+        # Rank roles
+        # This is terrible, I know :P
+        if rank < 10:
+            roles_to_add = set(['role_1_digit'])
+            roles_to_remove = set(['role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 100:
+            roles_to_add = set(['role_2_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 1000:
+            roles_to_add = set(['role_3_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 10000:
+            roles_to_add = set(['role_4_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 100000:
+            roles_to_add = set(['role_5_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 1000000:
+            roles_to_add = set(['role_6_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_7_digit'])
+        else:
+            roles_to_add = set(['role_7_digit'])
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit'])
+
+        # Gamemode roles
+        match gamemode.id:
+            case 0:
+                roles_to_add.add('role_standard')
+                roles_to_remove.add(['role_taiko', 'role_ctb', 'role_mania'])
+            case 1:
+                roles_to_add.add('role_taiko')
+                roles_to_remove.add(['role_standard', 'role_ctb', 'role_mania'])
+            case 2:
+                roles_to_add.add('role_ctb')
+                roles_to_remove.add(['role_standard', 'role_taiko', 'role_mania'])
+            case 3:
+                roles_to_add.add('role_mania')
+                roles_to_remove.add(['role_standard', 'role_taiko', 'role_ctb'])
+
+        # Add and remove any additional roles
+        if guild.role_remove:
+            roles_to_remove.append(guild.role_remove)
+        if guild.role_add:
+            roles_to_add.append(guild.role_add)
+
+        # Convert role strings to Role objects
+        roles_to_add = [member.guild.get_role(getattr(guild, attr)) for attr in roles_to_add if getattr(guild, attr)]
+        roles_to_remove = [member.guild.get_role(getattr(guild, attr)) for attr in roles_to_remove if getattr(guild, attr)]
+
+        await member.remove_roles(*roles_to_remove, reason=reason)
+        await member.add_roles(*roles_to_add, reason=reason)
+
 class Gamemode:
     id: int
     name: str
