@@ -2,7 +2,6 @@ import asyncio
 from datetime import datetime, timedelta
 
 import discord
-from discord import app_commands
 from discord.ext import commands, tasks
 
 import cogs.utils.database as database
