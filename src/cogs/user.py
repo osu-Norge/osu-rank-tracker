@@ -187,7 +187,7 @@ class User(commands.Cog):
         interaction (discord.Interaction): Slash command context object
         """
 
-        guild = database.GuildTable().get(interaction.guild.id)
+        guild = await database.GuildTable().get(interaction.guild.id)
         if (user := await database.UserTable().get(interaction.user.id)):
             osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
             if osu_user:
