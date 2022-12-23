@@ -54,18 +54,27 @@ class OsuApi:
                     raise aiohttp.HTTPException(response=r.status, message=r.reason)
 
     @classmethod
-    async def get_user(cls, user: str, gamemode_name: str):
+    async def get_user(cls, user: str, gamemode: Gamemode) -> dict | None:
         """
-        Fetch user info from the v2 API
+        Fetch osu! user info from the v2 API
+
+        Parameters
+        ----------
+        user (str): The osu username or user id
+        gamemode (Gamemode): Specified gamemode for statistics
+
+        Returns
+        ----------
+        dict: The user data. None if user not found
         """
 
-        gamemode = await Gamemode.from_name(gamemode_name)
-
+        # Get cached API token. Renew token if expired
         token = cls.cache.get('token')
         if not token:
             await cls.renew_token()
             token = cls.cache.get('token')
 
+        # Get user data
         async with aiohttp.ClientSession() as session:
             header = {'Authorization': f'Bearer {token}'}
             async with session.get(f'https://osu.ppy.sh/api/v2/users/{user}/{gamemode.url_name}', headers=header) as r:
