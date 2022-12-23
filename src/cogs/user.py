@@ -188,7 +188,7 @@ class User(commands.Cog):
         """
 
         # Defer because I suck at programming and this function takes a shit ton of time to run.
-        await interaction.defer()
+        await interaction.response.defer()
 
         guild = await database.GuildTable().get(interaction.guild.id)
         if (user := await database.UserTable().get(interaction.user.id)):
