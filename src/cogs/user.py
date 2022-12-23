@@ -187,6 +187,9 @@ class User(commands.Cog):
         interaction (discord.Interaction): Slash command context object
         """
 
+        # Defer because I suck at programming and this function takes a shit ton of time to run.
+        await interaction.defer()
+
         guild = await database.GuildTable().get(interaction.guild.id)
         if (user := await database.UserTable().get(interaction.user.id)):
             osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
@@ -194,7 +197,7 @@ class User(commands.Cog):
                 await OsuApi.update_user_rank(guild, interaction.user, osu_user, Gamemode.from_id(user.gamemode),
                                               reason='User forced rank update through command')
         
-        await interaction.response.send_message(embed_templates.success('Your roles have been updated!'))
+        await interaction.followup.send(embed_templates.success('Your roles have been updated!'))
 
 
 async def setup(bot: commands.Bot):
