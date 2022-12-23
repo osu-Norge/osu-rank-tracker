@@ -10,6 +10,7 @@ from expiringdict import ExpiringDict
 import yaml
 
 from . import database
+from cogs.utils import embed_templates
 
 
 class OsuApi:
@@ -161,7 +162,7 @@ class OsuApi:
         """
 
         # Check if the user is blacklisted
-        if member.id in guild.blacklist:
+        if guild.blacklisted_osu_users and osu_user['id'] in guild.blacklisted_osu_users:
             return
 
         # Check if the user is from a whitelisted country
@@ -198,22 +199,23 @@ class OsuApi:
         match gamemode.id:
             case 0:
                 roles_to_add.add('role_standard')
-                roles_to_remove.add(['role_taiko', 'role_ctb', 'role_mania'])
+                roles_to_remove.update(['role_taiko', 'role_ctb', 'role_mania'])
             case 1:
                 roles_to_add.add('role_taiko')
-                roles_to_remove.add(['role_standard', 'role_ctb', 'role_mania'])
+                roles_to_remove.update(['role_standard', 'role_ctb', 'role_mania'])
             case 2:
                 roles_to_add.add('role_ctb')
-                roles_to_remove.add(['role_standard', 'role_taiko', 'role_mania'])
+                roles_to_remove.update(['role_standard', 'role_taiko', 'role_mania'])
             case 3:
                 roles_to_add.add('role_mania')
-                roles_to_remove.add(['role_standard', 'role_taiko', 'role_ctb'])
+                roles_to_remove.update(['role_standard', 'role_taiko', 'role_ctb'])
+
 
         # Add and remove any additional roles
         if guild.role_remove:
-            roles_to_remove.append(guild.role_remove)
+            roles_to_remove.add(guild.role_remove)
         if guild.role_add:
-            roles_to_add.append(guild.role_add)
+            roles_to_add.add(guild.role_add)
 
         # Convert role strings to Role objects
         roles_to_add = [member.guild.get_role(getattr(guild, attr)) for attr in roles_to_add if getattr(guild, attr)]
@@ -221,6 +223,9 @@ class OsuApi:
 
         await member.remove_roles(*roles_to_remove, reason=reason)
         await member.add_roles(*roles_to_add, reason=reason)
+
+        await embed_templates.success('Your roles have been updated!')
+
 
 @dataclass
 class Gamemode:
