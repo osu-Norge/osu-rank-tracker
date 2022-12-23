@@ -118,6 +118,8 @@ class Table(Database):
                 return None
 
             self.cursor.execute(f'INSERT INTO public.{self.table_name} VALUES (%s)', (discord_id,))
+            self.connection.commit()
+
             self.cursor.execute(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
             db_data = self.cursor.fetchone()
 
