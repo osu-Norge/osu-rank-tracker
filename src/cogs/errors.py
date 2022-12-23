@@ -90,29 +90,29 @@ class Errors(commands.Cog):
 
         elif isinstance(error, commands.BotMissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            text = 'I miss the following permissions:\n\n' + \
-                   f'```\n{permissions}\n```'
-            return await ctx.reply(text)
+            embed = embed_templates.error_warning('I\'m missing the following permissions:\n\n' +
+                                                  f'```\n{permissions}\n```')
+            return await ctx.reply(embed=embed)
 
         elif isinstance(error, commands.MissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            text = 'You miss the following permissions\n\n' + \
-                   f'```\n{permissions}\n```'
-            return await ctx.reply(text)
+            embed = embed_templates.error_warning('You\'re missing the following permissions:\n\n' +
+                                                  f'```\n{permissions}\n```')
+            return await ctx.reply(embed=embed)
 
         elif isinstance(error, commands.NotOwner):
-            text = 'Only the bot owner can use this command'
-            return await ctx.reply(text)
+            embed = embed_templates.error_fatal('Only the bot owner can do this')
+            return await ctx.reply(embed=embed)
 
         elif isinstance(error, commands.CommandOnCooldown):
-            text = 'Commands has just been invoked' + \
-                   f'Try again in`{error.retry_after:.1f}` seconds.'
-            return await ctx.reply(text)
+            embed = embed_templates.error_warning('The command has just been invoked\n' +
+                                                  f'Try again in `{error.retry_after:.1f}` seconds.')
+            return await ctx.reply(embed=embed)
 
         elif isinstance(error, commands.NoPrivateMessage):
             try:
-                text = 'This command is only invokable in guilds'
-                return await ctx.reply(text)
+                embed = embed_templates.error_warning('This command is only invokable in guilds')
+                return await ctx.reply(embed=embed)
             except discord.errors.Forbidden:  # Thrown if bot is blocked by the user or if the user has closed their DMs
                 print('DM Blocked!')
 
@@ -143,26 +143,26 @@ class Errors(commands.Cog):
 
         if isinstance(error, commands.BotMissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            embed = embed_templates.error_warning(interaction, text='I\'m missing the following permissions:\n\n' +
-                                                                    f'```\n{permissions}\n```')
+            embed = embed_templates.error_warning('I\'m missing the following permissions:\n\n' +
+                                                  f'```\n{permissions}\n```')
             return await interaction.response.send_message(embed=embed)
 
         elif isinstance(error, commands.MissingPermissions):
             permissions = ', '.join(error.missing_perms)
-            embed = embed_templates.error_warning(interaction, text='You\'re missing the following permissions:\n\n' +
-                                                                    f'```\n{permissions}\n```')
+            embed = embed_templates.error_warning('You\'re missing the following permissions:\n\n' +
+                                                  f'```\n{permissions}\n```')
             return await interaction.response.send_message(embed=embed)
 
         elif isinstance(error, commands.NotOwner):
-            embed = embed_templates.error_fatal(interaction, text='Only the bot owner can do this')
+            embed = embed_templates.error_fatal('Only the bot owner can do this')
             return await interaction.response.send_message(embed=embed)
 
         elif isinstance(error, commands.CommandOnCooldown):
-            embed = embed_templates.error_warning(interaction, text='The command has just been invoked\n' +
-                                                                    f'Try again in `{error.retry_after:.1f}` seconds.')
+            embed = embed_templates.error_warning('The command has just been invoked\n' +
+                                                  f'Try again in `{error.retry_after:.1f}` seconds.')
             return await interaction.response.send_message(embed=embed)
 
-        embed = embed_templates.error_fatal(interaction, text='An unknown error occurred!')
+        embed = embed_templates.error_fatal('An unknown error occurred!')
         await interaction.response.send_message(embed=embed)
 
         # Log full exception to file
