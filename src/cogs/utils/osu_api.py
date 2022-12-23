@@ -224,8 +224,6 @@ class OsuApi:
         await member.remove_roles(*roles_to_remove, reason=reason)
         await member.add_roles(*roles_to_add, reason=reason)
 
-        await embed_templates.success('Your roles have been updated!')
-
 
 @dataclass
 class Gamemode:
