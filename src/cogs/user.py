@@ -197,7 +197,7 @@ class User(commands.Cog):
                 await OsuApi.update_user_rank(guild, interaction.user, osu_user, Gamemode.from_id(user.gamemode),
                                               reason='User forced rank update through command')
         
-        await interaction.followup.send(embed_templates.success('Your roles have been updated!'))
+        await interaction.followup.send(embed=embed_templates.success('Your roles have been updated!'))
 
 
 async def setup(bot: commands.Bot):
