@@ -141,23 +141,19 @@ class Errors(commands.Cog):
         # Log command usage, just in case
         await self.on_app_command_completion(interaction, interaction.command)
 
-        if isinstance(error, commands.BotMissingPermissions):
+        if isinstance(error, app_commands.BotMissingPermissions):
             permissions = ', '.join(error.missing_perms)
             embed = embed_templates.error_warning('I\'m missing the following permissions:\n\n' +
                                                   f'```\n{permissions}\n```')
             return await interaction.response.send_message(embed=embed)
 
-        elif isinstance(error, commands.MissingPermissions):
+        elif isinstance(error, app_commands.MissingPermissions):
             permissions = ', '.join(error.missing_perms)
             embed = embed_templates.error_warning('You\'re missing the following permissions:\n\n' +
                                                   f'```\n{permissions}\n```')
             return await interaction.response.send_message(embed=embed)
 
-        elif isinstance(error, commands.NotOwner):
-            embed = embed_templates.error_fatal('Only the bot owner can do this')
-            return await interaction.response.send_message(embed=embed)
-
-        elif isinstance(error, commands.CommandOnCooldown):
+        elif isinstance(error, app_commands.CommandOnCooldown):
             embed = embed_templates.error_warning('The command has just been invoked\n' +
                                                   f'Try again in `{error.retry_after:.1f}` seconds.')
             return await interaction.response.send_message(embed=embed)
