@@ -15,7 +15,7 @@ class OsuApi:
     cache = ExpiringDict(max_len=1, max_age_seconds=86400)
 
     with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
-        credntials = yaml.load(f, Loader=yaml.SafeLoader).get('api', {}).get('osu_v2', {})
+        credntials = yaml.load(f, Loader=yaml.SafeLoader).get('api', {}).get('osu', {})
 
     base_payload = {
         'client_id': credntials.get('client_id'),
