@@ -7,7 +7,7 @@ from iso3166 import countries
 
 from cogs.utils import embed_templates
 import cogs.utils.database as database
-from cogs.utils.osu_api import OsuApi
+from cogs.utils.osu_api import Gamemode, OsuApi
 
 
 class Settings(commands.Cog):
@@ -50,10 +50,10 @@ class Settings(commands.Cog):
         await guild_table.save(guild)
 
         if not role:
-            embed = embed_templates.success(interaction, text=f'The {role_name} role has been reset!')
+            embed = embed_templates.success(f'The {role_name} role has been reset!')
             return await interaction.response.send_message(embed=embed)
 
-        embed = embed_templates.success(interaction, text=f'{role.mention} has been set as the {role_name} role!')
+        embed = embed_templates.success(f'{role.mention} has been set as the {role_name} role!')
         await interaction.response.send_message(embed=embed)
 
     @app_commands.guild_only()
@@ -98,7 +98,7 @@ class Settings(commands.Cog):
                 setattr(guild, attribute, None)
         await guild_table.save(guild)
 
-        embed = embed_templates.success(interaction, text='All settings have been reset!')
+        embed = embed_templates.success('All settings have been reset!')
         await interaction.response.send_message(embed=embed)
 
     @settings_group.command()
@@ -138,7 +138,7 @@ class Settings(commands.Cog):
             )
             await interaction.response.send_message(embed=embed)
         else:
-            embed = embed_templates.success(interaction, text=f'Registration channel has been set to {channel.mention}')
+            embed = embed_templates.success(f'Registration channel has been set to {channel.mention}')
             await interaction.response.send_message(embed=embed)
 
     @whitelist_group.command(name='add')
@@ -156,8 +156,8 @@ class Settings(commands.Cog):
             country = countries.get(country_code)
         except KeyError:
             embed = embed_templates.error_warning(
-                interaction, text='Invalid country! Make you enter a valid country or country code\n\n' +
-                          'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
+                'Invalid country! Make you enter a valid country or country code\n\n' +
+                'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
             )
             return await interaction.response.send_message(embed=embed)
 
@@ -168,13 +168,13 @@ class Settings(commands.Cog):
             guild.whitelisted_countries = []
 
         if country.alpha2 in guild.whitelisted_countries:
-            embed = embed_templates.error_warning(interaction, text='Country is already in the whitelist')
+            embed = embed_templates.error_warning('Country is already in the whitelist')
             return await interaction.response.send_message(embed=embed)
 
         guild.whitelisted_countries.append(country.alpha2)
         await guild_table.save(guild)
 
-        embed = embed_templates.success(interaction, text=f'`{country.name}` has been added to the whitelist')
+        embed = embed_templates.success(f'`{country.name}` has been added to the whitelist')
         await interaction.response.send_message(embed=embed)
 
     @whitelist_group.command(name='remove')
@@ -192,8 +192,8 @@ class Settings(commands.Cog):
             country = countries.get(country_code)
         except KeyError:
             embed = embed_templates.error_warning(
-                interaction, text='Invalid country! Make you enter a valid country or country code\n\n' +
-                                  'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
+                'Invalid country! Make you enter a valid country or country code\n\n' +
+                'Click [here](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) for more info'
             )
             return await interaction.response.send_message(embed=embed)
 
@@ -201,13 +201,13 @@ class Settings(commands.Cog):
         guild = await guild_table.get(interaction.guild.id)
 
         if not guild.whitelisted_countries or country.alpha2 not in guild.whitelisted_countries:
-            embed = embed_templates.error_warning(interaction, text='Country is not in the whitelist')
+            embed = embed_templates.error_warning('Country is not in the whitelist')
             return await interaction.response.send_message(embed=embed)
 
         guild.whitelisted_countries.remove(country.alpha2)
         await guild_table.save(guild)
 
-        embed = embed_templates.success(interaction, text=f'`{country.name}` has been removed from the whitelist')
+        embed = embed_templates.success(f'`{country.name}` has been removed from the whitelist')
         await interaction.response.send_message(embed=embed)
 
     @whitelist_group.command(name='show')
@@ -224,13 +224,13 @@ class Settings(commands.Cog):
         guild = await guild_table.get(interaction.guild.id)
 
         if not guild.whitelisted_countries:
-            embed = embed_templates.error_warning(interaction, text='No countries are whitelisted!')
+            embed = embed_templates.error_warning('No countries are whitelisted!')
             return await interaction.response.send_message(embed=embed)
 
         guild.whitelisted_countries = [f'`{country}`' for country in guild.whitelisted_countries]
 
         if len(guild.whitelisted_countries) > 2048:
-            embed = embed_templates.error_warning(interaction, text='Whitelist is too long to be displayed!')
+            embed = embed_templates.error_warning('Whitelist is too long to be displayed!')
             return await interaction.response.send_message(embed=embed)
 
         embed = discord.Embed(title='Whitelisted countries')
@@ -248,12 +248,12 @@ class Settings(commands.Cog):
         osu_user (str): The osu! user to add to the blacklist
         """
 
-        user = await OsuApi.get_user(osu_user, 'standard')
+        user = await OsuApi.get_user(osu_user, Gamemode.from_name('standard'))
         user_id = user.get('id')
         username = user.get('username')
 
         if not user:
-            embed = embed_templates.error_warning(interaction, text='Invalid osu! user')
+            embed = embed_templates.error_warning('Invalid osu! user')
             return await interaction.response.send_message(embed=embed)
 
         guild_table = database.GuildTable()
@@ -263,7 +263,7 @@ class Settings(commands.Cog):
             guild.blacklisted_osu_users = []
 
         if user.get('id') in guild.blacklisted_osu_users:
-            embed = embed_templates.error_warning(interaction, text='User is already blacklisted!')
+            embed = embed_templates.error_warning('User is already blacklisted!')
             return await interaction.response.send_message(embed=embed)
 
         guild.blacklisted_osu_users.append(user_id)
@@ -286,19 +286,19 @@ class Settings(commands.Cog):
         osu_user (str): The osu! user to remove from the blacklist
         """
         
-        user = await OsuApi.get_user(osu_user, 'standard')
+        user = await OsuApi.get_user(osu_user, Gamemode.from_name('standard'))
         user_id = user.get('id')
         username = user.get('username')
 
         if not user:
-            embed = embed_templates.error_warning(interaction, text='Invalid osu! user')
+            embed = embed_templates.error_warning('Invalid osu! user')
             return await interaction.response.send_message(embed=embed)
 
         guild_table = database.GuildTable()
         guild = await guild_table.get(interaction.guild.id)
 
         if not guild.blacklisted_osu_users or user_id not in guild.blacklisted_osu_users:
-            embed = embed_templates.error_warning(interaction, text='User is not blacklisted!')
+            embed = embed_templates.error_warning('User is not blacklisted!')
             return await interaction.response.send_message(embed=embed)
 
         guild.blacklisted_osu_users.remove(user_id)
@@ -324,13 +324,13 @@ class Settings(commands.Cog):
         guild = await guild_table.get(interaction.guild.id)
 
         if not guild.blacklisted_osu_users:
-            embed = embed_templates.error_warning(interaction, text='No users are blacklisted!')
+            embed = embed_templates.error_warning('No users are blacklisted!')
             return await interaction.response.send_message(embed=embed)
 
         guild.blacklisted_osu_users = [f'[{user}](https://osu.ppy.sh/users/{user})' for user in guild.blacklisted_osu_users]
 
         if len(guild.blacklisted_osu_users) > 2048:
-            embed = embed_templates.error_warning(interaction, text='Blacklist is too long to be displayed!')
+            embed = embed_templates.error_warning('Blacklist is too long to be displayed!')
             return await interaction.response.send_message(embed=embed)
 
         embed = discord.Embed(title='Blacklisted users (IDs)')
