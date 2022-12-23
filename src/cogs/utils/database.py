@@ -225,6 +225,8 @@ class GuildTable(Table):
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
+        else:
+            return
 
         values = values + (guild.discord_id,)
 
