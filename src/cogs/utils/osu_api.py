@@ -114,7 +114,7 @@ class Gamemode:
     url_name: str
 
     @classmethod
-    async def from_id(cls, id: int) -> Gamemode:
+    def from_id(cls, id: int) -> Gamemode:
         """
         Creates an instance of its class based on id
 
@@ -127,12 +127,12 @@ class Gamemode:
         Gamemode: A Gamemode object
         """
 
-        name = await cls.id_to_name(id)
-        url_name = await cls.id_to_url_name(id)
+        name = cls.id_to_name(id)
+        url_name = cls.id_to_url_name(id)
         return cls(id, name, url_name)
 
     @classmethod
-    async def from_name(cls, name: str) -> Gamemode:
+    def from_name(cls, name: str) -> Gamemode:
         """
         Creates an instance of its class based on name
 
@@ -145,13 +145,13 @@ class Gamemode:
         Gamemode: A Gamemode object
         """
 
-        id = await cls.name_to_id(name)
-        name = await cls.id_to_name(id)  # Ensure name is correct
-        url_name = await cls.id_to_url_name(id)
+        id = cls.name_to_id(name)
+        name = cls.id_to_name(id)  # Ensure name is correct
+        url_name = cls.id_to_url_name(id)
         return cls(id, name, url_name)
 
     @classmethod
-    async def from_url_name(cls, url_name: str) -> Gamemode:
+    def from_url_name(cls, url_name: str) -> Gamemode:
         """
         Creates an instance of its class based on URL name
 
@@ -164,13 +164,13 @@ class Gamemode:
         Gamemode: A Gamemode object
         """
 
-        id = await Gamemode.url_name_to_id(url_name)
-        name = await Gamemode.id_to_name(id)
-        url_name = await Gamemode.id_to_url_name(id)  # Ensure name is correct
+        id = Gamemode.url_name_to_id(url_name)
+        name = Gamemode.id_to_name(id)
+        url_name = Gamemode.id_to_url_name(id)  # Ensure name is correct
         return cls(id, name, url_name)
 
     @staticmethod
-    async def id_to_name(id: int) -> str:
+    def id_to_name(id: int) -> str:
         """
         Converts a gamemode id to its display name
 
@@ -192,7 +192,7 @@ class Gamemode:
         return gamemode_names.get(id)
 
     @staticmethod
-    async def id_to_url_name(id: int) -> str:
+    def id_to_url_name(id: int) -> str:
         """
         Converts a gamemode id to its name used in URLs
 
@@ -214,7 +214,7 @@ class Gamemode:
         return gamemode_urls.get(id)
 
     @staticmethod
-    async def url_name_to_id(url_name: str) -> int:
+    def url_name_to_id(url_name: str) -> int:
         """
         Converts a gamemode URL name to its id
 
@@ -239,7 +239,7 @@ class Gamemode:
         return gamemode_ids.get(url_name.lower())
 
     @staticmethod
-    async def name_to_id(name: str) -> int:
+    def name_to_id(name: str) -> int:
         """
         Converts a gamemode display name to its id
 
