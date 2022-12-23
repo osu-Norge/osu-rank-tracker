@@ -173,7 +173,10 @@ class OsuApi:
 
         # Rank roles
         # This is terrible, I know :P
-        if rank < 10:
+        if not rank:
+            roles_to_add = set()
+            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
+        elif rank < 10:
             roles_to_add = set(['role_1_digit'])
             roles_to_remove = set(['role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
         elif rank < 100:
