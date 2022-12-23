@@ -1,6 +1,6 @@
 from __future__ import annotations
 from codecs import open
-import dataclasses
+from dataclasses import dataclass
 from enum import Enum
 import uuid
 
@@ -182,6 +182,7 @@ class OsuApi:
         await member.remove_roles(*roles_to_remove, reason=reason)
         await member.add_roles(*roles_to_add, reason=reason)
 
+@dataclass
 class Gamemode:
     id: int
     name: str
