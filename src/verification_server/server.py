@@ -1,15 +1,13 @@
+import sys
+sys.path.append('..')  # Allow to share the same database abstractions and connection
+
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from ..cogs.utils import database
-from ..cogs.utils.osu_api import Gamemode, OsuApi
+from cogs.utils import database
+from cogs.utils.osu_api import Gamemode, OsuApi
 
 app = FastAPI()
-
-
-class VerificationServer:
-    def __init__(self, port=80) -> None:
-        app.run(host="0.0.0.0", port=port, debug=False)
 
 
 @app.get('/')
@@ -25,26 +23,27 @@ async def callback(code: str, state: str):
     except ValueError:
         return 'Invalid request!'
 
+    gamemode = Gamemode.from_id(int(gamemode))
+
+    # Check if user is pending verification
     verification_table = database.VerificationTable()
     verification = await verification_table.get(discord_id)
 
-    if not verification:
-        return 'Invalid request!'
+    # Verify user link
+    if not verification and verification.uuid != uuid:
+        return 'Invalid verification! Not a valid user or identifier!'
 
-    if verification.token != uuid:
-        return 'Invalid request!'
-
-    gamemode = Gamemode.from_id(gamemode)
-
-    osu_user = await OsuApi.get_me_user(code, gamemode.url_name)
-    if not osu_user:
-        return 'Something went wrong! Please try again later'
-
+    # Get osu! user
+    if not (osu_user := await OsuApi.get_me_user(code, gamemode)):
+        return 'Something went wrong! Please try again later!'
     osu_id = osu_user['id']
     osu_name = osu_user['username']
 
-    user = database.User(discord_id=discord_id, osu_id=osu_id, gamemode=gamemode)
-    await database.UserTable().insert(user)
+    print(discord_id, osu_id, gamemode.id)
+
+    # Enter user into database
+    user = database.User(discord_id=discord_id, osu_id=osu_id, gamemode=gamemode.id)
+    await database.UserTable().save(user)
 
     await verification_table.delete(discord_id)
 
@@ -53,4 +52,5 @@ async def callback(code: str, state: str):
 
 @app.get('/success/{name}')
 async def success(name: str):
-    return f'Successfully verified {name}!'
+    return f'Hey {name}\nYou\'ve successfully connected your account to the bot!' + \
+            'You can close this window and return to Discord!'
