@@ -1,10 +1,12 @@
 from codecs import open
 from os import listdir
+from threading import Thread
 from time import time
 
 import discord
 from discord.ext import commands
 import yaml
+import uvicorn
 
 import cogs.utils.database as database
 from logger import BotLogger
@@ -28,11 +30,13 @@ class Bot(commands.Bot):
         self.logger = BotLogger().logger  # Initialize logger
 
         self.presence = config['bot'].get('presence', {})
-        self.osu_v1 = config['api'].get('osu_v1', {})
-        self.osu_v2 = config['api'].get('osu_v2', {})
         self.emoji = config.get('emoji', {})
         self.misc = config.get('misc', {})
-        self.server_port = config['server'].get('port', 80)
+
+        # Start verification server
+        server_port = config['server'].get('port', 80)
+        server = Thread(target=uvicorn.run, args=('verification_server.server:app',), kwargs={'port': server_port})
+        server.start()
 
     async def setup_hook(self):
         # Load cogs
