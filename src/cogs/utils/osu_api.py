@@ -5,6 +5,7 @@ from enum import Enum
 import uuid
 
 import aiohttp
+import discord
 from expiringdict import ExpiringDict
 import yaml
 
@@ -31,7 +32,8 @@ class OsuApi:
     user_payload = base_payload.copy()
     user_payload.update({
         'grant_type': 'authorization_code',
-        'redirect_uri': credntials.get('redirect_uri')
+        'redirect_uri': credntials.get('redirect_uri'),
+        'scope': 'identify'
     })
 
     @classmethod
@@ -83,32 +85,61 @@ class OsuApi:
                     return data
 
     @classmethod
-    async def get_me_user(cls, code: str, gamemode: Gamemode):
+    async def get_me_user(cls, code: str, gamemode: Gamemode) -> dict:
         """
-        Fetch user info from the v2 API
+        Fetch an authenticated osu! user's info from the v2 API
+
+        Parameters
+        ----------
+        code (str): The authorization code return from oAuth callback
+        gamemode (Gamemode): Specified gamemode for statistics
+
+        Returns
+        ----------
+        dict: The user data
         """
 
+        # Use code to get token
         async with aiohttp.ClientSession() as session:
-            header = {'Authorization': f'Bearer {code}'}
-            async with session.get(f'https://osu.ppy.sh/api/v2/users/me/{gamemode.url_name}', headers=header) as r:
+            payload = cls.user_payload.copy()
+            payload.update({
+                'code': code
+            })
+
+            async with session.post('https://osu.ppy.sh/oauth/token', json=payload) as r:
+                if r.status == 200:
+                    data = await r.json()
+                    token = data.get('access_token')
+                else:
+                    raise aiohttp.ClientResponseError(r.request_info, r.history)         
+
+            # Get user data
+            header = {'Authorization': f'Bearer {token}'}
+            async with session.get(f'https://osu.ppy.sh/api/v2/me/{gamemode.url_name}', headers=header) as r:
                 if r.status == 200:
                     data = await r.json()
                     return data
+                raise aiohttp.ClientResponseError(r.request_info, r.history)
 
     @classmethod
-    async def generate_auth_link(cls, discord_user_id: int, gamemode: int) -> str:
+    async def generate_auth_link(cls, discord_user_id: int, gamemode: Gamemode) -> str:
         """
-        Generates an authorization link for the osu!api v2
+        Generates an authorization link for users to authenticate with osu!api. Inserts pending verification into database
+
+        Parameters
+        -----------
+        discord_user_id (int): The discord user id
+        gamemode (Gamemode): The gamemode to set tracking for
 
         Returns
         -----------
         str: The authorization link
         """
 
-        uuid = uuid.uuid1()
-        state = f'{discord_user_id}:{gamemode}:{uuid}'
+        identifier = str(uuid.uuid1())
+        state = f'{discord_user_id}:{gamemode.id}:{identifier}'
 
-        verficiation = database.Verification(discord_id=discord_user_id, token=uuid)
+        verficiation = database.Verification(discord_id=discord_user_id, uuid=identifier)
         await database.VerificationTable().insert(verficiation)
 
         return f'https://osu.ppy.sh/oauth/authorize?client_id={cls.base_payload.get("client_id")}' + \

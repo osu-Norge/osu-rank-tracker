@@ -1,12 +1,12 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
 import cogs.utils.database as database
-from cogs.utils.osu_api import OsuApi
+from cogs.utils.osu_api import Gamemode, OsuApi
 
 
 class RankUpdate(commands.Cog):
@@ -29,28 +29,30 @@ class RankUpdate(commands.Cog):
         user_table = database.UserTable()
         guild_table = database.GuildTable()
 
-        guilds = guild_table.get_all()
+        sleep_time = await user_table.count() / 60  # TODO: calculate optimal sleep time based on user count and ratelimit
 
-        user_count = user_table.count()
-        sleep_time = user_count / 60  # TODO: calculate optimal sleep time based on user count and ratelimit
+        for guild in await guild_table.get_all():
+            if not (discord_guild := self.bot.get_guild(guild.discord_id)):
+                continue
 
-        for guild in guilds:
-            for member in guild.members:
-                if member.bot:
+            for member in discord_guild.members:
+                if member.bot or not (user := await user_table.get(member.id)):
                     continue
 
-                if not (user := user_table.get(member.id)):
-                    continue
+                gamemode = Gamemode.from_id(user.gamemode)
 
-                if not (rank := self.rank_cache.get(user.id)):
-                    osu_user = OsuApi.get_user(user.osu_id)
-                    if not osu_user:
+                # If rank is not cached, fetch it and cache it
+                if not (rank := self.rank_cache.get(user.discord_id)):
+                    # Get osu user and verify it exists
+                    if not (osu_user := await OsuApi.get_user(user.osu_id, gamemode)):
                         continue
-                    rank = osu_user["statistics"]["global_rank"]
-                    self.rank_cache[user.id] = rank
+                    # Get the user's rank and verify it exists
+                    if not (rank := osu_user.get("statistics", {}).get("global_rank")):
+                        continue
+                    self.rank_cache[user.discord_id] = rank
 
                 # Update the user's rank
-                await self.__update_user_rank(guild, member, rank, user.gamemode, reason='Automatic rank update based on osu! rank')
+                await OsuApi.update_user_rank(guild, member, osu_user, gamemode, reason='Automatic rank update based on osu! rank')
 
                 await asyncio.sleep(sleep_time)
 
@@ -67,7 +69,7 @@ class RankUpdate(commands.Cog):
         now = datetime.utcnow()
 
         if now.hour > 0:
-            sleep_until = now + datetime.timedelta(days=1)
+            sleep_until = now + timedelta(days=1)
             sleep_until = sleep_until.replace(hour=0, minute=0, second=0, microsecond=0)
         else:
             sleep_until = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -87,6 +89,18 @@ class RankUpdate(commands.Cog):
         guild = database.Guild(discord_id=guild.id)
         await database.GuildTable().save(guild)
 
+    @commands.Cog.listener('on_guild_remove')
+    async def on_guild_remove(self: commands.Bot, guild: discord.Guild):
+        """
+        Delete a guild from the database when the bot leaves a guild
+
+        Parameters
+        ----------
+        guild (discord.Guild): Guild instance
+        """
+
+        await database.GuildTable().delete(guild.id)
+
     @commands.Cog.listener('on_member_join')
     async def on_member_join(self, member: discord.Member):
         """
@@ -99,24 +113,11 @@ class RankUpdate(commands.Cog):
 
         guild = await database.GuildTable().get(member.guild.id)
         user = await database.UserTable().get(member.id)
-        if user:
-            await self.__update_user_rank(guild, member, user.gamemode, reason='User joined guild')
-
-    @app_commands.checks.cooldown(1, 60*60*12)  # 12 hours
-    @app_commands.command(name='force_update')
-    async def force_user_rank_update(self, interaction: discord.Interaction):
-        """
-        Force's a rank update for your user
-
-        Parameters
-        ----------
-        interaction (discord.Interaction): Slash command context object
-        """
-
-        guild = database.GuildTable().get(interaction.guild.id)
-        user = database.UserTable().get(interaction.author.id)
-        if user:
-            self.__update_user_rank(guild, interaction.author, user.gamemmode, reason='User forced rank update through command')
+        if user and not self.__is_blacklisted(member, guild):
+            osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
+            if osu_user and osu_user.get("statistics", {}).get("global_rank"):
+                await OsuApi.update_user_rank(guild, member, osu_user, Gamemode.from_id(user.gamemode),
+                                              reason='User joined guild')
 
 
 async def setup(bot: commands.Bot):

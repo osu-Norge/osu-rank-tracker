@@ -1,4 +1,6 @@
-import dataclasses
+from __future__ import annotations
+from abc import abstractmethod
+from dataclasses import astuple, dataclass
 
 import psycopg2
 import yaml
@@ -57,16 +59,16 @@ class Database:
         self.cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS public.user (
-                discord_id integer NOT NULL PRIMARY KEY,
-                osu_id integer,
-                gamemode smallint
+                discord_id bigint NOT NULL PRIMARY KEY,
+                osu_id integer NOT NULL,
+                gamemode smallint NOT NULL
             )
             """
         )
         self.cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS public.verification (
-                discord_id integer NOT NULL,
+                discord_id bigint NOT NULL PRIMARY KEY,
                 uuid TEXT NOT NULL
             )
             """
@@ -87,93 +89,121 @@ class Database:
         version = self.cursor.fetchone()[0].split(' ')[:2]
         return ' '.join(version)
 
-    async def get_guilds(self) -> list[tuple]:
-        """
-        Fetches all the entries in the guild table
 
-        Returns
-        -----------
-        list[tuple]: Table rows
-        """
-
-        self.cursor.execute('SELECT * FROM guild')
-        return self.cursor.fetchall()
-
-    async def get_users(self) -> list[tuple]:
-        """
-        Fetches all the entries in the users table
-
-        Returns
-        -----------
-        list[tuple]: Table rows
-        """
-
-        self.cursor.execute('SELECT * FROM user')
-        return self.cursor.fetchall()
-
-    async def get_channels(self) -> list[tuple]:
-        """
-        Fetches all the entries in the channels table
-
-        Returns
-        -----------
-        list[tuple]: Table rows
-        """
-
-        self.cursor.execute('SELECT * FROM channel')
-        return self.cursor.fetchall()
-
-
-@dataclasses.dataclass
-class Guild:
-    discord_id: int
-    registration_channel: int
-    whitelisted_countries: list[str]
-    blacklisted_osu_users: list[int]
-    role_moderator: int
-    role_remove: int
-    role_add: int
-    role_1_digit: int
-    role_2_digit: int
-    role_3_digit: int
-    role_4_digit: int
-    role_5_digit: int
-    role_6_digit: int
-    role_7_digit: int
-    role_standard: int
-    role_taiko: int
-    role_ctb: int
-    role_mania: int
-
-
-class GuildTable(Database):
-    def __init__(self):
+class Table(Database):
+    def __init__(self, table_name: str, dataclass: dataclass, create_row_on_none: bool = False):
         super().__init__()
+        self.table_name = table_name
+        self.dataclass = dataclass
+        self.create_row_on_none = create_row_on_none
 
-    async def get(self, discord_id: int) -> Guild:
+    async def get(self, discord_id: int) -> dataclass:
         """
-        Fetches a guild and its data from the database
+        Fetches a row from the database
 
         Parameters
         ----------
-        discord_id (int): The Discord Guild ID
+        discord_id (int): The Discord ID
 
         Returns
         ----------
-        Guild: A guild object
+        dataclass: A dataclass object
         """
 
-        try:
-            self.cursor.execute('INSERT INTO guild VALUES (%s)', (discord_id,))
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
-
-        self.cursor.execute('SELECT * FROM guild WHERE discord_id=%s', ([discord_id]))
+        self.cursor.execute(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
         db_data = self.cursor.fetchone()
 
-        if db_data:
-            return Guild(*db_data)
+        if not db_data:
+            if not self.create_row_on_none:
+                return None
+
+            self.cursor.execute(f'INSERT INTO public.{self.table_name} VALUES (%s)', (discord_id,))
+            self.cursor.execute(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
+            db_data = self.cursor.fetchone()
+
+        return self.dataclass(*db_data)
+
+    async def get_all(self) -> tuple[dataclass]:
+        """
+        Fetches all the rows from the database
+
+        Returns
+        ----------
+        tuple[dataclass]: A tuple of dataclass objects
+        """
+
+        self.cursor.execute(f'SELECT * FROM {self.table_name}')
+        db_data = self.cursor.fetchall()
+
+        return tuple(self.dataclass(*data) for data in db_data)
+
+    async def count(self) -> int:
+        """
+        Counts the number of rows in the database
+
+        Returns
+        ----------
+        int: The number of rows in the database
+        """
+
+        self.cursor.execute(f'SELECT COUNT(*) FROM {self.table_name}')
+        return self.cursor.fetchone()[0]
+
+    @abstractmethod
+    async def save(self, data: dataclass) -> None:
+        """
+        Saves a row to the database
+
+        Parameters
+        ----------
+        data (dataclass): A dataclass object
+
+        Raises
+        ----------
+        NotImplementedError: If the child class does not implement this method
+        """
+
+        # Leave implementation to the child class
+        raise NotImplementedError()
+
+    async def delete(self, discord_id: int) -> None:
+        """
+        Deletes a row from the database
+
+        Parameters
+        ----------
+        discord_id (int): The Discord ID
+        """
+
+        self.cursor.execute(f'DELETE FROM {self.table_name} WHERE discord_id = %s', (discord_id,))
+        self.connection.commit()
+
+
+@dataclass
+class Guild:
+    discord_id: int
+    registration_channel: int | None
+    whitelisted_countries: list[str] | None
+    blacklisted_osu_users: list[int] | None
+    role_moderator: int | None
+    role_remove: int | None
+    role_add: int | None
+    role_1_digit: int | None
+    role_2_digit: int | None
+    role_3_digit: int | None
+    role_4_digit: int | None
+    role_5_digit: int | None
+    role_6_digit: int | None
+    role_7_digit: int | None
+    role_standard: int | None
+    role_taiko: int | None
+    role_ctb: int | None
+    role_mania: int | None
+
+
+class GuildTable(Table):
+    def __init__(self):
+        super().__init__(table_name='guild', dataclass=Guild, create_row_on_none=True)
 
     async def save(self, guild: Guild) -> None:
         """
@@ -184,17 +214,23 @@ class GuildTable(Database):
         guild (Guild): A guild object
         """
 
+        values = astuple(guild)
+
         try:
-            self.cursor.execute('INSERT INTO guild VALUES (%s)', (guild.discord_id,))
+            self.cursor.execute(
+                f"""
+                INSERT INTO {self.table_name}
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, values)
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
 
-        values = dataclasses.astuple(guild) + (guild.discord_id,)
+        values = values + (guild.discord_id,)
 
         self.cursor.execute(
-            """
-            UPDATE guild SET
+            f"""
+            UPDATE {self.table_name} SET
             discord_id = %s,
             registration_channel = %s,
             whitelisted_countries = %s,
@@ -214,47 +250,21 @@ class GuildTable(Database):
             role_ctb = %s,
             role_mania = %s
             WHERE discord_id = %s
-            """,
-            values
+            """, values
         )
         self.connection.commit()
 
 
-@dataclasses.dataclass
+@dataclass
 class User:
     discord_id: int
     osu_id: int
     gamemode: int
 
 
-class UserTable(Database):
+class UserTable(Table):
     def __init__(self):
-        super().__init__()
-
-    async def get(self, discord_id: int) -> User:
-        """
-        Fetches a user and its data from the database
-
-        Parameters
-        ----------
-        discord_id (int): The Discord User ID
-
-        Returns
-        ----------
-        User: A user object
-        """
-
-        try:
-            self.cursor.execute('INSERT INTO user VALUES (%s)', (discord_id,))
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
-
-        self.cursor.execute('SELECT * FROM user WHERE discord_id=%s', ([discord_id]))
-        db_data = self.cursor.fetchone()
-
-        if db_data:
-            return User(*db_data)
+        super().__init__(table_name='user', dataclass=User, create_row_on_none=False)
 
     async def save(self, user: User) -> None:
         """
@@ -265,79 +275,39 @@ class UserTable(Database):
         user (User): A user object
         """
 
+        values = astuple(user)
+
         try:
-            self.cursor.execute('INSERT INTO user VALUES (%s)', (user.discord_id,))
+            self.cursor.execute(f'INSERT INTO public.{self.table_name} VALUES (%s, %s, %s)', values)
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
+        else:
+            return
 
-        try:
-            self.cursor.execute('INSERT INTO user VALUES (%s)', (id,))
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
-
-        values = dataclasses.astuple(user) + (user.discord_id,)
+        values = astuple(user) + (user.discord_id,)
 
         self.cursor.execute(
-            """
-            UPDATE user SET
+            f"""
+            UPDATE public.{self.table_name} SET
             discord_id = %s,
             osu_id = %s,
             gamemode = %s
             WHERE discord_id = %s
-            """,
-            values
+            """, values
         )
         self.connection.commit()
 
-    async def delete(self, discord_id: int) -> None:
-        """
-        Delete a user from the database
 
-        Parameters
-        ----------
-        discord_id (int): The Discord User ID
-        """
-
-        self.cursor.execute('DELETE FROM user WHERE discord_id=%s', ([discord_id]))
-        self.connection.commit()
-
-
-@dataclasses.dataclass
+@dataclass
 class Channel:
     discord_id: int
-    clean_after_message_id: int
+    clean_after_message_id: int | None
 
 
-class ChannelTable(Database):
+class ChannelTable(Table):
     def __init__(self):
-        super().__init__()
-
-    async def get(self, discord_id: int) -> Channel:
-        """
-        Fetches a channel and its data from the database
-
-        Parameters
-        ----------
-        discord_id (int): The Discord Channel ID
-
-        Returns
-        ----------
-        Channel: A channel object
-        """
-
-        try:
-            self.cursor.execute('INSERT INTO channel VALUES (%s)', (discord_id,))
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
-
-        self.cursor.execute('SELECT * FROM channel WHERE discord_id=%s', ([discord_id]))
-        db_data = self.cursor.fetchone()
-
-        if db_data:
-            return Channel(*db_data)
+        super().__init__(table_name='channel', dataclass=Channel, create_row_on_none=True)
 
     async def save(self, channel: Channel) -> None:
         """
@@ -348,81 +318,59 @@ class ChannelTable(Database):
         channel (Channel): A user object
         """
 
-        values = dataclasses.astuple(channel) + (channel.discord_id,)
+        values = astuple(channel)
+
+        try:
+            self.cursor.execute(f'INSERT INTO {self.table_name} VALUES (%s %s)', values)
+            self.connection.commit()
+        except psycopg2.errors.UniqueViolation:
+            self.connection.rollback()
+        else:
+            return
+
+        values = values + (channel.discord_id,)
 
         self.cursor.execute(
-            """
-            UPDATE channel SET
+            f"""
+            UPDATE {self.table_name} SET
             discord_id = %s,
             clean_after_message_id = %s
             WHERE discord_id = %s
-            """,
-            values
+            """, values
         )
         self.connection.commit()
 
 
-@dataclasses.dataclass
+@dataclass
 class Verification:
     discord_id: int
     uuid: str
 
 
-class VerificationTable(Database):
+class VerificationTable(Table):
     def __init__(self):
-        super().__init__()
+        super().__init__(table_name='verification', dataclass=Verification, create_row_on_none=False)
 
-    async def get(self, discord_id: int) -> Verification:
-        """
-        Fetches a user and its data from the database
-
-        Parameters
-        ----------
-        discord_id (int): The Discord User ID
-
-        Returns
-        ----------
-        VerificationTable: A user object
-        """
-
-        self.cursor.execute('SELECT * FROM verification WHERE discord_id=%s', ([discord_id]))
-        db_data = self.cursor.fetchone()
-
-        if db_data:
-            return Verification(*db_data)
-
-    async def insert(self, verification: Verification) -> None:
+    async def insert(self, verification: Verification) -> bool:
         """
         Insert a new pending verification into the database
 
         Parameters
         ----------
         verification (Verification): A verification object
+
+        Returns
+        ----------
+        bool: True if the verification was inserted, False if it already exists
         """
 
-        values = dataclasses.astuple(verification) + (verification.discord_id,)
+        values = astuple(verification)
 
         try:
-            self.cursor.execute(
-                """
-                UPDATE verification SET
-                discord_id = %s,
-                uuid = %s
-                WHERE discord_id = %s
-                """, values
-            )
+            self.cursor.execute(f'INSERT INTO {self.table_name} VALUES (%s, %s)', values)
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
+            return False
 
-    async def delete(self, discord_id: int):
-        """
-        Delete a user from the database
-
-        Parameters
-        ----------
-        discord_id (int): The Discord User ID
-        """
-
-        self.cursor.execute('DELETE FROM verification WHERE discord_id=%s', ([discord_id]))
-        self.connection.commit()
+        return True
