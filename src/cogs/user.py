@@ -188,7 +188,7 @@ class User(commands.Cog):
         """
 
         guild = database.GuildTable().get(interaction.guild.id)
-        if (user := database.UserTable().get(interaction.user.id)):
+        if (user := await database.UserTable().get(interaction.user.id)):
             osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
             if osu_user:
                 await OsuApi.update_user_rank(guild, interaction.user, osu_user, Gamemode.from_id(user.gamemode),
