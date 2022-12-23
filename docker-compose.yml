@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  osu_rank_tracker:
+    container_name: osu_rank_tracker
+    build: .
+    network_mode: "host"
