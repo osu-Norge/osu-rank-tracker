@@ -51,8 +51,6 @@ async def callback(request: Request, code: str, state: str):
     user = database.User(discord_id=discord_id, osu_id=osu_id, gamemode=gamemode.id)
     await database.UserTable().save(user)
 
-    await OsuApi.update_newly_created_user_rank(discord_id, gamemode, osu_user)
-
     await verification_table.delete(discord_id)
 
     return RedirectResponse(f'/success/{osu_name}', status_code=303)
