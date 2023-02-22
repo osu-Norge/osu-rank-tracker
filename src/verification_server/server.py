@@ -3,11 +3,17 @@ sys.path.append('..')  # Allow to share the same database abstractions and conne
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from cogs.utils import database
 from cogs.utils.osu_api import Gamemode, OsuApi
 
 app = FastAPI()
+
+# HTML templates to serve prettier feedback to the user
+app.mount('/static', StaticFiles(directory='static'), name='static')
+templates = Jinja2Templates(directory='templates')
 
 
 @app.get('/')
@@ -21,7 +27,7 @@ async def callback(code: str, state: str):
     try:
         discord_id, gamemode, uuid = state.split(':')
     except ValueError:
-        return 'Invalid request!'
+        return templates.TemplateResponse('error.html', {'message': 'Invalid request! Missing identifying data!'})
 
     gamemode = Gamemode.from_id(int(gamemode))
 
@@ -31,11 +37,11 @@ async def callback(code: str, state: str):
 
     # Verify user link
     if not verification and verification.uuid != uuid:
-        return 'Invalid verification! Not a valid user or identifier!'
+        return templates.TemplateResponse('error.html', {'message': 'Not a valid user or identifier'})
 
     # Get osu! user
     if not (osu_user := await OsuApi.get_me_user(code, gamemode)):
-        return 'Something went wrong! Please try again later!'
+        return templates.TemplateResponse('error.html', {'message': 'Failed to fetch osu! user! Try again later.'})
     osu_id = osu_user['id']
     osu_name = osu_user['username']
 
@@ -52,5 +58,4 @@ async def callback(code: str, state: str):
 
 @app.get('/success/{name}')
 async def success(name: str):
-    return f'Hey {name}\nYou\'ve successfully connected your account to the bot!' + \
-            'You can close this window and return to Discord!'
+    return templates.TemplateResponse('success.html', {'name': name})
