@@ -396,8 +396,6 @@ class Settings(commands.Cog):
         guild_table = database.GuildTable()
         guild = await guild_table.get(interaction.guild.id)
 
-        print(guild)
-
         embed = discord.Embed(title='Role associations')
         for role in self.Roles:
             role_id = getattr(guild, role.value[0])
