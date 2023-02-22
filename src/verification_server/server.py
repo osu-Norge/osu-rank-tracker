@@ -57,5 +57,5 @@ async def callback(request: Request, code: str, state: str):
 
 
 @app.get('/success/{name}')
-async def success(name: str):
-    return templates.TemplateResponse('success.html', {'name': name})
+async def success(request: Request, name: str):
+    return templates.TemplateResponse('success.html', {'request': request, 'name': name})
