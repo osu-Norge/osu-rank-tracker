@@ -87,7 +87,8 @@ class BotInfo(commands.Cog):
                               f'{self.bot.emoji["dnd"]}{len(dnd_members)} ' +
                               f'{self.bot.emoji["offline"]}{len(offline_members)}')
         embed.add_field(name='Links', value=f'[Website]({self.bot.misc["website"]}) | ' +
-                                             f'[Source code]({self.bot.misc["source_code"]})')
+                                            f'[Source code]({self.bot.misc["source_code"]}) |' +
+                                            f'[Invite]({self.__get_invite()})')
         embed_templates.default_footer(interaction, embed)
         await interaction.response.send_message(embed=embed)
 
@@ -127,6 +128,34 @@ class BotInfo(commands.Cog):
         )
         embed_templates.default_footer(interaction, embed)
         await interaction.response.send_message(embed=embed, content=None)
+
+    @app_commands.checks.bot_has_permissions(embed_links=True)
+    @app_commands.checks.cooldown(1, 2)
+    @app_commands.command(name='ping', description='Get the bot\'s invite link')
+    async def invite(self, interaction: discord.Interaction):
+        """
+        Get the bot's invite link
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        """
+
+        embed = discord.Embed(color=interaction.client.user.color, title='Invite')
+        embed.description = f'[Click here]({self.__get_invite()}) to invite me to your server!'
+        embed_templates.default_footer(interaction, embed)
+        await interaction.response.send_message(embed=embed, content=None)
+
+    def __get_invite(self) -> str:
+        """
+        Returns the bot's invite link
+
+        Returns
+        ----------
+        (str) The bot's invite link
+        """'
+
+        return f'https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=414733126656'
 
     def __get_ping(self) -> int:
         """
