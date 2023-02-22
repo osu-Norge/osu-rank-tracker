@@ -12,7 +12,7 @@ from cogs.utils.osu_api import Gamemode, OsuApi
 app = FastAPI()
 
 # HTML templates to serve prettier feedback to the user
-app.mount('/static', StaticFiles(directory='static'), name='static')
+app.mount('/static', StaticFiles(directory='src/verification_server/static'), name='static')
 templates = Jinja2Templates(directory='templates')
 
 
