@@ -227,6 +227,28 @@ class OsuApi:
         await member.remove_roles(*roles_to_remove, reason=reason)
         await member.add_roles(*roles_to_add, reason=reason)
 
+    async def update_newly_created_user_rank(discord_user_id: int, gamemode_id: int, osu_user: dict):
+        """
+        This function exist in order to facilitate rank updates across all guilds whenver a new user is registered.
+        The reason we need a separate function is because the verification server does not have access to the discord.py client.
+        It simply calls update_user_rank() for every guild.
+
+        Parameters
+        ----------
+        discord_user_id (int): The Discord user ID
+        gamemode_id (int): The osu! gamemode ID
+        osu_user (dict): The osu! user info
+        """
+
+        discord_user = await self.bot.fetch_user(discord_user_id)
+        if not discord_user:
+            return
+
+        for guild in discord_user.mutual_guilds:
+            db_guild = await database.GuildTable().get(guild.id)
+            member = guild.get_member(discord_user_id)
+            await self.update_user_rank(member, db_guild, osu_user, Gamemode.from_id(gamemode_id), 'New user registered')
+
 
 @dataclass
 class Gamemode:
