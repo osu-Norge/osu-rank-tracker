@@ -107,7 +107,6 @@ class User(commands.Cog):
         osu_user = await OsuApi.get_user(db_user.osu_id, gamemode)
 
         # TODO add data validation
-        # TODO add spacing between numbers
         # TODO show data when None
 
         # unpack some of the data to shorten embed code
@@ -130,20 +129,20 @@ class User(commands.Cog):
         embed.set_author(name=f'{user.name}#{user.discriminator}', icon_url=user.avatar)
         embed.set_thumbnail(url=osu_user['avatar_url'])
         embed.description = f'**ID**: {osu_user["id"]}\n**Registered with gamemode**: {gamemode.name}\n' + \
-                            f'{self.bot.emoji["osu_ss"]}{ss_ranks} ' + \
-                            f'{self.bot.emoji["osu_ss_silver"]}{ssh_ranks} ' + \
-                            f'{self.bot.emoji["osu_s"]}{s_ranks} ' + \
-                            f'{self.bot.emoji["osu_s_silver"]}{sh_ranks} ' + \
-                            f'{self.bot.emoji["osu_a"]}{a_ranks}'
-        embed.add_field(name='Rank', value=f':earth_asia: {global_rank}\n{country_emoji} {country_rank}')
-        embed.add_field(name='PP', value=int(osu_user['statistics']['pp']))
+                            f'{self.bot.emoji["osu_ss"]}{ss_ranks:,} ' + \
+                            f'{self.bot.emoji["osu_ss_silver"]}{ssh_ranks:,} ' + \
+                            f'{self.bot.emoji["osu_s"]}{s_ranks:,} ' + \
+                            f'{self.bot.emoji["osu_s_silver"]}{sh_ranks:,} ' + \
+                            f'{self.bot.emoji["osu_a"]}{a_ranks:,}'
+        embed.add_field(name='Rank', value=f':earth_asia: {global_rank:,}\n{country_emoji} {country_rank:,}')
+        embed.add_field(name='PP', value=f'{int(osu_user["statistics"]["pp"]):,}')
         embed.add_field(name='Accuracy', value=f'{round(osu_user["statistics"]["hit_accuracy"], 2)}%')
         embed.add_field(name='Level', value=osu_user['statistics']['level']['current'])
-        embed.add_field(name='Playcount', value=osu_user['statistics']['play_count'])
-        embed.add_field(name='Playtime (Hours)', value=f'{int(osu_user["statistics"]["play_time"] / 60 / 60)}')
-        embed.add_field(name='Total Hits', value=osu_user['statistics']['total_hits'])
-        embed.add_field(name='Total Score', value=osu_user['statistics']['total_score'])
-        embed.add_field(name='Ranked Score', value=osu_user['statistics']['ranked_score'])
+        embed.add_field(name='Playcount', value=f'{osu_user["statistics"]["play_count"]:,}')
+        embed.add_field(name='Playtime (Hours)', value=f'{int(osu_user["statistics"]["play_time"] / 60 / 60):,}')
+        embed.add_field(name='Total Hits', value=f'{osu_user["statistics"]["total_hits"]:,}')
+        embed.add_field(name='Total Score', value=f'{osu_user["statistics"]["total_score"]:,}')
+        embed.add_field(name='Ranked Score', value=f'{osu_user["statistics"]["ranked_score"]:,}')
         embed.add_field(name='Joined', value=joined_timestamp)
         await interaction.response.send_message(embed=embed)
 
