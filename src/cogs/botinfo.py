@@ -154,7 +154,7 @@ class BotInfo(commands.Cog):
         hours, remainder = divmod(remainder, 60 * 60)
         minutes, seconds = divmod(remainder, 60)
 
-        return f'{days}d, {hours}t, {minutes}m, {seconds}s'
+        return f'{days}d, {hours}h, {minutes}m, {seconds}s'
 
 
 async def setup(bot: commands.Bot):
