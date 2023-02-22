@@ -11,12 +11,12 @@ class Database:
         with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
             self.db = yaml.load(f, Loader=yaml.SafeLoader).get('database', {})
 
-    self.connection = psycopg2.connect(
-            host=self.db['host'],
-            dbname=self.db['dbname'],
-            user=self.db['username'],
-            password=self.db['password']
-        )
+        self.connection = psycopg2.connect(
+                host=self.db['host'],
+                dbname=self.db['dbname'],
+                user=self.db['username'],
+                password=self.db['password']
+            )
         self.cursor = self.connection.cursor()
 
     def init_db(self) -> None:
