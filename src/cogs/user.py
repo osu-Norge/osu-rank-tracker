@@ -172,7 +172,7 @@ class User(commands.Cog):
         await interaction.response.send_message(
             embed=embed_templates.success(f'Gamemode set to `{gamemode.name}`\n\n' + \
                                           'Role updates will take effect on next update cycle\n' + \
-                                          'If you want to update your rank now, use `/user update`')
+                                          'If you want to update your rank now, use </user update:1055686713655177231>')  # TODO: remove hardcoded command mention
         )
 
     @app_commands.checks.cooldown(1, 60*60*12)  # 12 hours
