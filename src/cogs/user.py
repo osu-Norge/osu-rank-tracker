@@ -189,6 +189,9 @@ class User(commands.Cog):
         # Defer because I suck at programming and this function takes a shit ton of time to run.
         await interaction.response.defer()
 
+        if not interaction.guild:
+            return await interaction.followup.send(embed=embed_templates.error_warning('This command can only be used in a server'))
+
         guild = await database.GuildTable().get(interaction.guild.id)
         if (user := await database.UserTable().get(interaction.user.id)):
             osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
