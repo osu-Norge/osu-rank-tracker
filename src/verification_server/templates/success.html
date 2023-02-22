@@ -6,9 +6,12 @@
 
   <body>
     <img src="{{ url_for('static', path='/checkmark.png') }}" />
-    <h1>Success!</h1>
+    <h1>You've successfully connected your osu! account to the bot!</h1>
     <h2>{{ name }}</h2>
-    <p>You've successfully connected your osu! account to the bot!</p>
+    <p>
+      Enter the <span class="command">/user update</span> command in a guild to
+      get your roles assigned
+    </p>
     <p>You may now close this window</p>
   </body>
 </html>
