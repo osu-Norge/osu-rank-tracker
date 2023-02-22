@@ -11,7 +11,157 @@ class Database:
         with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
             self.db = yaml.load(f, Loader=yaml.SafeLoader).get('database', {})
 
-    delete(self, discord_id: int) -> None:
+    self.connection = psycopg2.connect(
+            host=self.db['host'],
+            dbname=self.db['dbname'],
+            user=self.db['username'],
+            password=self.db['password']
+        )
+        self.cursor = self.connection.cursor()
+
+    def init_db(self) -> None:
+        """
+        Creates all the necessary tables in order for the bot to function
+        """
+
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS public.channel (
+                discord_id bigint NOT NULL PRIMARY KEY,
+                clean_after_message_id bigint
+            )
+            """
+        )
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS public.guild (
+                discord_id bigint NOT NULL PRIMARY KEY,
+                registration_channel bigint REFERENCES channel(discord_id),
+                whitelisted_countries char(2)[],
+                blacklisted_osu_users integer[],
+                role_moderator bigint,
+                role_remove bigint,
+                role_add bigint,
+                role_1_digit bigint,
+                role_2_digit bigint,
+                role_3_digit bigint,
+                role_4_digit bigint,
+                role_5_digit bigint,
+                role_6_digit bigint,
+                role_7_digit bigint,
+                role_standard bigint,
+                role_taiko bigint,
+                role_ctb bigint,
+                role_mania bigint
+            )
+            """
+        )
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS public.user (
+                discord_id bigint NOT NULL PRIMARY KEY,
+                osu_id integer NOT NULL,
+                gamemode smallint NOT NULL
+            )
+            """
+        )
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS public.verification (
+                discord_id bigint NOT NULL PRIMARY KEY,
+                uuid TEXT NOT NULL
+            )
+            """
+        )
+
+        self.connection.commit()
+
+    async def get_version(self) -> str:
+        """
+        Fetches the database server version number
+        Returns
+        ----------
+        str: The database driver name and its version number
+        """
+
+        self.cursor.execute('SELECT VERSION()')
+        version = self.cursor.fetchone()[0].split(' ')[:2]
+        return ' '.join(version)
+
+
+class Table(Database):
+    def __init__(self, table_name: str, dataclass: dataclass, create_row_on_none: bool = False):
+        super().__init__()
+        self.table_name = table_name
+        self.dataclass = dataclass
+        self.create_row_on_none = create_row_on_none
+
+    async def get(self, discord_id: int) -> dataclass:
+        """
+        Fetches a row from the database
+        Parameters
+        ----------
+        discord_id (int): The Discord ID
+        Returns
+        ----------
+        dataclass: A dataclass object
+        """
+
+        self.cursor.execute(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
+        db_data = self.cursor.fetchone()
+
+        if not db_data:
+            if not self.create_row_on_none:
+                return None
+
+            self.cursor.execute(f'INSERT INTO public.{self.table_name} VALUES (%s)', (discord_id,))
+            self.connection.commit()
+
+            self.cursor.execute(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
+            db_data = self.cursor.fetchone()
+
+        return self.dataclass(*db_data)
+
+    async def get_all(self) -> tuple[dataclass]:
+        """
+        Fetches all the rows from the database
+        Returns
+        ----------
+        tuple[dataclass]: A tuple of dataclass objects
+        """
+
+        self.cursor.execute(f'SELECT * FROM public.{self.table_name}')
+        db_data = self.cursor.fetchall()
+
+        return tuple(self.dataclass(*data) for data in db_data)
+
+    async def count(self) -> int:
+        """
+        Counts the number of rows in the database
+        Returns
+        ----------
+        int: The number of rows in the database
+        """
+
+        self.cursor.execute(f'SELECT COUNT(*) FROM public.{self.table_name}')
+        return self.cursor.fetchone()[0]
+
+    @abstractmethod
+    async def save(self, data: dataclass) -> None:
+        """
+        Saves a row to the database
+        Parameters
+        ----------
+        data (dataclass): A dataclass object
+        Raises
+        ----------
+        NotImplementedError: If the child class does not implement this method
+        """
+
+        # Leave implementation to the child class
+        raise NotImplementedError()
+
+    async def delete(self, discord_id: int) -> None:
         """
         Deletes a row from the database
 
