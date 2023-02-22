@@ -46,7 +46,7 @@ class RankUpdate(commands.Cog):
                     if not (osu_user := await OsuApi.get_user(user.osu_id, gamemode)):
                         continue
                     # Get the user's rank and verify it exists
-                    if not (rank := osu_user.get("statistics", {}).get("global_rank")):
+                    if not (rank := osu_user.get('statistics', {}).get('global_rank')):
                         continue
                     self.rank_cache[user.discord_id] = rank
 
@@ -114,7 +114,7 @@ class RankUpdate(commands.Cog):
         user = await database.UserTable().get(member.id)
         if user and not self.__is_blacklisted(member, guild):
             osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
-            if osu_user and osu_user.get("statistics", {}).get("global_rank"):
+            if osu_user and osu_user.get('statistics', {}).get('global_rank'):
                 await OsuApi.update_user_rank(guild, member, osu_user, Gamemode.from_id(user.gamemode),
                                               reason='User joined guild')
 

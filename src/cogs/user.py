@@ -113,7 +113,7 @@ class User(commands.Cog):
         country_emoji = f':flag_{osu_user["country_code"].lower()}:'
         global_rank = osu_user['statistics']['global_rank']
         country_rank = osu_user['statistics']['rank']['country']
-        joined_timestamp = discord.utils.format_dt(datetime.fromisoformat(osu_user['join_date']), style="f")
+        joined_timestamp = discord.utils.format_dt(datetime.fromisoformat(osu_user['join_date']), style='f')
         ss_ranks = osu_user['statistics']['grade_counts']['ss']
         ssh_ranks = osu_user['statistics']['grade_counts']['ssh']
         s_ranks = osu_user['statistics']['grade_counts']['s']
