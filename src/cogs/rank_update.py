@@ -28,7 +28,7 @@ class RankUpdate(commands.Cog):
         user_table = database.UserTable()
         guild_table = database.GuildTable()
 
-        sleep_time = await user_table.count() / 60  # TODO: calculate optimal sleep time based on user count and ratelimit
+        sleep_time = 1 / 10  # Maximum 10 requests per second. Discord allows 50 and osu allows 20. We're playing it safe
 
         for guild in await guild_table.get_all():
             if not (discord_guild := self.bot.get_guild(guild.discord_id)):
