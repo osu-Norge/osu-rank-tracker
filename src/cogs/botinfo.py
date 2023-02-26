@@ -87,7 +87,7 @@ class BotInfo(commands.Cog):
                               f'{self.bot.emoji["dnd"]}{len(dnd_members)} ' +
                               f'{self.bot.emoji["offline"]}{len(offline_members)}')
         embed.add_field(name='Links', value=f'[Website]({self.bot.misc["website"]}) | ' +
-                                            f'[Source code]({self.bot.misc["source_code"]}) |' +
+                                            f'[Source code]({self.bot.misc["source_code"]}) | ' +
                                             f'[Invite]({self.__get_invite()})')
         embed_templates.default_footer(interaction, embed)
         await interaction.response.send_message(embed=embed)
