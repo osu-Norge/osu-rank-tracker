@@ -19,7 +19,7 @@ class RankUpdate(commands.Cog):
     def cog_unload(self):
         self.update_ranks.cancel()
 
-    @tasks.loop(hours=24)
+    @tasks.loop(hours=12)
     async def update_ranks(self):
         """
         Update the ranks of all users in the database
@@ -61,18 +61,18 @@ class RankUpdate(commands.Cog):
     @update_ranks.before_loop
     async def before_update_ranks(self):
         """
-        Schedule the update ranks task to run at 00:00 UTC
+        Schedule the update ranks task to every 12 hours at 00:00/12:00 UTC
+        Chooses the closest next time to run based on the current time
         """
 
         await self.bot.wait_until_ready()
 
         now = datetime.utcnow()
 
-        if now.hour > 0:
-            sleep_until = now + timedelta(days=1)
-            sleep_until = sleep_until.replace(hour=0, minute=0, second=0, microsecond=0)
+        if now.hour < 12:
+            sleep_until = now.replace(hour=12, minute=0, second=0, microsecond=0)
         else:
-            sleep_until = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            sleep_until = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
 
         await discord.utils.sleep_until(sleep_until)
 
