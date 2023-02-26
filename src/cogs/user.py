@@ -177,6 +177,7 @@ class User(commands.Cog):
                                           'If you want to update your rank now, use </user update:1055686713655177231>')
         )
 
+    # @app_commands.guild_only()
     @app_commands.checks.cooldown(2, 60*60*24)  # 2 times every 24 hours
     @user_group.command(name='update')
     async def force_user_rank_update(self, interaction: discord.Interaction):
@@ -191,6 +192,8 @@ class User(commands.Cog):
         # Defer because I suck at programming and this function takes a shit ton of time to run.
         await interaction.response.defer()
 
+        # As far as I know, Discord limitations makes it so we can't use the built-in guild_only check on subcommands
+        # So we have to do it ourselves.
         if not interaction.guild:
             return await interaction.followup.send(
                 embed=embed_templates.error_warning('This command can only be used in a server')
