@@ -203,10 +203,13 @@ class User(commands.Cog):
         if (user := await database.UserTable().get(interaction.user.id)):
             osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
             if osu_user:
-                await OsuApi.update_user_rank(guild, interaction.user, osu_user, Gamemode.from_id(user.gamemode),
-                                              reason='User forced rank update through command')
-
-        await interaction.followup.send(embed=embed_templates.success('Your roles have been updated!'))
+                update = await OsuApi.update_user_rank(guild, interaction.user, osu_user,
+                                                       Gamemode.from_id(user.gamemode),
+                                                       reason='User forced rank update through command')
+                if update.get('success'):
+                    return await interaction.followup.send(embed=embed_templates.success(update['message']))
+                else:
+                    return await interaction.followup.send(embed=embed_templates.error_warning(update['message']))
 
 
 async def setup(bot: commands.Bot):

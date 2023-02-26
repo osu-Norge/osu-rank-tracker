@@ -154,7 +154,7 @@ class OsuApi:
         osu_user: dict,
         gamemode: Gamemode,
         reason: str = None
-    ):
+    ) -> dict:
         """
         Update a user's rank in a guild (if they're not blacklisted or from a non-whitelisted country)
 
@@ -165,15 +165,19 @@ class OsuApi:
         osu_user (dict): userinfo from the osu! API
         gamemode (Gamemode): The gamemode the rank is for
         reason (str): The reason for the rank update
+
+        Returns
+        ----------
+        dict: Information about the rank update. {success: bool, message: str}
         """
 
         # Check if the user is blacklisted
         if guild.blacklisted_osu_users and osu_user['id'] in guild.blacklisted_osu_users:
-            return
+            return {'success': False, 'message': 'You are blacklisted from this guild'}
 
         # Check if the user is from a whitelisted country
         if guild.whitelisted_countries and osu_user['country']['code'] not in guild.whitelisted_countries:
-            return
+            return {'success': False, 'message': 'You are not from a country that\'s whitelisted in this guild'}
 
         rank = osu_user['statistics']['global_rank']
 
@@ -221,6 +225,7 @@ class OsuApi:
 
         await member.remove_roles(*roles_to_remove, reason=reason)
         await member.add_roles(*roles_to_add, reason=reason)
+        return {'success': True, 'message': 'Your roles have been updated in accordance to your current osu! rank!'}
 
     @staticmethod
     def __get_roles_to_remove(roles_to_add: list[str]) -> list[str]:  # TODO: make an enum or something. idk

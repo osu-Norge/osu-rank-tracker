@@ -127,11 +127,15 @@ class RankUpdate(commands.Cog):
 
         guild = await database.GuildTable().get(member.guild.id)
         user = await database.UserTable().get(member.id)
-        if user and not self.__is_blacklisted(member, guild):
+        if user:
             osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
-            if osu_user and osu_user.get('statistics', {}).get('global_rank'):
-                await OsuApi.update_user_rank(guild, member, osu_user, Gamemode.from_id(user.gamemode),
-                                              reason='User joined guild')
+            update = await OsuApi.update_user_rank(guild, member, osu_user, Gamemode.from_id(user.gamemode),
+                                                   reason='User joined guild')
+
+            if update.get('success'):
+                self.bot.logger.info(f'Updated rank of user ({member.id})')
+            else:
+                self.bot.logger.info(f'Rank not updated for user ({member.id}) - {update["reason"]}')
 
 
 async def setup(bot: commands.Bot):
