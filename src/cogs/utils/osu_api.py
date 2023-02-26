@@ -184,30 +184,30 @@ class OsuApi:
         # Rank roles
         # This is terrible, I know :P
         if not rank:
-            roles_to_add = set()
+            roles_to_add = []
         elif rank < 10:
-            roles_to_add = set(['role_1_digit'])
+            roles_to_add = ['role_1_digit']
         elif rank < 100:
-            roles_to_add = set(['role_2_digit'])
+            roles_to_add = ['role_2_digit']
         elif rank < 1000:
-            roles_to_add = set(['role_3_digit'])
+            roles_to_add = ['role_3_digit']
         elif rank < 10000:
-            roles_to_add = set(['role_4_digit'])
+            roles_to_add = ['role_4_digit']
         elif rank < 100000:
-            roles_to_add = set(['role_5_digit'])
+            roles_to_add = ['role_5_digit']
         elif rank < 1000000:
-            roles_to_add = set(['role_6_digit'])
+            roles_to_add = ['role_6_digit']
         else:
-            roles_to_add = set(['role_7_digit'])
+            roles_to_add = ['role_7_digit']
 
         # Gamemode roles
         match gamemode.id:
             case 0:
-                roles_to_add.add('role_standard')
+                roles_to_add.append('role_standard')
             case 1:
-                roles_to_add.add('role_taiko')
+                roles_to_add.append('role_taiko')
             case 2:
-                roles_to_add.add('role_ctb')
+                roles_to_add.append('role_ctb')
             case 3:
                 roles_to_add.add('role_mania')
 
@@ -215,9 +215,9 @@ class OsuApi:
 
         # Add and remove any additional roles
         if guild.role_remove:
-            roles_to_remove.add('role_remove')
+            roles_to_remove.append('role_remove')
         if guild.role_add:
-            roles_to_add.add('role_add')
+            roles_to_add.append('role_add')
 
         # Convert role strings to Role objects
         roles_to_add = [member.guild.get_role(getattr(guild, r)) for r in roles_to_add if getattr(guild, r)]
