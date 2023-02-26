@@ -114,10 +114,10 @@ class User(commands.Cog):
         global_rank = osu_user['statistics']['global_rank']
         country_rank = osu_user['statistics']['rank']['country']
         joined_timestamp = discord.utils.format_dt(datetime.fromisoformat(osu_user['join_date']), style='f')
-        ss_ranks = osu_user['statistics']['grade_counts']['ss']
         ssh_ranks = osu_user['statistics']['grade_counts']['ssh']
-        s_ranks = osu_user['statistics']['grade_counts']['s']
+        ss_ranks = osu_user['statistics']['grade_counts']['ss']
         sh_ranks = osu_user['statistics']['grade_counts']['sh']
+        s_ranks = osu_user['statistics']['grade_counts']['s']
         a_ranks = osu_user['statistics']['grade_counts']['a']
 
         # Construct embed
@@ -129,10 +129,10 @@ class User(commands.Cog):
         embed.set_author(name=f'{user.name}#{user.discriminator}', icon_url=user.avatar)
         embed.set_thumbnail(url=osu_user['avatar_url'])
         embed.description = f'**ID**: {osu_user["id"]}\n**Registered with gamemode**: {gamemode.name}\n' + \
-                            f'{self.bot.emoji["osu_ss"]}{ss_ranks:,} ' + \
                             f'{self.bot.emoji["osu_ss_silver"]}{ssh_ranks:,} ' + \
-                            f'{self.bot.emoji["osu_s"]}{s_ranks:,} ' + \
+                            f'{self.bot.emoji["osu_ss"]}{ss_ranks:,} ' + \
                             f'{self.bot.emoji["osu_s_silver"]}{sh_ranks:,} ' + \
+                            f'{self.bot.emoji["osu_s"]}{s_ranks:,} ' + \
                             f'{self.bot.emoji["osu_a"]}{a_ranks:,}'
         embed.add_field(name='Rank', value=f':earth_asia: {global_rank:,}\n{country_emoji} {country_rank:,}')
         embed.add_field(name='PP', value=f'{int(osu_user["statistics"]["pp"]):,}')
