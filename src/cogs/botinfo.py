@@ -153,7 +153,7 @@ class BotInfo(commands.Cog):
         Returns
         ----------
         (str) The bot's invite link
-        """'
+        """
 
         return f'https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=414733126656'
 
@@ -196,4 +196,3 @@ async def setup(bot: commands.Bot):
     """
 
     await bot.add_cog(BotInfo(bot))
-

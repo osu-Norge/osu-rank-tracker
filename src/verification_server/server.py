@@ -1,13 +1,13 @@
 import sys
 sys.path.append('..')  # Allow to share the same database abstractions and connection
 
-from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, Request  # noqa E402
+from fastapi.responses import RedirectResponse  # noqa E402
+from fastapi.staticfiles import StaticFiles  # noqa E402
+from fastapi.templating import Jinja2Templates  # noqa E402
 
-from cogs.utils import database
-from cogs.utils.osu_api import Gamemode, OsuApi
+from cogs.utils import database  # noqa E402
+from cogs.utils.osu_api import Gamemode, OsuApi  # noqa E402
 
 app = FastAPI()
 
@@ -27,7 +27,10 @@ async def callback(request: Request, code: str, state: str):
     try:
         discord_id, gamemode, uuid = state.split(':')
     except ValueError:
-        return templates.TemplateResponse('error.html', {'request': request, 'message': 'Invalid request! Missing identifying data!'})
+        return templates.TemplateResponse(
+            'error.html',
+            {'request': request, 'message': 'Invalid request! Missing identifying data!'}
+        )
 
     gamemode = Gamemode.from_id(int(gamemode))
 
@@ -37,11 +40,18 @@ async def callback(request: Request, code: str, state: str):
 
     # Verify user link
     if not verification and verification.uuid != uuid:
-        return templates.TemplateResponse('error.html', {'request': request, 'message': 'Not a valid user or identifier'})
+        return templates.TemplateResponse(
+            'error.html',
+            {'request': request, 'message': 'Not a valid user or identifier'}
+        )
 
     # Get osu! user
     if not (osu_user := await OsuApi.get_me_user(code, gamemode)):
-        return templates.TemplateResponse('error.html', {'request': request, 'message': 'Failed to fetch osu! user! Try again later.'})
+        return templates.TemplateResponse(
+            'error.html',
+            {'request': request, 'message': 'Failed to fetch osu! user! Try again later.'}
+        )
+
     osu_id = osu_user['id']
     osu_name = osu_user['username']
 

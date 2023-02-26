@@ -14,4 +14,3 @@ class BotLogger:
         logger.addHandler(handler)
 
         self.logger = logger
-

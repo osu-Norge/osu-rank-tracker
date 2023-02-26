@@ -38,7 +38,11 @@ class Errors(commands.Cog):
         )
 
     @commands.Cog.listener()
-    async def on_app_command_completion(self, interaction: discord.Interaction, command: app_commands.Command | app_commands.ContextMenu):
+    async def on_app_command_completion(
+        self,
+        interaction: discord.Interaction,
+        command: app_commands.Command | app_commands.ContextMenu
+    ):
         """
         Logs slash command execution metadata
 
@@ -114,7 +118,7 @@ class Errors(commands.Cog):
                 embed = embed_templates.error_warning('This command is only invokable in guilds')
                 return await ctx.reply(embed=embed)
             except discord.errors.Forbidden:  # Thrown if bot is blocked by the user or if the user has closed their DMs
-                print('DM Blocked!')
+                self.bot.logger.info('DM Blocked!')
 
         elif isinstance(error, commands.DisabledCommand):
             pass
@@ -175,4 +179,3 @@ async def setup(bot: commands.Bot):
     """
 
     await bot.add_cog(Errors(bot))
-

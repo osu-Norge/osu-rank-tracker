@@ -23,11 +23,20 @@ class Settings(commands.Cog):
         default_permissions=discord.Permissions(manage_guild=True)
     )
 
-    whitelist_group = app_commands.Group(name='whitelist', description='Manage country whitelist', parent=settings_group)
-    blacklist_group = app_commands.Group(name='blacklist', description='Manage user blacklist', parent=settings_group)
-    role_group = app_commands.Group(name='role', description='Manage role settings', parent=settings_group)
+    whitelist_group = app_commands.Group(name='whitelist', description='Manage country whitelist',
+                                         parent=settings_group)
+    blacklist_group = app_commands.Group(name='blacklist', description='Manage user blacklist',
+                                         parent=settings_group)
+    role_group = app_commands.Group(name='role', description='Manage role settings',
+                                    parent=settings_group)
 
-    async def __role_setter(self, interaction: discord.Interaction, role: discord.Role | None, role_variable: str, role_name: str):
+    async def __role_setter(
+        self,
+        interaction: discord.Interaction,
+        role: discord.Role | None,
+        role_variable: str,
+        role_name: str
+    ):
         """
         Validates a role and puts it into the database. Sends confirmation message to Discord
 
@@ -196,7 +205,7 @@ class Settings(commands.Cog):
         embed = discord.Embed(title='Whitelisted countries')
         embed.description = ', '.join(guild.whitelisted_countries)
         await interaction.response.send_message(embed=embed)
-    
+
     @blacklist_group.command(name='add')
     async def blacklist_add(self, interaction: discord.Interaction, osu_user: str):
         """
@@ -244,7 +253,7 @@ class Settings(commands.Cog):
         interaction (discord.Interaction): Slash command context object
         osu_user (str): The osu! user to remove from the blacklist
         """
-        
+
         user = await OsuApi.get_user(osu_user, Gamemode.from_name('standard'))
         user_id = user.get('id')
         username = user.get('username')
@@ -285,7 +294,7 @@ class Settings(commands.Cog):
             embed = embed_templates.error_warning('No users are blacklisted!')
             return await interaction.response.send_message(embed=embed)
 
-        guild.blacklisted_osu_users = [f'[{user}](https://osu.ppy.sh/users/{user})' for user in guild.blacklisted_osu_users]
+        guild.blacklisted_osu_users = [f'[{u}](https://osu.ppy.sh/users/{u})' for u in guild.blacklisted_osu_users]
 
         if len(guild.blacklisted_osu_users) > 2048:
             embed = embed_templates.error_warning('Blacklist is too long to be displayed!')
@@ -294,7 +303,6 @@ class Settings(commands.Cog):
         embed = discord.Embed(title='Blacklisted users (IDs)')
         embed.description = ', '.join(guild.blacklisted_osu_users)
         await interaction.response.send_message(embed=embed)
-
 
     class Roles(Enum):
         """
@@ -361,7 +369,7 @@ class Settings(commands.Cog):
             if role_id:
                 discord_role = interaction.guild.get_role(role_id)
                 embed.add_field(name=role.value[1], value=discord_role.mention)
-        
+
         await interaction.response.send_message(embed=embed)
 
 

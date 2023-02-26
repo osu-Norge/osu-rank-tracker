@@ -7,7 +7,7 @@ def default_footer(interaction: discord.Interaction, embed: discord.Embed) -> di
 
     Parameters
     -----------
-    interaction (discord.Interaction): The slash command context object    
+    interaction (discord.Interaction): The slash command context object
     embed (discord.Embed): An embed object to add the footer to
 
     Returns

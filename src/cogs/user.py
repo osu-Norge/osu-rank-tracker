@@ -49,7 +49,8 @@ class User(commands.Cog):
         # Generate auth link
         auth_link = await OsuApi.generate_auth_link(interaction.user.id, Gamemode.from_id(gamemode.value))
         await interaction.response.send_message(
-            embed=embed_templates.success(f'Click the link to verify your osu! account:\n\n{auth_link}\n\nYou\'ve got 2 minutes to complete this verifcation'),
+            embed=embed_templates.success(f'Click the link to verify your osu! account:\n\n{auth_link}\n\n' +
+                                          'You\'ve got 2 minutes to complete this verifcation'),
             ephemeral=True
         )
 
@@ -169,10 +170,11 @@ class User(commands.Cog):
         user.gamemode = gamemode.id
         await user_table.save(user)
 
+        # TODO: remove hardcoded command mention
         await interaction.response.send_message(
-            embed=embed_templates.success(f'Gamemode set to `{gamemode.name}`\n\n' + \
-                                          'Role updates will take effect on next update cycle\n' + \
-                                          'If you want to update your rank now, use </user update:1055686713655177231>')  # TODO: remove hardcoded command mention
+            embed=embed_templates.success(f'Gamemode set to `{gamemode.name}`\n\n' +
+                                          'Role updates will take effect on next update cycle\n' +
+                                          'If you want to update your rank now, use </user update:1055686713655177231>')
         )
 
     @app_commands.checks.cooldown(2, 60*60*24)  # 2 times every 24 hours
@@ -190,7 +192,9 @@ class User(commands.Cog):
         await interaction.response.defer()
 
         if not interaction.guild:
-            return await interaction.followup.send(embed=embed_templates.error_warning('This command can only be used in a server'))
+            return await interaction.followup.send(
+                embed=embed_templates.error_warning('This command can only be used in a server')
+            )
 
         guild = await database.GuildTable().get(interaction.guild.id)
         if (user := await database.UserTable().get(interaction.user.id)):
@@ -198,7 +202,7 @@ class User(commands.Cog):
             if osu_user:
                 await OsuApi.update_user_rank(guild, interaction.user, osu_user, Gamemode.from_id(user.gamemode),
                                               reason='User forced rank update through command')
-        
+
         await interaction.followup.send(embed=embed_templates.success('Your roles have been updated!'))
 
 

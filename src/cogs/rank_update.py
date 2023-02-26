@@ -28,7 +28,7 @@ class RankUpdate(commands.Cog):
         user_table = database.UserTable()
         guild_table = database.GuildTable()
 
-        sleep_time = 1 / 10  # Maximum 10 requests per second. Discord allows 50 and osu allows 20. We're playing it safe
+        sleep_time = 1 / 10  # Max 10 requests per second. Discord allows 50 and osu allows 20. We're playing it safe
 
         for guild in await guild_table.get_all():
             if not (discord_guild := self.bot.get_guild(guild.discord_id)):
@@ -51,7 +51,8 @@ class RankUpdate(commands.Cog):
                     self.rank_cache[user.discord_id] = rank
 
                 # Update the user's rank
-                await OsuApi.update_user_rank(guild, member, osu_user, gamemode, reason='Automatic rank update based on osu! rank')
+                await OsuApi.update_user_rank(guild, member, osu_user, gamemode,
+                                              reason='Automatic rank update based on osu! rank')
 
                 await asyncio.sleep(sleep_time)
 

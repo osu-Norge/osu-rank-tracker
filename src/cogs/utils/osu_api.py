@@ -10,7 +10,6 @@ from expiringdict import ExpiringDict
 import yaml
 
 from . import database
-from cogs.utils import embed_templates
 
 
 class OsuApi:
@@ -112,7 +111,7 @@ class OsuApi:
                     data = await r.json()
                     token = data.get('access_token')
                 else:
-                    raise aiohttp.ClientResponseError(r.request_info, r.history)         
+                    raise aiohttp.ClientResponseError(r.request_info, r.history)
 
             # Get user data
             header = {'Authorization': f'Bearer {token}'}
@@ -125,7 +124,8 @@ class OsuApi:
     @classmethod
     async def generate_auth_link(cls, discord_user_id: int, gamemode: Gamemode) -> str:
         """
-        Generates an authorization link for users to authenticate with osu!api. Inserts pending verification into database
+        Generates an authorization link for users to authenticate with osu!api.
+        Inserts pending verification into database
 
         Parameters
         -----------
@@ -148,7 +148,13 @@ class OsuApi:
                f'&state={state}&response_type=code&scope=identify'
 
     @staticmethod
-    async def update_user_rank(guild: database.Guild, member: discord.Member, osu_user: dict, gamemode: Gamemode, reason: str = None):
+    async def update_user_rank(
+        guild: database.Guild,
+        member: discord.Member,
+        osu_user: dict,
+        gamemode: Gamemode,
+        reason: str = None
+    ):
         """
         Update a user's rank in a guild (if they're not blacklisted or from a non-whitelisted country)
 
