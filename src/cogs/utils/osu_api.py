@@ -175,44 +175,33 @@ class OsuApi:
         # This is terrible, I know :P
         if not rank:
             roles_to_add = set()
-            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
         elif rank < 10:
             roles_to_add = set(['role_1_digit'])
-            roles_to_remove = set(['role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
         elif rank < 100:
             roles_to_add = set(['role_2_digit'])
-            roles_to_remove = set(['role_1_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
         elif rank < 1000:
             roles_to_add = set(['role_3_digit'])
-            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
         elif rank < 10000:
             roles_to_add = set(['role_4_digit'])
-            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit'])
         elif rank < 100000:
             roles_to_add = set(['role_5_digit'])
-            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_6_digit', 'role_7_digit'])
         elif rank < 1000000:
             roles_to_add = set(['role_6_digit'])
-            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_7_digit'])
         else:
             roles_to_add = set(['role_7_digit'])
-            roles_to_remove = set(['role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit', 'role_5_digit', 'role_6_digit'])
 
         # Gamemode roles
         match gamemode.id:
             case 0:
                 roles_to_add.add('role_standard')
-                roles_to_remove.update(['role_taiko', 'role_ctb', 'role_mania'])
             case 1:
                 roles_to_add.add('role_taiko')
-                roles_to_remove.update(['role_standard', 'role_ctb', 'role_mania'])
             case 2:
                 roles_to_add.add('role_ctb')
-                roles_to_remove.update(['role_standard', 'role_taiko', 'role_mania'])
             case 3:
                 roles_to_add.add('role_mania')
-                roles_to_remove.update(['role_standard', 'role_taiko', 'role_ctb'])
 
+        roles_to_remove = OsuApi.__get_roles_to_remove(roles_to_add)
 
         # Add and remove any additional roles
         if guild.role_remove:
@@ -221,11 +210,36 @@ class OsuApi:
             roles_to_add.add('role_add')
 
         # Convert role strings to Role objects
-        roles_to_add = [member.guild.get_role(getattr(guild, attr)) for attr in roles_to_add if getattr(guild, attr)]
-        roles_to_remove = [member.guild.get_role(getattr(guild, attr)) for attr in roles_to_remove if getattr(guild, attr)]
+        roles_to_add = [member.guild.get_role(getattr(guild, r)) for r in roles_to_add if getattr(guild, r)]
+        roles_to_remove = [member.guild.get_role(getattr(guild, r)) for r in roles_to_remove if getattr(guild, r)]
 
         await member.remove_roles(*roles_to_remove, reason=reason)
         await member.add_roles(*roles_to_add, reason=reason)
+
+    @staticmethod
+    def __get_roles_to_remove(roles_to_add: list[str]) -> list[str]:  # TODO: make an enum or something. idk
+        """
+        Returns a list of roles to remove based on the roles to add
+
+        Parameters
+        ----------
+        roles_to_add (list[str]): A list of roles to add
+
+        Returns
+        ----------
+        list[str]: A list of roles to remove
+        """
+
+        # This kinda fucking sucks because of its time complexity and it's hardcoded but whatever
+        roles_to_remove = [
+            'role_1_digit', 'role_2_digit', 'role_3_digit',
+            'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit',
+            'role_standard', 'role_taiko', 'role_ctb', 'role_mania'
+        ]
+        for add_role in roles_to_add:
+            roles_to_remove.remove(add_role)
+
+        return roles_to_remove
 
 
 @dataclass
