@@ -76,7 +76,7 @@ class Settings(commands.Cog):
         interaction (discord.Interaction): Slash command context object
         """
 
-        pass
+        await interaction.response.send_message('This feature is not yet implemented')
 
     @settings_group.command()
     async def show(self, interaction: discord.Interaction):
@@ -88,7 +88,7 @@ class Settings(commands.Cog):
         interaction (discord.Interaction): Slash command context object
         """
 
-        pass
+        await interaction.response.send_message('This feature is not yet implemented')
 
     @settings_group.command()
     async def reset(self, interaction: discord.Interaction):
