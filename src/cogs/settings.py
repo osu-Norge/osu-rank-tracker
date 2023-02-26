@@ -101,46 +101,6 @@ class Settings(commands.Cog):
         embed = embed_templates.success('All settings have been reset!')
         await interaction.response.send_message(embed=embed)
 
-    @settings_group.command()
-    async def regchannel(self, interaction: discord.Interaction, channel: discord.TextChannel, *, remove_after_message: str = None):
-        """
-        Set the registration channel
-
-        Parameters
-        ----------
-        interaction (discord.Interaction): Slash command context object
-        channel (discord.TextChannel): The channel to set as the registration channel
-        remove_after_message (str): The message to delete all messages after
-        """
-
-        # TODO: remove_after_message
-
-        channel_table = database.ChannelTable()
-        db_channel = await channel_table.get(channel.id)
-
-        if remove_after_message:
-            db_channel.clean_after_message_id = remove_after_message.id
-        else:
-            db_channel.clean_after_message_id = None
-
-        await channel_table.save(db_channel)
-
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(interaction.guild.id)
-        guild.registration_channel = channel.id
-        await guild_table.save(guild)
-
-        if remove_after_message:
-            embed = embed_templates.success(
-                interaction,
-                text=f'Registration channel has been set to {channel.mention} & all messages in the channel after ' +
-                     f'[this message]({remove_after_message.jump_url}) will be deleted on registration'
-            )
-            await interaction.response.send_message(embed=embed)
-        else:
-            embed = embed_templates.success(f'Registration channel has been set to {channel.mention}')
-            await interaction.response.send_message(embed=embed)
-
     @whitelist_group.command(name='add')
     async def whitelist_add(self, interaction: discord.Interaction, country_code: str):
         """
@@ -341,7 +301,6 @@ class Settings(commands.Cog):
         List of roles that can be set in the database. Serves as autocomplete for the role command
         """
 
-        moderator = 'role_moderator', 'moderator'
         on_registration_add = 'role_add', 'addrole'
         on_registration_remove = 'role_remove', 'removerole'
         digit_1 = 'role_1_digit', '1 digit'

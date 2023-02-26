@@ -26,20 +26,10 @@ class Database:
 
         self.cursor.execute(
             """
-            CREATE TABLE IF NOT EXISTS public.channel (
-                discord_id bigint NOT NULL PRIMARY KEY,
-                clean_after_message_id bigint
-            )
-            """
-        )
-        self.cursor.execute(
-            """
             CREATE TABLE IF NOT EXISTS public.guild (
                 discord_id bigint NOT NULL PRIMARY KEY,
-                registration_channel bigint REFERENCES channel(discord_id),
                 whitelisted_countries char(2)[],
                 blacklisted_osu_users integer[],
-                role_moderator bigint,
                 role_remove bigint,
                 role_add bigint,
                 role_1_digit bigint,
@@ -177,10 +167,8 @@ class Table(Database):
 @dataclass
 class Guild:
     discord_id: int
-    registration_channel: int | None
     whitelisted_countries: list[str] | None
     blacklisted_osu_users: list[int] | None
-    role_moderator: int | None
     role_remove: int | None
     role_add: int | None
     role_1_digit: int | None
@@ -215,7 +203,7 @@ class GuildTable(Table):
             self.cursor.execute(
                 f"""
                 INSERT INTO {self.table_name}
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, values)
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
@@ -229,10 +217,8 @@ class GuildTable(Table):
             f"""
             UPDATE {self.table_name} SET
             discord_id = %s,
-            registration_channel = %s,
             whitelisted_countries = %s,
             blacklisted_osu_users = %s,
-            role_moderator = %s,
             role_remove = %s,
             role_add = %s,
             role_1_digit = %s,
@@ -290,48 +276,6 @@ class UserTable(Table):
             discord_id = %s,
             osu_id = %s,
             gamemode = %s
-            WHERE discord_id = %s
-            """, values
-        )
-        self.connection.commit()
-
-
-@dataclass
-class Channel:
-    discord_id: int
-    clean_after_message_id: int | None
-
-
-class ChannelTable(Table):
-    def __init__(self):
-        super().__init__(table_name='channel', dataclass=Channel, create_row_on_none=True)
-
-    async def save(self, channel: Channel) -> None:
-        """
-        Save a channel object in the database
-
-        Parameters
-        ----------
-        channel (Channel): A user object
-        """
-
-        values = astuple(channel)
-
-        try:
-            self.cursor.execute(f'INSERT INTO {self.table_name} VALUES (%s %s)', values)
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
-        else:
-            return
-
-        values = values + (channel.discord_id,)
-
-        self.cursor.execute(
-            f"""
-            UPDATE {self.table_name} SET
-            discord_id = %s,
-            clean_after_message_id = %s
             WHERE discord_id = %s
             """, values
         )
