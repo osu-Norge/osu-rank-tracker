@@ -131,7 +131,7 @@ class BotInfo(commands.Cog):
 
     @app_commands.checks.bot_has_permissions(embed_links=True)
     @app_commands.checks.cooldown(1, 2)
-    @app_commands.command(name='ping', description='Get the bot\'s invite link')
+    @app_commands.command(name='invite', description='Get the bot\'s invite link')
     async def invite(self, interaction: discord.Interaction):
         """
         Get the bot's invite link
