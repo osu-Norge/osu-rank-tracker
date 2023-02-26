@@ -175,7 +175,7 @@ class User(commands.Cog):
                                           'If you want to update your rank now, use </user update:1055686713655177231>')  # TODO: remove hardcoded command mention
         )
 
-    @app_commands.checks.cooldown(1, 60*10)  # 10 mintues
+    @app_commands.checks.cooldown(2, 60*60*24)  # 2 times every 24 hours
     @user_group.command(name='update')
     async def force_user_rank_update(self, interaction: discord.Interaction):
         """
