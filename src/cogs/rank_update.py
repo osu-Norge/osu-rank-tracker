@@ -25,18 +25,24 @@ class RankUpdate(commands.Cog):
         Update the ranks of all users in the database
         """
 
+        self.bot.logger.info('Initiating automatic rank update...')
+
         user_table = database.UserTable()
         guild_table = database.GuildTable()
 
         sleep_time = 1 / 10  # Max 10 requests per second. Discord allows 50 and osu allows 20. We're playing it safe
 
         for guild in await guild_table.get_all():
+            self.bot.logger.info(f'Updating ranks for guild - {guild.discord_id}...')
+
             if not (discord_guild := self.bot.get_guild(guild.discord_id)):
                 continue
 
             for member in discord_guild.members:
                 if member.bot or not (user := await user_table.get(member.id)):
                     continue
+
+                self.bot.logger.info(f'Checking/Updating rank of user - {user.discord_id}...')
 
                 gamemode = Gamemode.from_id(user.gamemode)
 
@@ -58,6 +64,8 @@ class RankUpdate(commands.Cog):
 
         self.rank_cache = {}  # Clear the rank cache
 
+        self.bot.logger.info("Rank update complete!")
+
     @update_ranks.before_loop
     async def before_update_ranks(self):
         """
@@ -74,6 +82,8 @@ class RankUpdate(commands.Cog):
         else:
             sleep_until = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
 
+        self.bot.logger.info(f'Scheduling automatic rank update for {sleep_until} UTC')
+
         await discord.utils.sleep_until(sleep_until)
 
     @commands.Cog.listener('on_guild_join')
@@ -86,6 +96,7 @@ class RankUpdate(commands.Cog):
         guild (discord.Guild): Guild instance
         """
 
+        self.bot.logger.info(f'Bot added to guild - {guild.id}')
         guild = database.Guild(discord_id=guild.id)
         await database.GuildTable().save(guild)
 
@@ -99,6 +110,7 @@ class RankUpdate(commands.Cog):
         guild (discord.Guild): Guild instance
         """
 
+        self.bot.logger.info(f'Bot removed from guild - {guild.id}')
         await database.GuildTable().delete(guild.id)
 
     @commands.Cog.listener('on_member_join')
@@ -110,6 +122,8 @@ class RankUpdate(commands.Cog):
         ----------
         member (discord.Member): Member instance
         """
+
+        self.bot.logger.info(f'User ({member.id}) joined guild ({member.guild.id})')
 
         guild = await database.GuildTable().get(member.guild.id)
         user = await database.UserTable().get(member.id)
