@@ -209,7 +209,7 @@ class OsuApi:
             case 2:
                 roles_to_add.append('role_ctb')
             case 3:
-                roles_to_add.add('role_mania')
+                roles_to_add.append('role_mania')
 
         roles_to_remove = OsuApi.__get_roles_to_remove(roles_to_add)
 
