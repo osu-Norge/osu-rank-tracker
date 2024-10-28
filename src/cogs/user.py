@@ -129,7 +129,7 @@ class User(commands.Cog):
         )
         embed.set_author(name=f'{user.name}#{user.discriminator}', icon_url=user.avatar)
         embed.set_thumbnail(url=osu_user['avatar_url'])
-        embed.description = f'**ID**: {osu_user["id"]}\n**Registered with gamemode**: {gamemode.name}\n' + \
+        embed.description = f'**ID**: {osu_user["id"]}\n**Registered gamemode**: {gamemode.name}\n' + \
                             f'{self.bot.emoji["osu_ss_silver"]}{ssh_ranks:,} ' + \
                             f'{self.bot.emoji["osu_ss"]}{ss_ranks:,} ' + \
                             f'{self.bot.emoji["osu_s_silver"]}{sh_ranks:,} ' + \
