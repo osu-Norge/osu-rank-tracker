@@ -157,6 +157,8 @@ class RankUpdate(commands.Cog):
             if value == role.id:
                 setattr(guild, key, None)
 
+        await database.GuildTable().save(guild)
+
         self.bot.logger.info(f'Registered role {role.id} deleted! Removed the mapping!')
 
 
