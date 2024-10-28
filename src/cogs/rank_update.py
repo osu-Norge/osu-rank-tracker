@@ -1,4 +1,5 @@
 import asyncio
+import dataclasses
 from datetime import datetime, timedelta
 
 import discord
@@ -136,6 +137,27 @@ class RankUpdate(commands.Cog):
                 self.bot.logger.info(f'Updated rank of user ({member.id})')
             else:
                 self.bot.logger.info(f'Rank not updated for user ({member.id}) - {update["reason"]}')
+
+    @commands.Cog.listener('on_guild_role_delete')
+    async def on_guild_role_delete(self, role: discord.Role):
+        """
+        Clear database mapping if role is deleted
+
+        Parameters
+        ----------
+        role (discord.Role): Role instance
+        """
+
+        guild = await database.GuildTable().get(role.guild.id)
+        if not guild:
+            return
+
+        attributes = dataclasses.asdict(guild)
+        for key, value in attributes.items():
+            if value == role.id:
+                setattr(guild, key, None)
+
+        self.bot.logger.info(f'Registered role {role.id} deleted! Removed the mapping!')
 
 
 async def setup(bot: commands.Bot):
