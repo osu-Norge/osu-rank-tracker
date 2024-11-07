@@ -5,104 +5,58 @@
 <p>A Discord bot that keeps track of members' osu! ranks and updates their roles accordingly.</p>
 </div>
 
-⚠️ <b>This bot is not made with scalability in mind. It is made for the purpose of being used in the osu!Norge Discord server. If you decide to use this code, and you don't have the correct role setup, it will break.</b> ⚠️
+## Features (\* = new in rewrite)
 
-<br>
+- Updates roles every 12 hours
+- Users can pick their desired gamemode to be tracked
+- OAuth2 authentication with osu!\*
+- Slash commands\*
+- Automatic role removal/added on registration (you can essentially lock people out of the server until they've registered)
+- Blacklist osu! users
+- Whitelist osu! users from certain countries
 
-<h3>Table of Contents</h3>
+## Setup
 
-* [Getting Started](#getting-started)
-  * [Prerequisites](#prerequisites)
-  * [Setup](#setup)
-* [Contributing](#contributing)
-* [License](#license)
-* [Acknowledgments](#acknowledgments)
+### Prerequisites
 
-<br>
+- Postgresql database
+- Python 3.10+
+- osu!API v2 API key
 
-<h2 align="center">Getting Started</h2>
+This README will assume you have managed to set all of these up correclty.
 
-<h3>Prerequisites</h3>
+### Presteps - Configuration
 
-* A [MongoDB](https://github.com/mongodb/mongo) Database
+Both hosting options below require you to create a config.
 
-<h3>Setup</h3>
+Make a copy of [config.yaml.example](src/config/config.yaml.example) and remove the `.example` part. Now edit the config to your liking!
 
-<details>
-  <summary>Manual</summary>
+### Option 1 - Docker
 
-<h3>Additional prerequisites</h3>
+Run `docker-compose up` and you should be good!
 
-* [Python](https://github.com/python/cpython) 3.6+
+### Option 2 - Manual
 
-<h3>Installation</h3>
+1. Install dependencies
 
-*Assming that you have set your Python 3 path to `python` and you have set up a database.*
-
-* Install the required Python modules:
-  ```
-  python -m pip install -r requirements.txt
-  ```
-
-* Go to the `src/config` directory & rename the [config.yaml.example](src/config/config.yaml.example) file to `config.yaml`. Replace the values within the config file with your own.
-
-* Return to the [src](src) directory
-
-* Run the bot
-
-  ```cmd
-  python src/run.py
-  ```
-</details>
-
-<details>
-  <summary>Docker (not available ATM)</summary>
-  
-Example docker-compose.yml
-
-NOTE: `config.yaml` needs to exist on the host as a file
-
-```yml
-  osu-bot:
-    container_name: osu-bot
-    image: osu-Norge/osu_rank_tracker
-    networks:
-      - internal
-    volumes:
-      - ./config.yaml:/app/data/config.yaml
 ```
-  
-</details>
+python -m pip install -r requirements.txt
+```
 
-<h2 align="center">Contributing</h2>
+This assumes that `python` points to a python3.10+ installation.
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+2. Run the bot
 
-<br>
+```
+python src/run.py
+``
 
-<h2 align="center">License</h2>
+## Invite
 
-[Mozilla Public License 2.0](LICENSE)
+If you don't feel like hosting the bot yourself you can [invite]() our instance to your server!
 
-<br>
+## Contributing
 
-<h2 align="center">Acknowledgments</h2>
+Even though the bot has recently been rewritten, it is quite the mess. All contributions are much appreciated!
 
-We want to thank the following people:
-
-* [Roxedus](https://github.com/Roxedus) for adding Docker support
-
-and these people for their indirect contributions to the project. Their code is not necessary in order for the bot to operate however their code is used in the production version of the bot aswell as being featured in this repo:
-
-* [nitros12](https://github.com/nitros12) for writing the [Eval.py](src/cogs/Eval.py) cog - ([original code](https://gist.github.com/nitros12/2c3c265813121492655bc95aa54da6b9))
-* [EvieePy](https://github.com/EvieePy) for writing a template for the [Errors.py](src/cogs/Errors.py) cog - ([original code](https://gist.github.com/EvieePy/7822af90858ef65012ea500bcecf1612))
-
-<br>
-
-##
-<div align="center">
-  <h3>Project developed by</h3>
-  <a href="https://discord.gg/Y7zyjGU"><img src="https://raw.githubusercontent.com/osu-Norge/assets/master/products/banner_discord.png"></a>
-</div>
-
-
+Please read [CONTRIBUTING.md](CONTRIBUTING.md).

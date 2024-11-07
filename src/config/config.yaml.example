@@ -1,3 +1,6 @@
+config_mode: prod
+dev_guild_id:
+
 # Bot settings
 bot:
   token: 
@@ -5,13 +8,17 @@ bot:
   presence:
     message: API Abuse
     activity: watching
+    type: dnd
+
+# Verification server settings
+server:
+  port: 
 
 # API
 api:
-  osu_v1:
-    key: 
-  osu_v2:
+  osu:
     client_id: 
+    client_secret: 
     redirect_uri: 
 
 # Database
@@ -27,6 +34,11 @@ emoji:
   idle: <:idle:516328783347843082>
   dnd: <:dnd:516328782844395579>
   offline: <:offline:516328785407246356>
+  osu_ss: <:GradeSS:609830028842237962>
+  osu_ss_silver: <:GradeSSSilver:609830030402387981>
+  osu_s: <:GradeS:609830028729122843>
+  osu_s_silver: <:GradeSSilver:609830028913672193>
+  osu_a: <:GradeA:609830029177913344>
 
 # Misc
 misc:

@@ -1,60 +1,59 @@
-from discord.ext import commands
-import discord
-
 from codecs import open
-import yaml
-import pymongo
-
 from os import listdir
-import locale
+from threading import Thread
 from time import time
 
+import discord
+from discord.ext import commands
+import yaml
+import uvicorn
 
-locale.setlocale(locale.LC_ALL, '')
+import cogs.utils.database as database
+from logger import BotLogger
+
 
 with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
 
-intents = discord.Intents.default()
-intents.guilds = True
-intents.members = True
-intents.messages = True
+database.Database().init_db()
 
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=commands.when_mentioned_or(config['bot']['prefix']),
-                         case_insensitive=True, intents=intents)
+        super().__init__(
+            command_prefix=commands.when_mentioned_or(config['bot']['prefix']),
+            case_insensitive=True,
+            intents=discord.Intents.all(),
+            allowed_mentions=discord.AllowedMentions(everyone=False)
+        )
 
-        self.prefix = config['bot']['prefix']
-        self.presence = config['bot']['presence']
-        self.presence_activity = config['bot']['presence_activity']
+        self.logger = BotLogger().logger  # Initialize logger
 
-        self.osu_api_key = config['osu_api_key']
-        self.database_plain = pymongo.MongoClient(config['database'])
-        self.database = self.database_plain['osu-rank-tracker']['users']
-        self.blacklist = self.database_plain['osu-rank-tracker']['blacklist']
-
-        self.guild = config['guild']
-        self.set_channel = config['set_channel']
-        self.roles = config.get('roles', {})
-
+        self.presence = config['bot'].get('presence', {})
         self.emoji = config.get('emoji', {})
         self.misc = config.get('misc', {})
 
+        # Start verification server
+        server_port = config['server'].get('port', 80)
+        server = Thread(target=uvicorn.run, args=('verification_server.server:app',), kwargs={'port': server_port})
+        server.start()
+
+    async def setup_hook(self):
+        # Load cogs
+        for file in listdir('./src/cogs'):
+            if file.endswith('.py'):
+                name = file[:-3]
+                await bot.load_extension(f'cogs.{name}')
+
+        # Sync slash commands to Discord
+        if config.get('config_mode') == 'prod':
+            await self.tree.sync()
+        else:
+            self.tree.copy_global_to(guild=discord.Object(id=config['dev_guild_id']))
+            await self.tree.sync(guild=discord.Object(id=config['dev_guild_id']))
+
 
 bot = Bot()
-
-
-activities = {
-    'playing': 0,
-    'listening': 2,
-    'watching': 3
-}
-if bot.presence_activity.lower() in activities:
-    activity_type = activities[bot.presence_activity]
-else:
-    activity_type = 0
 
 
 @bot.event
@@ -62,17 +61,29 @@ async def on_ready():
     if not hasattr(bot, 'uptime'):
         bot.uptime = time()
 
-    for file in listdir('src/cogs'):
-        if file.endswith('.py'):
-            name = file[:-3]
-            bot.load_extension(f'cogs.{name}')
-
-    print(f'\nUsername:      {bot.user.name}')
+    print(f'Username:        {bot.user.name}')
     print(f'ID:              {bot.user.id}')
     print(f'Version:         {discord.__version__}')
-    print('...............................................................\n')
-    await bot.change_presence(activity=discord.Activity(type=activity_type, name=bot.presence),
-                              status=discord.Status.online)
+    print('.' * 50 + '\n')
+
+    # Set initial presence
+    # Presence status
+    status_types = {
+        'online': discord.Status.online,
+        'dnd': discord.Status.dnd,
+        'idle': discord.Status.idle,
+        'offline': discord.Status.offline,
+    }
+    status_type = status_types.get(bot.presence['type'].lower(), discord.Status.online)
+
+    # Presence actitivity
+    activities = {'playing': 0, 'listening': 2, 'watching': 3}
+    activity_type = activities.get(bot.presence['activity'].lower(), 0)
+
+    await bot.change_presence(
+        activity=discord.Activity(type=activity_type, name=bot.presence.get('message')),
+        status=status_type
+    )
 
 
-bot.run(config['bot']['token'], bot=True, reconnect=True)
+bot.run(config['bot']['token'], reconnect=True)
