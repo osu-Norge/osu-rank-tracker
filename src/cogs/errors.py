@@ -33,7 +33,7 @@ class Errors(commands.Cog):
 
         self.bot.logger.info(
             f'{"❌ " if ctx.command_failed else "✔ "} {ctx.command} | ' +
-            f'{ctx.author.name}#{ctx.author.discriminator} ({ctx.author.id}) | ' +
+            f'{ctx.author.name} ({ctx.author.id}) | ' +
             f'{ctx.guild.id}-{ctx.channel.id}-{ctx.message.id}'
         )
 
@@ -54,7 +54,7 @@ class Errors(commands.Cog):
 
         self.bot.logger.info(
             f'{"❌ " if interaction.command_failed else "✔ "} {command.name} | ' +
-            f'{interaction.user.name}#{interaction.user.discriminator} ({interaction.user.id}) | ' +
+            f'{interaction.user.name} ({interaction.user.id}) | ' +
             f'{interaction.guild_id}-{interaction.channel_id}-{interaction.id}'
         )
 

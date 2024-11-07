@@ -17,7 +17,7 @@ def default_footer(interaction: discord.Interaction, embed: discord.Embed) -> di
 
     return embed.set_footer(
         icon_url=interaction.user.avatar,
-        text=f'{interaction.user.name}#{interaction.user.discriminator}'
+        text=interaction.user.name
     )
 
 

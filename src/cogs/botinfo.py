@@ -71,7 +71,7 @@ class BotInfo(commands.Cog):
         embed = discord.Embed(color=interaction.client.user.color, url=self.bot.misc['website'])
         embed.set_author(name=dev.name, icon_url=dev.display_avatar)
         embed.set_thumbnail(url=self.bot.user.display_avatar)
-        embed.add_field(name='Dev', value=f'{dev.mention}\n{dev.name}#{dev.discriminator}')
+        embed.add_field(name='Dev', value=f'{dev.mention}\n{dev.name}')
         embed.add_field(name='Uptime', value=self.__get_uptime())
         embed.add_field(name='Ping', value=f'Websocket ping: {self.__get_ping()} ms')
         embed.add_field(name='Servers', value=len(self.bot.guilds))

@@ -127,7 +127,7 @@ class User(commands.Cog):
             color=osu_user['profile_colour'],
             url=f'https://osu.ppy.sh/users/{osu_user["id"]}'
         )
-        embed.set_author(name=f'{user.name}#{user.discriminator}', icon_url=user.avatar)
+        embed.set_author(name=user.name, icon_url=user.avatar)
         embed.set_thumbnail(url=osu_user['avatar_url'])
         embed.description = f'**ID**: {osu_user["id"]}\n**Registered gamemode**: {gamemode.name}\n' + \
                             f'{self.bot.emoji["osu_ss_silver"]}{ssh_ranks:,} ' + \
