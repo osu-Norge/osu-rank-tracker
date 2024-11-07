@@ -48,7 +48,7 @@ This assumes that `python` points to a python3.10+ installation.
 
 ```
 python src/run.py
-``
+```
 
 ## Invite
 
