@@ -20,7 +20,7 @@
 
 - Postgresql database
 - Python 3.10+
-- osu!API v2 API key
+- osu!API v2 API credentials
 
 This README will assume you have managed to set all of these up correclty.
 
