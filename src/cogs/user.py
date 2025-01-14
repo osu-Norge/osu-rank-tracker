@@ -208,7 +208,7 @@ class User(commands.Cog):
     @user_group.command(name='update')
     async def force_user_rank_update(self, interaction: discord.Interaction):
         """
-        Force's a rank update for your user
+        Forces a rank update for your user
 
         Parameters
         ----------
