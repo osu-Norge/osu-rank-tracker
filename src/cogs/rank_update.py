@@ -1,6 +1,6 @@
 import asyncio
 import dataclasses
-from datetime import datetime, timedelta
+from datetime import time
 
 import discord
 from discord.ext import commands, tasks
@@ -20,7 +20,7 @@ class RankUpdate(commands.Cog):
     def cog_unload(self):
         self.update_ranks.cancel()
 
-    @tasks.loop(hours=12)
+    @tasks.loop(time=time(hour=0, minute=0))
     async def update_ranks(self):
         """
         Update the ranks of all users in the database
@@ -75,17 +75,6 @@ class RankUpdate(commands.Cog):
         """
 
         await self.bot.wait_until_ready()
-
-        now = datetime.utcnow()
-
-        if now.hour < 12:
-            sleep_until = now.replace(hour=12, minute=0, second=0, microsecond=0)
-        else:
-            sleep_until = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-
-        self.bot.logger.info(f'Scheduling automatic rank update for {sleep_until} UTC')
-
-        await discord.utils.sleep_until(sleep_until)
 
     @commands.Cog.listener('on_guild_join')
     async def on_guild_join(self: commands.Bot, guild: discord.Guild):
