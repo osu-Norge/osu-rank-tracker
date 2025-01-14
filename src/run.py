@@ -35,7 +35,11 @@ class Bot(commands.Bot):
 
         # Start verification server
         server_port = config['server'].get('port', 80)
-        server = Thread(target=uvicorn.run, args=('verification_server.server:app',), kwargs={'port': server_port})
+        server = Thread(
+            target=uvicorn.run,
+            args=('verification_server.server:app',),
+            kwargs={'port': server_port, 'host': '0.0.0.0'}
+        )
         server.start()
 
     async def setup_hook(self):
