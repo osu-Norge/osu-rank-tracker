@@ -1,6 +1,7 @@
 from __future__ import annotations
 from codecs import open
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 import uuid
 
@@ -140,7 +141,11 @@ class OsuApi:
         identifier = str(uuid.uuid1())
         state = f'{discord_user_id}:{gamemode.id}:{identifier}'
 
-        verficiation = database.Verification(discord_id=discord_user_id, uuid=identifier)
+        verficiation = database.Verification(
+            discord_id=discord_user_id,
+            uuid=identifier,
+            expires=datetime.now(timezone.utc) + timedelta(minutes=2)
+        )
         await database.VerificationTable().insert(verficiation)
 
         return f'https://osu.ppy.sh/oauth/authorize?client_id={cls.base_payload.get("client_id")}' + \

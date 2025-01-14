@@ -1,9 +1,9 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from cogs.utils import embed_templates
 import cogs.utils.database as database
@@ -15,11 +15,37 @@ class User(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.verification_cleanup.start()
 
     user_group = app_commands.Group(
         name='user',
         description='User management commands'
     )
+
+    def cog_unload(self):
+        self.verification_cleanup.cancel()
+
+    @tasks.loop(minutes=2)
+    async def verification_cleanup(self):
+        """
+        Clean up any pending verifications that have expired. This is in case the register command fails to do so
+        """
+
+        # Would be more efficent to query expired verifications directly, but this is fine
+        verification_table = database.VerificationTable()
+        verifications = await verification_table.get_all()
+        for verification in verifications:
+            if verification.expires < datetime.now(timezone.utc).replace(tzinfo=None):
+                self.bot.logger.info(f'Cleaning up expired verification for {verification.discord_id}')
+                await verification_table.delete(verification.discord_id)
+
+    @verification_cleanup.before_loop
+    async def before_verification_cleanup(self):
+        """
+        Make sure bot is ready before starting the verification cleanup loop
+        """
+
+        await self.bot.wait_until_ready()
 
     @user_group.command()
     async def register(self, interaction: discord.Interaction, gamemode: GamemodeOptions = GamemodeOptions.standard):

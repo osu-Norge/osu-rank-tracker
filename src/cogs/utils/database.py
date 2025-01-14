@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import astuple, dataclass
+from datetime import datetime
 
 import psycopg2
 import yaml
@@ -59,7 +60,8 @@ class Database:
             """
             CREATE TABLE IF NOT EXISTS public.verification (
                 discord_id bigint NOT NULL PRIMARY KEY,
-                uuid TEXT NOT NULL
+                uuid TEXT NOT NULL,
+                expires TIMESTAMP
             )
             """
         )
@@ -286,6 +288,7 @@ class UserTable(Table):
 class Verification:
     discord_id: int
     uuid: str
+    expires: datetime
 
 
 class VerificationTable(Table):
@@ -308,7 +311,7 @@ class VerificationTable(Table):
         values = astuple(verification)
 
         try:
-            self.cursor.execute(f'INSERT INTO {self.table_name} VALUES (%s, %s)', values)
+            self.cursor.execute(f'INSERT INTO {self.table_name} VALUES (%s, %s, %s)', values)
             self.connection.commit()
         except psycopg2.errors.UniqueViolation:
             self.connection.rollback()
