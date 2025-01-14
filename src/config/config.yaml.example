@@ -12,7 +12,7 @@ bot:
 
 # Verification server settings
 server:
-  port: 
+  port: 6969
 
 # API
 api:
