@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append('..')  # Allow to share the same database abstractions and connection
 
 from fastapi import FastAPI, Request  # noqa E402

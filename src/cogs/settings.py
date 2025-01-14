@@ -5,8 +5,8 @@ from discord import app_commands
 from discord.ext import commands
 from iso3166 import countries
 
-from cogs.utils import embed_templates
 import cogs.utils.database as database
+from cogs.utils import embed_templates
 from cogs.utils.osu_api import Gamemode, OsuApi
 
 

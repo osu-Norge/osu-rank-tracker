@@ -1,5 +1,5 @@
-from os import environ, getpid
 import platform
+from os import environ, getpid
 from time import time
 
 import discord

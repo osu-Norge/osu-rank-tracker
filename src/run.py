@@ -4,13 +4,12 @@ from threading import Thread
 from time import time
 
 import discord
-from discord.ext import commands
-import yaml
 import uvicorn
+import yaml
+from discord.ext import commands
 
 import cogs.utils.database as database
 from logger import BotLogger
-
 
 with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)

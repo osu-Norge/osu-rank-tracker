@@ -1,8 +1,8 @@
 import asyncio
 from os import listdir
-import requests
 
 import discord
+import requests
 from discord.ext import commands
 
 from cogs.utils import embed_templates

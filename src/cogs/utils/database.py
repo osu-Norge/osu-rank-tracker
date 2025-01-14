@@ -1,4 +1,3 @@
-from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import astuple, dataclass
 from datetime import datetime
@@ -71,6 +70,7 @@ class Database:
     async def get_version(self) -> str:
         """
         Fetches the database server version number
+
         Returns
         ----------
         str: The database driver name and its version number
@@ -91,9 +91,11 @@ class Table(Database):
     async def get(self, discord_id: int) -> dataclass:
         """
         Fetches a row from the database
+
         Parameters
         ----------
         discord_id (int): The Discord ID
+
         Returns
         ----------
         dataclass: A dataclass object
@@ -117,6 +119,7 @@ class Table(Database):
     async def get_all(self) -> tuple[dataclass]:
         """
         Fetches all the rows from the database
+
         Returns
         ----------
         tuple[dataclass]: A tuple of dataclass objects
@@ -142,6 +145,7 @@ class Table(Database):
     async def save(self, data: dataclass) -> None:
         """
         Saves a row to the database
+
         Parameters
         ----------
         data (dataclass): A dataclass object
