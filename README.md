@@ -34,6 +34,8 @@ Make a copy of [config.yaml.example](src/config/config.yaml.example) and remove 
 
 Run `docker-compose up` and you should be good!
 
+If you have changed the specified port in the config remember to reflect that in the docker-compose file.
+
 ### Option 2 - Manual
 
 1. Install dependencies
