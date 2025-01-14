@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   osu_rank_tracker:
     container_name: osu_rank_tracker
