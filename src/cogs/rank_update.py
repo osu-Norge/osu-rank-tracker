@@ -115,17 +115,36 @@ class RankUpdate(commands.Cog):
 
         self.bot.logger.info(f'User ({member.id}) joined guild ({member.guild.id})')
 
-        guild = await database.GuildTable().get(member.guild.id)
         user = await database.UserTable().get(member.id)
         if user:
-            osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
-            update = await OsuApi.update_user_rank(guild, member, osu_user, Gamemode.from_id(user.gamemode),
-                                                   reason='User joined guild')
+            await self.update_member_rank(member, user, reason='User joined guild')
 
-            if update.get('success'):
-                self.bot.logger.info(f'Updated rank of user ({member.id})')
-            else:
-                self.bot.logger.info(f'Rank not updated for user ({member.id}) - {update["reason"]}')
+    @commands.Cog.listener('on_user_registered')
+    async def on_user_registered(self, discord_id: int):
+        """Update rank roles after a user's osu! account is verified."""
+
+        user = await database.UserTable().get(discord_id)
+        if not user:
+            self.bot.logger.error(f'No registered user found after verification for Discord user {discord_id}')
+            return
+
+        for guild in self.bot.guilds:
+            if member := guild.get_member(discord_id):
+                await self.update_member_rank(member, user, reason='User registered with the bot')
+
+    async def update_member_rank(self, member: discord.Member, user: database.User, reason: str):
+        guild = await database.GuildTable().get(member.guild.id)
+        gamemode = Gamemode.from_id(user.gamemode)
+        osu_user = await OsuApi.get_user(user.osu_id, gamemode)
+        if not osu_user:
+            self.bot.logger.error(f'Could not fetch osu! profile for registered user {user.discord_id}')
+            return
+
+        update = await OsuApi.update_user_rank(guild, member, osu_user, gamemode, reason=reason)
+        if update.get('success'):
+            self.bot.logger.info(f'Updated rank of user ({member.id})')
+        else:
+            self.bot.logger.info(f'Rank not updated for user ({member.id}) - {update["message"]}')
 
     @commands.Cog.listener('on_guild_role_delete')
     async def on_guild_role_delete(self, role: discord.Role):

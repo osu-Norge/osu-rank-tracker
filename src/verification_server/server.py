@@ -29,8 +29,9 @@ async def callback(request: Request, code: str, state: str):
         discord_id, gamemode, uuid = state.split(':')
     except ValueError:
         return templates.TemplateResponse(
-            'error.html',
-            {'request': request, 'message': 'Invalid request! Missing identifying data!'}
+            request=request,
+            name='error.html',
+            context={'message': 'Invalid request! Missing identifying data!'}
         )
 
     gamemode = Gamemode.from_id(int(gamemode))
@@ -42,15 +43,17 @@ async def callback(request: Request, code: str, state: str):
     # Verify user link
     if not verification or verification.uuid != uuid:
         return templates.TemplateResponse(
-            'error.html',
-            {'request': request, 'message': 'Not a valid user or identifier'}
+            request=request,
+            name='error.html',
+            context={'message': 'Not a valid user or identifier'}
         )
 
     # Get osu! user
     if not (osu_user := await OsuApi.get_me_user(code, gamemode)):
         return templates.TemplateResponse(
-            'error.html',
-            {'request': request, 'message': 'Failed to fetch osu! user! Try again later.'}
+            request=request,
+            name='error.html',
+            context={'message': 'Failed to fetch osu! user! Try again later.'}
         )
 
     osu_id = osu_user['id']
@@ -64,9 +67,12 @@ async def callback(request: Request, code: str, state: str):
 
     await verification_table.delete(discord_id)
 
+    bot = request.app.state.bot
+    bot.loop.call_soon_threadsafe(bot.dispatch, 'user_registered', user.discord_id)
+
     return RedirectResponse(f'/success/{osu_name}', status_code=303)
 
 
 @app.get('/success/{name}')
 async def success(request: Request, name: str):
-    return templates.TemplateResponse('success.html', {'request': request, 'name': name})
+    return templates.TemplateResponse(request=request, name='success.html', context={'name': name})

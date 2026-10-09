@@ -10,6 +10,7 @@ from discord.ext import commands
 
 import cogs.utils.database as database
 from logger import BotLogger
+from verification_server.server import app as verification_app
 
 with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
@@ -33,10 +34,11 @@ class Bot(commands.Bot):
         self.misc = config.get('misc', {})
 
         # Start verification server
+        verification_app.state.bot = self
         server_port = config['server'].get('port', 80)
         server = Thread(
             target=uvicorn.run,
-            args=('verification_server.server:app',),
+            args=(verification_app,),
             kwargs={'port': server_port, 'host': '0.0.0.0'},
             daemon=True,
         )
