@@ -132,6 +132,24 @@ class RankUpdate(commands.Cog):
             if member := guild.get_member(discord_id):
                 await self.update_member_rank(member, user, reason='User registered with the bot')
 
+    @commands.Cog.listener('on_user_unregistered')
+    async def on_user_unregistered(self, discord_id: int):
+        """Remove osu! roles after a user's account is unregistered."""
+
+        for discord_guild in self.bot.guilds:
+            member = discord_guild.get_member(discord_id)
+            if not member:
+                continue
+
+            guild = await database.GuildTable().get(discord_guild.id)
+            roles_to_remove = [
+                role for role_name in OsuApi.MANAGED_ROLE_NAMES
+                if (role_id := getattr(guild, role_name)) and (role := discord_guild.get_role(role_id))
+            ]
+            if roles_to_remove:
+                await member.remove_roles(*roles_to_remove, reason='User unregistered from the bot')
+                self.bot.logger.info(f'Removed osu! roles from user ({discord_id}) in guild ({discord_guild.id})')
+
     async def update_member_rank(self, member: discord.Member, user: database.User, reason: str):
         guild = await database.GuildTable().get(member.guild.id)
         gamemode = Gamemode.from_id(user.gamemode)

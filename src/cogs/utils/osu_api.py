@@ -15,6 +15,12 @@ from . import database
 
 
 class OsuApi:
+    RANK_AND_GAMEMODE_ROLES = (
+        'role_1_digit', 'role_2_digit', 'role_3_digit', 'role_4_digit',
+        'role_5_digit', 'role_6_digit', 'role_7_digit',
+        'role_standard', 'role_taiko', 'role_ctb', 'role_mania'
+    )
+    MANAGED_ROLE_NAMES = (*RANK_AND_GAMEMODE_ROLES, 'role_add')
     cache = ExpiringDict(max_len=1, max_age_seconds=86400)
 
     with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
@@ -248,11 +254,7 @@ class OsuApi:
         """
 
         # This kinda fucking sucks because of its time complexity and it's hardcoded but whatever
-        roles_to_remove = [
-            'role_1_digit', 'role_2_digit', 'role_3_digit',
-            'role_4_digit', 'role_5_digit', 'role_6_digit', 'role_7_digit',
-            'role_standard', 'role_taiko', 'role_ctb', 'role_mania'
-        ]
+        roles_to_remove = list(OsuApi.RANK_AND_GAMEMODE_ROLES)
         for add_role in roles_to_add:
             roles_to_remove.remove(add_role)
 

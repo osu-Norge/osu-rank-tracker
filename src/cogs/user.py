@@ -104,8 +104,10 @@ class User(commands.Cog):
             )
 
         await user_table.delete(user.discord_id)
+        self.bot.dispatch('user_unregistered', user.discord_id)
         await interaction.response.send_message(
-            embed=embed_templates.success('Your osu! account has been removed from the bot'),
+            embed=embed_templates.success('Your osu! account has been removed from the bot. ' +
+                                          'Your osu! roles are being removed.'),
             ephemeral=True
         )
 
