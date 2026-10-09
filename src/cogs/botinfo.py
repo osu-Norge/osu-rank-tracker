@@ -72,8 +72,8 @@ class BotInfo(commands.Cog):
         embed.set_author(name=dev.name, icon_url=dev.display_avatar)
         embed.set_thumbnail(url=self.bot.user.display_avatar)
         embed.add_field(name='Dev', value=f'{dev.mention}\n{dev.name}')
-        embed.add_field(name='Uptime', value=self.__get_uptime())
-        embed.add_field(name='Ping', value=f'Websocket ping: {self.__get_ping()} ms')
+        embed.add_field(name='Uptime', value=self._get_uptime())
+        embed.add_field(name='Ping', value=f'Websocket ping: {self._get_ping()} ms')
         embed.add_field(name='Servers', value=len(self.bot.guilds))
         embed.add_field(name='Discord.py', value=discord.__version__)
         embed.add_field(name='Python', value=platform.python_version())
@@ -88,7 +88,7 @@ class BotInfo(commands.Cog):
                               f'{self.bot.emoji["offline"]}{len(offline_members)}')
         embed.add_field(name='Links', value=f'[Website]({self.bot.misc["website"]}) | ' +
                                             f'[Source code]({self.bot.misc["source_code"]}) | ' +
-                                            f'[Invite]({self.__get_invite()})')
+                                            f'[Invite]({self._get_invite()})')
         embed_templates.default_footer(interaction, embed)
         await interaction.response.send_message(embed=embed)
 
@@ -105,7 +105,7 @@ class BotInfo(commands.Cog):
         """
 
         embed = discord.Embed(color=interaction.client.user.color)
-        embed.add_field(name='🔌 Uptime', value=self.__get_uptime())
+        embed.add_field(name='🔌 Uptime', value=self._get_uptime())
         embed_templates.default_footer(interaction, embed)
         await interaction.response.send_message(embed=embed)
 
@@ -124,7 +124,7 @@ class BotInfo(commands.Cog):
         embed = discord.Embed(color=interaction.client.user.color)
         embed.add_field(
             name='📶 Ping',
-            value=f'**Websocket ping:** {self.__get_ping()} ms'
+            value=f'**Websocket ping:** {self._get_ping()} ms'
         )
         embed_templates.default_footer(interaction, embed)
         await interaction.response.send_message(embed=embed, content=None)
@@ -142,11 +142,11 @@ class BotInfo(commands.Cog):
         """
 
         embed = discord.Embed(color=interaction.client.user.color, title='Invite')
-        embed.description = f'[Click here]({self.__get_invite()}) to invite me to your server!'
+        embed.description = f'[Click here]({self._get_invite()}) to invite me to your server!'
         embed_templates.default_footer(interaction, embed)
         await interaction.response.send_message(embed=embed, content=None)
 
-    def __get_invite(self) -> str:
+    def _get_invite(self) -> str:
         """
         Returns the bot's invite link
 
@@ -157,7 +157,7 @@ class BotInfo(commands.Cog):
 
         return f'https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&scope=bot&permissions=414733126656'
 
-    def __get_ping(self) -> int:
+    def _get_ping(self) -> int:
         """
         Get the bot's ping in milliseconds
 
@@ -168,7 +168,7 @@ class BotInfo(commands.Cog):
 
         return int(self.bot.latency * 1000)
 
-    def __get_uptime(self) -> str:
+    def _get_uptime(self) -> str:
         """
         Returns the current uptime of the bot in string format
 

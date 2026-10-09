@@ -223,7 +223,7 @@ class OsuApi:
             case 3:
                 roles_to_add.append('role_mania')
 
-        roles_to_remove = OsuApi.__get_roles_to_remove(roles_to_add)
+        roles_to_remove = OsuApi._get_roles_to_remove(roles_to_add)
 
         # Add and remove any additional roles
         if guild.role_remove:
@@ -240,7 +240,7 @@ class OsuApi:
         return {'success': True, 'message': 'Your roles have been updated in accordance to your current osu! rank!'}
 
     @staticmethod
-    def __get_roles_to_remove(roles_to_add: list[str]) -> list[str]:  # TODO: make an enum or something. idk
+    def _get_roles_to_remove(roles_to_add: list[str]) -> list[str]:  # TODO: make an enum or something. idk
         """
         Returns a list of roles to remove based on the roles to add
 

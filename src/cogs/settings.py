@@ -30,7 +30,7 @@ class Settings(commands.Cog):
     role_group = app_commands.Group(name='role', description='Manage role settings',
                                     parent=settings_group)
 
-    async def __role_setter(
+    async def _role_setter(
         self,
         interaction: discord.Interaction,
         role: discord.Role | None,
@@ -335,7 +335,7 @@ class Settings(commands.Cog):
         role (discord.Role): The role to set
         """
 
-        await self.__role_setter(interaction, role=role, role_variable=type.value[0], role_name=type.value[1])
+        await self._role_setter(interaction, role=role, role_variable=type.value[0], role_name=type.value[1])
 
     @role_group.command(name='remove')
     async def role_remove(self, interaction: discord.Interaction, type: Roles):
@@ -348,7 +348,7 @@ class Settings(commands.Cog):
         type (Roles): The type of role to remove
         """
 
-        await self.__role_setter(interaction, role=None, role_variable=type.value[0], role_name=type.value[1])
+        await self._role_setter(interaction, role=None, role_variable=type.value[0], role_name=type.value[1])
 
     @role_group.command(name='show')
     async def role_show(self, interaction: discord.Interaction):
