@@ -37,7 +37,7 @@ async def callback(request: Request, code: str, state: str):
 
     # Check if user is pending verification
     verification_table = database.VerificationTable()
-    verification = await verification_table.get(discord_id)
+    verification = await verification_table.get(int(discord_id))
 
     # Verify user link
     if not verification or verification.uuid != uuid:
@@ -59,7 +59,7 @@ async def callback(request: Request, code: str, state: str):
     print(discord_id, osu_id, gamemode.id)
 
     # Enter user into database
-    user = database.User(discord_id=discord_id, osu_id=osu_id, gamemode=gamemode.id)
+    user = database.User(discord_id=int(discord_id), osu_id=osu_id, gamemode=gamemode.id)
     await database.UserTable().save(user)
 
     await verification_table.delete(discord_id)
