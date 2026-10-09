@@ -37,7 +37,8 @@ class Bot(commands.Bot):
         server = Thread(
             target=uvicorn.run,
             args=('verification_server.server:app',),
-            kwargs={'port': server_port, 'host': '0.0.0.0'}
+            kwargs={'port': server_port, 'host': '0.0.0.0'},
+            daemon=True,
         )
         server.start()
 
