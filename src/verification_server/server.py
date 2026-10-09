@@ -40,7 +40,7 @@ async def callback(request: Request, code: str, state: str):
     verification = await verification_table.get(discord_id)
 
     # Verify user link
-    if not verification and verification.uuid != uuid:
+    if not verification or verification.uuid != uuid:
         return templates.TemplateResponse(
             'error.html',
             {'request': request, 'message': 'Not a valid user or identifier'}
