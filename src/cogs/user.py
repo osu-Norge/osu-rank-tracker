@@ -228,16 +228,26 @@ class User(commands.Cog):
             )
 
         guild = await database.GuildTable().get(interaction.guild.id)
-        if (user := await database.UserTable().get(interaction.user.id)):
-            osu_user = await OsuApi.get_user(user.osu_id, Gamemode.from_id(user.gamemode))
-            if osu_user:
-                update = await OsuApi.update_user_rank(guild, interaction.user, osu_user,
-                                                       Gamemode.from_id(user.gamemode),
-                                                       reason='User forced rank update through command')
-                if update.get('success'):
-                    return await interaction.followup.send(embed=embed_templates.success(update['message']))
-                else:
-                    return await interaction.followup.send(embed=embed_templates.error_warning(update['message']))
+
+        user = await database.UserTable().get(interaction.user.id)
+        if not user:
+            return await interaction.followup.send(embed=embed_templates.error_warning('You are not registered with the bot'))
+
+        gamemode = Gamemode.from_id(user.gamemode)
+        osu_user = await OsuApi.get_user(user.osu_id, gamemode)
+        if not osu_user:
+            return await interaction.followup.send(embed=embed_templates.error_warning('Your registered osu! account could not be found. Try again later or re-register your account.'))
+
+        update = await OsuApi.update_user_rank(
+            guild,
+            interaction.user,
+            osu_user,
+            gamemode,
+            reason='User forced rank update through command'
+        )
+        if update.get('success'):
+            return await interaction.followup.send(embed=embed_templates.success(update['message']))
+        return await interaction.followup.send(embed=embed_templates.error_warning(update['message']))
 
 
 async def setup(bot: commands.Bot):
