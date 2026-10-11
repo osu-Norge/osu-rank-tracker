@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates  # noqa E402
 
 from cogs.utils import database  # noqa E402
 from cogs.utils.osu_api import Gamemode, OsuApi  # noqa E402
+from logger import verification_logger  # noqa E402
 
 app = FastAPI()
 
@@ -59,7 +60,7 @@ async def callback(request: Request, code: str, state: str):
     osu_id = osu_user['id']
     osu_name = osu_user['username']
 
-    print(discord_id, osu_id, gamemode.id)
+    verification_logger.info(f'User verified: {discord_id=}, {osu_id=}, {gamemode.id=}')
 
     # Enter user into database
     user = database.User(discord_id=int(discord_id), osu_id=osu_id, gamemode=gamemode.id)

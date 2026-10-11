@@ -11,6 +11,8 @@ import discord
 import yaml
 from expiringdict import ExpiringDict
 
+from logger import logger
+
 from . import database
 
 
@@ -50,7 +52,7 @@ class OsuApi:
         Requests a new Authorization Code from the osu!api v2
         """
 
-        print('Fetching new token...')
+        logger.info('Fetching new token...')
 
         async with aiohttp.ClientSession() as session:
             async with session.post('https://osu.ppy.sh/oauth/token', json=cls.token_payload) as r:

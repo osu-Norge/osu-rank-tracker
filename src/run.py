@@ -9,7 +9,7 @@ import yaml
 from discord.ext import commands
 
 import cogs.utils.database as database
-from logger import BotLogger
+from logger import logger
 from verification_server.server import app as verification_app
 
 with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
@@ -27,7 +27,7 @@ class Bot(commands.Bot):
             allowed_mentions=discord.AllowedMentions(everyone=False)
         )
 
-        self.logger = BotLogger().logger  # Initialize logger
+        self.logger = logger
 
         self.presence = config['bot'].get('presence', {})
         self.emoji = config.get('emoji', {})
@@ -67,10 +67,10 @@ async def on_ready():
     if not hasattr(bot, 'uptime'):
         bot.uptime = time()
 
-    print(f'Username:        {bot.user.name}')
-    print(f'ID:              {bot.user.id}')
-    print(f'Version:         {discord.__version__}')
-    print('.' * 50 + '\n')
+    bot.logger.info(f'Username:        {bot.user.name}')
+    bot.logger.info(f'ID:              {bot.user.id}')
+    bot.logger.info(f'Version:         {discord.__version__}')
+    bot.logger.info('.' * 50)
 
     # Set initial presence
     # Presence status
