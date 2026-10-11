@@ -231,12 +231,21 @@ class User(commands.Cog):
 
         user = await database.UserTable().get(interaction.user.id)
         if not user:
-            return await interaction.followup.send(embed=embed_templates.error_warning('You are not registered with the bot'))
+            return await interaction.followup.send(
+                embed=embed_templates.error_warning(
+                    'You are not registered with the bot'
+                )
+            )
 
         gamemode = Gamemode.from_id(user.gamemode)
         osu_user = await OsuApi.get_user(user.osu_id, gamemode)
         if not osu_user:
-            return await interaction.followup.send(embed=embed_templates.error_warning('Your registered osu! account could not be found. Try again later or re-register your account.'))
+            return await interaction.followup.send(
+                embed=embed_templates.error_warning(
+                    'Your registered osu! account could not be found. '
+                    'Try again later or re-register your account.'
+                )
+            )
 
         update = await OsuApi.update_user_rank(
             guild,
