@@ -89,8 +89,7 @@ class RankUpdate(commands.Cog):
         """
 
         self.bot.logger.info(f'Bot added to guild - {guild.id}')
-        guild = database.Guild(discord_id=guild.id)
-        await database.GuildTable().save(guild)
+        await database.GuildTable().get(guild.id)  # Creates the row if it doesn't exist
 
     @commands.Cog.listener('on_guild_remove')
     async def on_guild_remove(self: commands.Bot, guild: discord.Guild):
