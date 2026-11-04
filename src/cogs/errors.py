@@ -114,12 +114,13 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.NoPrivateMessage):
             try:
                 embed = embed_templates.error_warning('This command is only invokable in guilds')
-                return await ctx.reply(embed=embed)
+                await ctx.reply(embed=embed)
             except discord.errors.Forbidden:  # Thrown if bot is blocked by the user or if the user has closed their DMs
                 self.bot.logger.info('DM Blocked!')
+            return
 
         elif isinstance(error, commands.DisabledCommand):
-            pass
+            return
 
         elif isinstance(error, commands.CheckFailure):
             return
