@@ -1,6 +1,5 @@
 import asyncio
 import signal
-from codecs import open
 from os import listdir
 from threading import Thread
 from time import time
