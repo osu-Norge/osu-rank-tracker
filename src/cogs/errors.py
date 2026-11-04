@@ -93,13 +93,13 @@ class Errors(commands.Cog):
             return await ctx.send_help(ctx.command)
 
         elif isinstance(error, commands.BotMissingPermissions):
-            permissions = ', '.join(error.missing_perms)
+            permissions = ', '.join(error.missing_permissions)
             embed = embed_templates.error_warning('I\'m missing the following permissions:\n\n' +
                                                   f'```\n{permissions}\n```')
             return await ctx.reply(embed=embed)
 
         elif isinstance(error, commands.MissingPermissions):
-            permissions = ', '.join(error.missing_perms)
+            permissions = ', '.join(error.missing_permissions)
             embed = embed_templates.error_warning('You\'re missing the following permissions:\n\n' +
                                                   f'```\n{permissions}\n```')
             return await ctx.reply(embed=embed)
@@ -146,13 +146,13 @@ class Errors(commands.Cog):
         await self.on_app_command_completion(interaction, interaction.command)
 
         if isinstance(error, app_commands.BotMissingPermissions):
-            permissions = ', '.join(error.missing_perms)
+            permissions = ', '.join(error.missing_permissions)
             embed = embed_templates.error_warning('I\'m missing the following permissions:\n\n' +
                                                   f'```\n{permissions}\n```')
             return await interaction.response.send_message(embed=embed)
 
         elif isinstance(error, app_commands.MissingPermissions):
-            permissions = ', '.join(error.missing_perms)
+            permissions = ', '.join(error.missing_permissions)
             embed = embed_templates.error_warning('You\'re missing the following permissions:\n\n' +
                                                   f'```\n{permissions}\n```')
             return await interaction.response.send_message(embed=embed)
