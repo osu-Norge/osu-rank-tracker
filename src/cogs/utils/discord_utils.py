@@ -2,7 +2,7 @@ from contextlib import suppress
 
 import discord
 
-from cogs.utils import embed_templates
+from cogs.utils import embed_templates, misc_utils
 
 
 def get_color(discord_object: discord.User | discord.Member | discord.Role) -> discord.Color:
@@ -22,6 +22,34 @@ def get_color(discord_object: discord.User | discord.Member | discord.Role) -> d
         return discord_object.color
 
     return discord.Colour(0x99AAB5)
+
+
+async def send_paginated(interaction: discord.Interaction, title: str, lines: list[str]):
+    """
+    Send lines in an embed, split into pages with buttons to flip through them if they don't fit on one
+
+    Parameters
+    ----------
+    interaction (discord.Interaction): The slash command interaction
+    title (str): The embed title
+    lines (list[str]): The lines to send. Must not be empty
+    """
+
+    embeds = [
+        discord.Embed(color=interaction.client.user.color, title=title, description=page)
+        for page in misc_utils.paginate(lines)
+    ]
+
+    view = discord.utils.MISSING
+    if len(embeds) > 1:
+        for number, embed in enumerate(embeds, 1):
+            embed.set_footer(text=f'Page {number}/{len(embeds)}')
+        view = Scroller(embeds, interaction)
+
+    if interaction.response.is_done():
+        await interaction.followup.send(embed=embeds[0], view=view)
+    else:
+        await interaction.response.send_message(embed=embeds[0], view=view)
 
 
 class Scroller(discord.ui.View):

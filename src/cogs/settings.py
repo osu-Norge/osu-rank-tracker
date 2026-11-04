@@ -6,7 +6,7 @@ from discord import app_commands
 from discord.ext import commands
 from iso3166 import countries
 
-from cogs.utils import database, discord_utils, embed_templates, misc_utils
+from cogs.utils import database, discord_utils, embed_templates
 from cogs.utils.osu_api import Gamemode, OsuApi
 
 
@@ -197,22 +197,32 @@ class Settings(commands.Cog):
         interaction (discord.Interaction): The slash command interaction
         """
 
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(interaction.guild.id)
+        guild = await database.GuildTable().get(interaction.guild.id)
 
         if not guild.whitelisted_countries:
             embed = embed_templates.error_warning('No countries are whitelisted!')
             return await interaction.response.send_message(embed=embed)
 
-        guild.whitelisted_countries = [f'`{country}`' for country in guild.whitelisted_countries]
+        names = {code: country.name for code in guild.whitelisted_countries if (country := countries.get(code, None))}
+        lines = [f'{self._flag(code)} {names[code]} ({code})' for code in sorted(names, key=names.get)]
+        lines += [f'{code} (unknown country code)' for code in guild.whitelisted_countries if code not in names]
+        await discord_utils.send_paginated(interaction, f'Whitelisted countries ({len(lines)})', lines)
 
-        if len(guild.whitelisted_countries) > 2048:
-            embed = embed_templates.error_warning('Whitelist is too long to be displayed!')
-            return await interaction.response.send_message(embed=embed)
+    @staticmethod
+    def _flag(country_code: str) -> str:
+        """
+        Returns the flag emoji of a country
 
-        embed = discord.Embed(title='Whitelisted countries')
-        embed.description = ', '.join(guild.whitelisted_countries)
-        await interaction.response.send_message(embed=embed)
+        Parameters
+        ----------
+        country_code (str): The ISO 3166 alpha-2 country code
+
+        Returns
+        ----------
+        (str): The flag emoji, made of the two regional indicator symbols for the code
+        """
+
+        return ''.join(chr(0x1F1E6 + ord(letter) - ord('A')) for letter in country_code.upper())
 
     @blacklist_group.command(name='add')
     @app_commands.describe(osu_user='osu! username or user ID')
@@ -330,17 +340,7 @@ class Settings(commands.Cog):
         title = f'Blacklisted osu! users ({len(lines)})'
         if usernames is None:
             title += ' - couldn\'t look up usernames'
-        embeds = [
-            discord.Embed(color=interaction.client.user.color, title=title, description=page)
-            for page in misc_utils.paginate(lines)
-        ]
-
-        if len(embeds) == 1:
-            return await interaction.followup.send(embed=embeds[0])
-
-        for number, embed in enumerate(embeds, 1):
-            embed.set_footer(text=f'Page {number}/{len(embeds)}')
-        await interaction.followup.send(embed=embeds[0], view=discord_utils.Scroller(embeds, interaction))
+        await discord_utils.send_paginated(interaction, title, lines)
 
     class Roles(Enum):
         """
