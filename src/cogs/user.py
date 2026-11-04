@@ -48,6 +48,7 @@ class User(commands.Cog):
         await self.bot.wait_until_ready()
 
     @user_group.command()
+    @app_commands.describe(gamemode='The gamemode to track your rank in. Defaults to standard')
     async def register(self, interaction: discord.Interaction, gamemode: GamemodeOptions = GamemodeOptions.standard):
         """
         Connect your osu! account to the bot
@@ -112,6 +113,7 @@ class User(commands.Cog):
         )
 
     @user_group.command()
+    @app_commands.describe(user='The member to view. Defaults to you')
     async def view(self, interaction: discord.Interaction, user: discord.Member = None):
         """
         View your osu! account
@@ -176,6 +178,7 @@ class User(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @user_group.command(name='gamemode')
+    @app_commands.describe(gamemode='The gamemode to track your rank in')
     async def set_gamemode(self, interaction: discord.Interaction, gamemode: GamemodeOptions):
         """
         Set your osu! gamemode

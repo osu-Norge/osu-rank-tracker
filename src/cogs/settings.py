@@ -111,6 +111,7 @@ class Settings(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @whitelist_group.command(name='add')
+    @app_commands.describe(country_code='Country code or English name, e.g. NO, NOR or Norway')
     async def whitelist_add(self, interaction: discord.Interaction, country_code: str):
         """
         Add a country to the whitelist
@@ -147,6 +148,7 @@ class Settings(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @whitelist_group.command(name='remove')
+    @app_commands.describe(country_code='Country code or English name, e.g. NO, NOR or Norway')
     async def whitelist_remove(self, interaction: discord.Interaction, country_code: str):
         """
         Remove a country from the whitelist
@@ -207,6 +209,7 @@ class Settings(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @blacklist_group.command(name='add')
+    @app_commands.describe(osu_user='osu! username or user ID')
     async def blacklist_add(self, interaction: discord.Interaction, osu_user: str):
         """
         Add an osu user to the blacklist
@@ -244,6 +247,7 @@ class Settings(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @blacklist_group.command(name='remove')
+    @app_commands.describe(osu_user='osu! username or user ID')
     async def blacklist_remove(self, interaction: discord.Interaction, osu_user: str):
         """
         Remove an osu user from the blacklist
@@ -324,6 +328,10 @@ class Settings(commands.Cog):
         gamemode_mania = 'role_mania', 'osu!mania'
 
     @role_group.command(name='set')
+    @app_commands.describe(
+        type='What the role is for: a rank range, a gamemode, or given/removed on registration',
+        role='The Discord role to use'
+    )
     async def role_set(self, interaction: discord.Interaction, type: Roles, role: discord.Role):
         """
         Associate discord role with a role type in the database
@@ -338,6 +346,7 @@ class Settings(commands.Cog):
         await self._role_setter(interaction, role=role, role_variable=type.value[0], role_name=type.value[1])
 
     @role_group.command(name='remove')
+    @app_commands.describe(type='Which role to unset')
     async def role_remove(self, interaction: discord.Interaction, type: Roles):
         """
         Remove a role from the database
