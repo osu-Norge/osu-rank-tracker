@@ -141,7 +141,8 @@ class Errors(commands.Cog):
         """
 
         # Log command usage, just in case
-        await self.on_app_command_completion(interaction, interaction.command)
+        if interaction.command:
+            await self.on_app_command_completion(interaction, interaction.command)
 
         if isinstance(error, app_commands.BotMissingPermissions):
             permissions = ', '.join(error.missing_permissions)
