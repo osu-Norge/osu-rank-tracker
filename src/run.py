@@ -157,4 +157,4 @@ async def on_ready():
     )
 
 
-bot.run(config['bot']['token'], reconnect=True)
+bot.run(config['bot']['token'], reconnect=True, log_handler=None)  # logger.py already logs to the console

@@ -1,6 +1,7 @@
 *.yaml
 *.pyc
 *.log
+logs/
 __pycache__/
 .vscode/
 .idea/

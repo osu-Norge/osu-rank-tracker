@@ -41,6 +41,8 @@ Run `docker compose up` and you should be good!
 
 The config is mounted into the container from `src/config/config.yaml`, not copied into the image, so changing it only needs a restart.
 
+The bot logs to the console, which `docker compose logs` shows, and to `logs/discord.log`, which is kept outside the container.
+
 If you have changed the specified port in the config remember to reflect that in the docker-compose file.
 
 ### Option 2 - Manual
@@ -61,7 +63,7 @@ uv run src/run.py
 
 Set `config_mode` to anything other than `prod`, e.g. `dev`, and `dev_guild_id` to the ID of your test server. Slash commands are then only synced to that server instead of globally.
 
-Use a separate bot application, with its own token, for development. If you run dev mode with the production bot's token, every command shows up twice in the test server: once as a global command and once as a server command. The bot logs a warning when this happens, and prod mode removes the test server's commands again if `dev_guild_id` is set. To check which application you're running, compare the bot ID logged to `discord.log` at startup. If Discord still shows old commands, press Ctrl+R to reload it.
+Use a separate bot application, with its own token, for development. If you run dev mode with the production bot's token, every command shows up twice in the test server: once as a global command and once as a server command. The bot logs a warning when this happens, and prod mode removes the test server's commands again if `dev_guild_id` is set. To check which application you're running, compare the bot ID logged at startup. If Discord still shows old commands, press Ctrl+R to reload it.
 
 ## Invite
 
