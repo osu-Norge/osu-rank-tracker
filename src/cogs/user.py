@@ -7,6 +7,7 @@ from discord.ext import commands, tasks
 
 import cogs.utils.database as database
 from cogs.utils import embed_templates
+from cogs.utils.misc_utils import log_errors
 from cogs.utils.osu_api import Gamemode, GamemodeOptions, OsuApi
 
 
@@ -26,6 +27,7 @@ class User(commands.Cog):
         self.verification_cleanup.cancel()
 
     @tasks.loop(minutes=2)
+    @log_errors
     async def verification_cleanup(self):
         """
         Clean up any pending verifications that have expired. This is in case the register command fails to do so

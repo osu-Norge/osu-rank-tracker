@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands, tasks
 
 import cogs.utils.database as database
+from cogs.utils.misc_utils import log_errors
 from cogs.utils.osu_api import Gamemode, OsuApi
 
 
@@ -21,6 +22,7 @@ class RankUpdate(commands.Cog):
         self.update_ranks.cancel()
 
     @tasks.loop(time=time(hour=0, minute=0))
+    @log_errors
     async def update_ranks(self):
         """
         Update the ranks of all users in the database
