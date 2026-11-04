@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "002278fd66d7dab6864cda05913c8e44bf3fb4a9",
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "include-v-in-tag": false,
+      "extra-files": [
+        {
+          "type": "toml",
+          "path": "uv.lock",
+          "jsonpath": "$.package[?(@.name.value=='osu-rank-tracker')].version"
+        }
+      ]
+    }
+  }
+}
