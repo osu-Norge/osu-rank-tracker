@@ -46,6 +46,34 @@ class OsuApi:
     })
 
     @classmethod
+    async def check_credentials(cls) -> None:
+        """
+        Checks that the osu! API credentials in the config are filled in and accepted by osu!.
+        Raises RuntimeError with an explanation if they aren't. If osu! can't be reached, only logs a warning
+        """
+
+        missing = [key for key in ('client_id', 'client_secret', 'redirect_uri') if not cls.credntials.get(key)]
+        if missing:
+            keys = ', '.join(f'api.osu.{key}' for key in missing)
+            message = f'The osu! API credentials are missing in config.yaml: {keys}'
+            logger.critical(message)
+            raise RuntimeError(message)
+
+        try:
+            await cls.renew_token()
+        except aiohttp.ClientResponseError as error:
+            if error.status not in (400, 401):
+                logger.warning(f'Could not check the osu! API credentials, osu! responded with {error.status}')
+                return
+
+            message = ('osu! rejected the API credentials in config.yaml (api.osu.client_id and '
+                       'api.osu.client_secret). Check them at https://osu.ppy.sh/home/account/edit#oauth')
+            logger.critical(message)
+            raise RuntimeError(message) from error
+        except (aiohttp.ClientError, TimeoutError) as error:
+            logger.warning(f'Could not check the osu! API credentials, osu! could not be reached: {error!r}')
+
+    @classmethod
     async def renew_token(cls) -> None:
         """
         Requests a new Authorization Code from the osu!api v2

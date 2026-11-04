@@ -65,6 +65,7 @@ class Bot(commands.Bot):
         # One HTTP session for the whole bot, so connections are reused
         self.http_session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
         OsuApi.session = self.http_session
+        await OsuApi.check_credentials()
 
         await database.Database.open(config['database'])
         await database.Database().init_db()
