@@ -1,8 +1,6 @@
-from abc import abstractmethod
-from dataclasses import astuple, dataclass
+from dataclasses import astuple, dataclass, fields
 from datetime import datetime
 
-import psycopg
 from psycopg_pool import AsyncConnectionPool
 
 
@@ -173,15 +171,20 @@ class Table(Database):
         dataclass: A dataclass object
         """
 
-        select_query = f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s'
-        db_data = await self.fetchone(select_query, (discord_id,))
+        db_data = await self.fetchone(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
 
         if not db_data:
             if not self.create_row_on_none:
                 return None
 
-            await self.execute(f'INSERT INTO public.{self.table_name} VALUES (%s)', (discord_id,))
-            db_data = await self.fetchone(select_query, (discord_id,))
+            # The no-op update makes RETURNING give the row even if it was created in the meantime
+            db_data = await self.fetchone(
+                f"""
+                INSERT INTO public.{self.table_name} (discord_id) VALUES (%s)
+                ON CONFLICT (discord_id) DO UPDATE SET discord_id = EXCLUDED.discord_id
+                RETURNING *
+                """, (discord_id,)
+            )
 
         return self.dataclass(*db_data)
 
@@ -207,21 +210,24 @@ class Table(Database):
 
         return (await self.fetchone(f'SELECT COUNT(*) FROM public.{self.table_name}'))[0]
 
-    @abstractmethod
     async def save(self, data: dataclass) -> None:
         """
-        Saves a row to the database
+        Saves a row to the database, replacing the existing row with the same Discord ID
 
         Parameters
         ----------
         data (dataclass): A dataclass object
-        Raises
-        ----------
-        NotImplementedError: If the child class does not implement this method
         """
 
-        # Leave implementation to the child class
-        raise NotImplementedError()
+        columns = [field.name for field in fields(data)]
+        await self.execute(
+            f"""
+            INSERT INTO public.{self.table_name} ({', '.join(columns)})
+            VALUES ({', '.join(['%s'] * len(columns))})
+            ON CONFLICT (discord_id) DO UPDATE SET
+            {', '.join(f'{column} = EXCLUDED.{column}' for column in columns if column != 'discord_id')}
+            """, astuple(data)
+        )
 
     async def delete(self, discord_id: int) -> None:
         """
@@ -259,53 +265,6 @@ class GuildTable(Table):
     def __init__(self):
         super().__init__(table_name='guild', dataclass=Guild, create_row_on_none=True)
 
-    async def save(self, guild: Guild) -> None:
-        """
-        Save a guild object in the database
-
-        Parameters
-        ----------
-        guild (Guild): A guild object
-        """
-
-        values = astuple(guild)
-
-        try:
-            await self.execute(
-                f"""
-                INSERT INTO {self.table_name}
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, values)
-        except psycopg.errors.UniqueViolation:
-            pass
-        else:
-            return
-
-        values = values + (guild.discord_id,)
-
-        await self.execute(
-            f"""
-            UPDATE {self.table_name} SET
-            discord_id = %s,
-            whitelisted_countries = %s,
-            blacklisted_osu_users = %s,
-            role_remove = %s,
-            role_add = %s,
-            role_1_digit = %s,
-            role_2_digit = %s,
-            role_3_digit = %s,
-            role_4_digit = %s,
-            role_5_digit = %s,
-            role_6_digit = %s,
-            role_7_digit = %s,
-            role_standard = %s,
-            role_taiko = %s,
-            role_ctb = %s,
-            role_mania = %s
-            WHERE discord_id = %s
-            """, values
-        )
-
 
 @dataclass
 class User:
@@ -317,36 +276,6 @@ class User:
 class UserTable(Table):
     def __init__(self):
         super().__init__(table_name='user', dataclass=User, create_row_on_none=False)
-
-    async def save(self, user: User) -> None:
-        """
-        Save a user object in the database
-
-        Parameters
-        ----------
-        user (User): A user object
-        """
-
-        values = astuple(user)
-
-        try:
-            await self.execute(f'INSERT INTO public.{self.table_name} VALUES (%s, %s, %s)', values)
-        except psycopg.errors.UniqueViolation:
-            pass
-        else:
-            return
-
-        values = astuple(user) + (user.discord_id,)
-
-        await self.execute(
-            f"""
-            UPDATE public.{self.table_name} SET
-            discord_id = %s,
-            osu_id = %s,
-            gamemode = %s
-            WHERE discord_id = %s
-            """, values
-        )
 
 
 @dataclass
@@ -373,11 +302,8 @@ class VerificationTable(Table):
         bool: True if the verification was inserted, False if it already exists
         """
 
-        values = astuple(verification)
-
-        try:
-            await self.execute(f'INSERT INTO {self.table_name} VALUES (%s, %s, %s)', values)
-        except psycopg.errors.UniqueViolation:
-            return False
-
-        return True
+        inserted = await self.execute(
+            f'INSERT INTO public.{self.table_name} VALUES (%s, %s, %s) ON CONFLICT (discord_id) DO NOTHING',
+            astuple(verification)
+        )
+        return inserted == 1
