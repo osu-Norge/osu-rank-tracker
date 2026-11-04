@@ -4,3 +4,5 @@ services:
     build: .
     ports:
       - 6969:6969
+    volumes:
+      - ./src/config/config.yaml:/app/src/config/config.yaml:ro

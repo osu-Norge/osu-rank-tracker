@@ -32,7 +32,9 @@ Make a copy of [config.yaml.example](src/config/config.yaml.example) and remove 
 
 ### Option 1 - Docker
 
-Run `docker-compose up` and you should be good!
+Run `docker compose up` and you should be good!
+
+The config is mounted into the container from `src/config/config.yaml`, not copied into the image, so changing it only needs a restart.
 
 If you have changed the specified port in the config remember to reflect that in the docker-compose file.
 
