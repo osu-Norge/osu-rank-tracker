@@ -263,27 +263,33 @@ class Settings(commands.Cog):
         osu_user (str): The osu! user to remove from the blacklist
         """
 
-        user = await OsuApi.get_user(osu_user, Gamemode.from_name('standard'))
-        if not user:
-            embed = embed_templates.error_warning('Invalid osu! user')
-            return await interaction.response.send_message(embed=embed)
-
-        user_id = user.get('id')
-        username = user.get('username')
-
         guild_table = database.GuildTable()
         guild = await guild_table.get(interaction.guild.id)
+        blacklist = guild.blacklisted_osu_users or []
 
-        if not guild.blacklisted_osu_users or user_id not in guild.blacklisted_osu_users:
+        # Remove blacklisted IDs without looking them up, as restricted or deleted accounts can't be looked up
+        if osu_user.isdigit() and int(osu_user) in blacklist:
+            user_id, username = int(osu_user), None
+        else:
+            user = await OsuApi.get_user(osu_user, Gamemode.from_name('standard'))
+            if not user:
+                embed = embed_templates.error_warning('Invalid osu! user')
+                return await interaction.response.send_message(embed=embed)
+
+            user_id = user.get('id')
+            username = user.get('username')
+
+        if user_id not in blacklist:
             embed = embed_templates.error_warning('User is not blacklisted!')
             return await interaction.response.send_message(embed=embed)
 
-        guild.blacklisted_osu_users.remove(user_id)
+        blacklist.remove(user_id)
+        guild.blacklisted_osu_users = blacklist
         await guild_table.save(guild)
 
-        embed = embed_templates.success(
-            f'[{username}](https://osu.ppy.sh/users/{user_id}) ({user_id}) is no longer blacklisted!'
-        )
+        name = f'[{username}](https://osu.ppy.sh/users/{user_id}) ({user_id})' if username else \
+            f'[{user_id}](https://osu.ppy.sh/users/{user_id})'
+        embed = embed_templates.success(f'{name} is no longer blacklisted!')
         await interaction.response.send_message(embed=embed)
 
     @blacklist_group.command(name='show')
