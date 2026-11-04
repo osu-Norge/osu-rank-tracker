@@ -5,7 +5,6 @@ from discord import app_commands
 from discord.ext import commands
 
 from cogs.utils import embed_templates
-from cogs.utils.misc_utils import ignore_exception
 
 
 class Errors(commands.Cog):
@@ -69,9 +68,9 @@ class Errors(commands.Cog):
         error (commands.CommandError): Eror context object
         """
 
-        # Reset cooldown if command throws AttributeError
-        with ignore_exception(AttributeError):
-            self.bot.get_command(f'{ctx.command}').reset_cooldown(ctx)
+        # Failed invocations shouldn't count towards the cooldown, but the cooldown error itself must not reset it
+        if ctx.command and not isinstance(error, commands.CommandOnCooldown):
+            ctx.command.reset_cooldown(ctx)
 
         # Ignore command's own error handling
         if hasattr(ctx.command, 'on_error'):
@@ -89,7 +88,6 @@ class Errors(commands.Cog):
             commands.BadArgument
         )
         if isinstance(error, send_help):
-            self.bot.get_command(f'{ctx.command}').reset_cooldown(ctx)
             return await ctx.send_help(ctx.command)
 
         elif isinstance(error, commands.BotMissingPermissions):
