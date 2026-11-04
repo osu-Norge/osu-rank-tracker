@@ -10,7 +10,7 @@ import uvicorn
 import yaml
 from discord.ext import commands
 
-import cogs.utils.database as database
+from cogs.utils import database
 from cogs.utils.osu_api import OsuApi
 from logger import logger
 from verification_server.server import app as verification_app

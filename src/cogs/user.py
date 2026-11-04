@@ -5,8 +5,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-import cogs.utils.database as database
-from cogs.utils import embed_templates
+from cogs.utils import database, embed_templates
 from cogs.utils.misc_utils import log_errors
 from cogs.utils.osu_api import Gamemode, GamemodeOptions, OsuApi
 

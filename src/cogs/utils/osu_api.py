@@ -10,9 +10,8 @@ import discord
 import yaml
 from expiringdict import ExpiringDict
 
+from cogs.utils import database
 from logger import logger
-
-from . import database
 
 
 class OsuApi:
