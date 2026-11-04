@@ -1,6 +1,7 @@
 from dataclasses import astuple, dataclass, fields
 from datetime import datetime
 
+from psycopg import AsyncConnection
 from psycopg_pool import AsyncConnectionPool
 
 
@@ -25,10 +26,24 @@ class Database:
                 'password': config['password'],
                 'autocommit': True,
             },
+            configure=cls._configure_connection,
             check=AsyncConnectionPool.check_connection,
             open=False,
         )
         await cls.pool.open(wait=True, timeout=30)
+
+    @staticmethod
+    async def _configure_connection(connection: AsyncConnection) -> None:
+        """
+        Sets up a new connection in the pool. Timestamps are stored without a time zone, so Postgres has to convert
+        them in UTC, which the code compares them against, rather than in the server's time zone
+
+        Parameters
+        ----------
+        connection (AsyncConnection): The new connection
+        """
+
+        await connection.execute("SET timezone TO 'UTC'")
 
     @classmethod
     async def close(cls) -> None:
