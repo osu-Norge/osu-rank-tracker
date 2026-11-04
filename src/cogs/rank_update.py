@@ -30,7 +30,7 @@ class RankUpdate(commands.Cog):
 
         self.update_ranks.cancel()
 
-    @tasks.loop(time=time(hour=0, minute=0))
+    @tasks.loop(time=[time(hour=0, minute=0), time(hour=12, minute=0)])
     @log_errors
     async def update_ranks(self):
         """
