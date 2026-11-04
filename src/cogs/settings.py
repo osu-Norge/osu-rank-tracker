@@ -362,36 +362,38 @@ class Settings(commands.Cog):
         gamemode_mania = 'role_mania', 'osu!mania'
 
     @role_group.command(name='set')
+    @app_commands.rename(role_type='type')
     @app_commands.describe(
-        type='What the role is for: a rank range, a gamemode, or given/removed on registration',
+        role_type='What the role is for: a rank range, a gamemode, or given/removed on registration',
         role='The Discord role to use'
     )
-    async def role_set(self, interaction: discord.Interaction, type: Roles, role: discord.Role):
+    async def role_set(self, interaction: discord.Interaction, role_type: Roles, role: discord.Role):
         """
         Associate discord role with a role type in the database
 
         Parameters
         ----------
         interaction (discord.Interaction): The slash command interaction
-        type (Roles): The type of role to set
+        role_type (Roles): The type of role to set
         role (discord.Role): The role to set
         """
 
-        await self._role_setter(interaction, role=role, role_variable=type.value[0], role_name=type.value[1])
+        await self._role_setter(interaction, role=role, role_variable=role_type.value[0], role_name=role_type.value[1])
 
     @role_group.command(name='remove')
-    @app_commands.describe(type='Which role to unset')
-    async def role_remove(self, interaction: discord.Interaction, type: Roles):
+    @app_commands.rename(role_type='type')
+    @app_commands.describe(role_type='Which role to unset')
+    async def role_remove(self, interaction: discord.Interaction, role_type: Roles):
         """
         Remove a role from the database
 
         Parameters
         ----------
         interaction (discord.Interaction): The slash command interaction
-        type (Roles): The type of role to remove
+        role_type (Roles): The type of role to remove
         """
 
-        await self._role_setter(interaction, role=None, role_variable=type.value[0], role_name=type.value[1])
+        await self._role_setter(interaction, role=None, role_variable=role_type.value[0], role_name=role_type.value[1])
 
     @role_group.command(name='show')
     async def role_show(self, interaction: discord.Interaction):
