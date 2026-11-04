@@ -1,3 +1,5 @@
+import asyncio
+import signal
 from codecs import open
 from os import listdir
 from threading import Thread
@@ -45,11 +47,17 @@ class Bot(commands.Bot):
         server.start()
 
     async def setup_hook(self):
+        # Shut down cleanly on SIGTERM
+        try:
+            asyncio.get_running_loop().add_signal_handler(signal.SIGTERM, self._on_sigterm)
+        except NotImplementedError:
+            pass  # Not supported on Windows
+
         # Load cogs
         for file in listdir('./src/cogs'):
             if file.endswith('.py'):
                 name = file[:-3]
-                await bot.load_extension(f'cogs.{name}')
+                await self.load_extension(f'cogs.{name}')
 
         # Sync slash commands to Discord
         if config.get('config_mode') == 'prod':
@@ -75,6 +83,10 @@ class Bot(commands.Bot):
                     f'This application has {len(global_commands)} global commands, so commands will show up twice '
                     'in the dev guild. Use a separate bot application for development'
                 )
+
+    def _on_sigterm(self):
+        self.logger.info('Received SIGTERM, shutting down...')
+        self._shutdown_task = asyncio.create_task(self.close())  # Keep a reference so the task isn't garbage collected
 
 
 bot = Bot()
