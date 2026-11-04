@@ -221,12 +221,12 @@ class Settings(commands.Cog):
         """
 
         user = await OsuApi.get_user(osu_user, Gamemode.from_name('standard'))
-        user_id = user.get('id')
-        username = user.get('username')
-
         if not user:
             embed = embed_templates.error_warning('Invalid osu! user')
             return await interaction.response.send_message(embed=embed)
+
+        user_id = user.get('id')
+        username = user.get('username')
 
         guild_table = database.GuildTable()
         guild = await guild_table.get(interaction.guild.id)
@@ -259,12 +259,12 @@ class Settings(commands.Cog):
         """
 
         user = await OsuApi.get_user(osu_user, Gamemode.from_name('standard'))
-        user_id = user.get('id')
-        username = user.get('username')
-
         if not user:
             embed = embed_templates.error_warning('Invalid osu! user')
             return await interaction.response.send_message(embed=embed)
+
+        user_id = user.get('id')
+        username = user.get('username')
 
         guild_table = database.GuildTable()
         guild = await guild_table.get(interaction.guild.id)
