@@ -56,14 +56,12 @@ class OsuApi:
         logger.info('Fetching new token...')
 
         async with cls.session.post('https://osu.ppy.sh/oauth/token', json=cls.token_payload) as r:
-            if r.status == 200:
-                data = await r.json()
+            r.raise_for_status()
+            data = await r.json()
 
-                cls.cache.update({
-                    'token': data.get('access_token')
-                })
-            else:
-                raise aiohttp.HTTPException(response=r.status, message=r.reason)
+            cls.cache.update({
+                'token': data.get('access_token')
+            })
 
     @classmethod
     async def get_user(cls, user: str, gamemode: Gamemode) -> dict | None:
