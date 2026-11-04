@@ -16,7 +16,6 @@ class RankUpdate(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.update_ranks.start()
-        self.rank_cache = {}
 
     def cog_unload(self):
         self.update_ranks.cancel()
@@ -35,6 +34,9 @@ class RankUpdate(commands.Cog):
 
         sleep_time = 1 / 10  # Max 10 requests per second. Discord allows 50 and osu allows 20. We're playing it safe
 
+        # osu! profiles fetched during this update, so members of several servers are only fetched once
+        osu_users = {}
+
         for guild in await guild_table.get_all():
             self.bot.logger.info(f'Updating ranks for guild - {guild.discord_id}...')
 
@@ -49,23 +51,21 @@ class RankUpdate(commands.Cog):
 
                 gamemode = Gamemode.from_id(user.gamemode)
 
-                # If rank is not cached, fetch it and cache it
-                if not (rank := self.rank_cache.get(user.discord_id)):
-                    # Get osu user and verify it exists
+                # Get osu user and verify it exists
+                if not (osu_user := osu_users.get(user.discord_id)):
                     if not (osu_user := await OsuApi.get_user(user.osu_id, gamemode)):
                         continue
-                    # Get the user's rank and verify it exists
-                    if not (rank := osu_user.get('statistics', {}).get('global_rank')):
-                        continue
-                    self.rank_cache[user.discord_id] = rank
+                    osu_users[user.discord_id] = osu_user
+
+                # Skip users without a rank
+                if not osu_user.get('statistics', {}).get('global_rank'):
+                    continue
 
                 # Update the user's rank
                 await OsuApi.update_user_rank(guild, member, osu_user, gamemode,
                                               reason='Automatic rank update based on osu! rank')
 
                 await asyncio.sleep(sleep_time)
-
-        self.rank_cache = {}  # Clear the rank cache
 
         self.bot.logger.info("Rank update complete!")
 
