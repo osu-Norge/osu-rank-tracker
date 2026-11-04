@@ -1,5 +1,3 @@
-from enum import Enum
-
 import aiohttp
 import discord
 from discord import app_commands
@@ -49,9 +47,9 @@ class Settings(commands.Cog):
         Parameters
         ----------
         interaction (discord.Interaction): The slash command interaction
-        role (str): The user inputted role name, id or mention
+        role (discord.Role | None): The role to set, or None to reset it
         role_variable (str): The database column name
-        role_name (str): The role name that will be displayed in the confirmation message on Discord
+        role_name (str): The name of the role setting, as shown in Discord
         """
 
         guild_table = database.GuildTable()
@@ -65,10 +63,10 @@ class Settings(commands.Cog):
         await guild_table.save(guild)
 
         if not role:
-            embed = embed_templates.success(f'The {role_name} role has been reset!')
+            embed = embed_templates.success(f'**{role_name}** no longer has a role')
             return await interaction.response.send_message(embed=embed)
 
-        embed = embed_templates.success(f'{role.mention} has been set as the {role_name} role!')
+        embed = embed_templates.success(f'{role.mention} is now set for **{role_name}**')
         await interaction.response.send_message(embed=embed)
 
     @app_commands.guild_only()
@@ -342,58 +340,59 @@ class Settings(commands.Cog):
             title += ' - couldn\'t look up usernames'
         await discord_utils.send_paginated(interaction, title, lines)
 
-    class Roles(Enum):
-        """
-        List of roles that can be set in the database. Serves as autocomplete for the role command
-        """
-
-        on_registration_add = 'role_add', 'addrole'
-        on_registration_remove = 'role_remove', 'removerole'
-        digit_1 = 'role_1_digit', '1 digit'
-        digit_2 = 'role_2_digit', '2 digit'
-        digit_3 = 'role_3_digit', '3 digit'
-        digit_4 = 'role_4_digit', '4 digit'
-        digit_5 = 'role_5_digit', '5 digit'
-        digit_6 = 'role_6_digit', '6 digit'
-        digit_7 = 'role_7_digit', '7 digit'
-        gamemode_standard = 'role_standard', 'osu!standard'
-        gamemode_taiko = 'role_taiko', 'osu!taiko'
-        gamemode_ctb = 'role_ctb', 'osu!catch'
-        gamemode_mania = 'role_mania', 'osu!mania'
+    # The role settings by database column, with the names shown in Discord
+    ROLE_TYPES = {
+        'role_add': 'Given on registration',
+        'role_remove': 'Removed on registration',
+        'role_1_digit': '1-digit rank (#1–9)',
+        'role_2_digit': '2-digit rank (#10–99)',
+        'role_3_digit': '3-digit rank (#100–999)',
+        'role_4_digit': '4-digit rank (#1,000–9,999)',
+        'role_5_digit': '5-digit rank (#10,000–99,999)',
+        'role_6_digit': '6-digit rank (#100,000–999,999)',
+        'role_7_digit': '7-digit rank (#1,000,000+)',
+        'role_standard': 'osu!standard players',
+        'role_taiko': 'osu!taiko players',
+        'role_ctb': 'osu!catch players',
+        'role_mania': 'osu!mania players',
+    }
+    ROLE_TYPE_CHOICES = [app_commands.Choice(name=name, value=column) for column, name in ROLE_TYPES.items()]
 
     @role_group.command(name='set')
     @app_commands.rename(role_type='type')
+    @app_commands.choices(role_type=ROLE_TYPE_CHOICES)
     @app_commands.describe(
         role_type='What the role is for: a rank range, a gamemode, or given/removed on registration',
         role='The Discord role to use'
     )
-    async def role_set(self, interaction: discord.Interaction, role_type: Roles, role: discord.Role):
+    async def role_set(self, interaction: discord.Interaction, role_type: app_commands.Choice[str], role: discord.Role):
         """
         Associate discord role with a role type in the database
 
         Parameters
         ----------
         interaction (discord.Interaction): The slash command interaction
-        role_type (Roles): The type of role to set
+        role_type (app_commands.Choice[str]): The role setting to change
         role (discord.Role): The role to set
         """
 
-        await self._role_setter(interaction, role=role, role_variable=role_type.value[0], role_name=role_type.value[1])
+        await self._role_setter(interaction, role=role, role_variable=role_type.value, role_name=role_type.name)
 
     @role_group.command(name='remove')
     @app_commands.rename(role_type='type')
+    @app_commands.choices(role_type=ROLE_TYPE_CHOICES)
     @app_commands.describe(role_type='Which role to unset')
-    async def role_remove(self, interaction: discord.Interaction, role_type: Roles):
+    async def role_remove(self, interaction: discord.Interaction, role_type: app_commands.Choice[str]):
         """
         Remove a role from the database
 
         Parameters
         ----------
         interaction (discord.Interaction): The slash command interaction
-        role_type (Roles): The type of role to remove
+        role_type (app_commands.Choice[str]): The role setting to reset
         """
 
-        await self._role_setter(interaction, role=None, role_variable=role_type.value[0], role_name=role_type.value[1])
+        await self._role_setter(interaction, role=None, role_variable=role_type.value, role_name=role_type.name)
 
     @role_group.command(name='show')
     async def role_show(self, interaction: discord.Interaction):
@@ -409,11 +408,11 @@ class Settings(commands.Cog):
         guild = await guild_table.get(interaction.guild.id)
 
         embed = discord.Embed(title='Role associations')
-        for role in self.Roles:
-            role_id = getattr(guild, role.value[0])
+        for column, name in self.ROLE_TYPES.items():
+            role_id = getattr(guild, column)
             if role_id:
                 discord_role = interaction.guild.get_role(role_id)
-                embed.add_field(name=role.value[1], value=discord_role.mention)
+                embed.add_field(name=name, value=discord_role.mention)
 
         await interaction.response.send_message(embed=embed)
 
