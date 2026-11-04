@@ -1,8 +1,12 @@
 from dataclasses import astuple, dataclass, fields
 from datetime import datetime
+from pathlib import Path
 
 from psycopg import AsyncConnection
 from psycopg_pool import AsyncConnectionPool
+
+MIGRATIONS_DIR = './src/migrations'
+MIGRATION_LOCK_ID = 4_161_947_312  # Any number, as long as nothing else uses it as an advisory lock
 
 
 class Database:
@@ -108,51 +112,53 @@ class Database:
             cursor = await connection.execute(query, params)
             return await cursor.fetchall()
 
-    async def init_db(self) -> None:
+    async def migrate(self) -> list[str]:
         """
-        Creates all the necessary tables in order for the bot to function
+        Applies the migrations in src/migrations that haven't been applied yet, in order of their numbers.
+        Each one runs in a transaction, so a migration that fails leaves the database as it was before it
+
+        Returns
+        ----------
+        (list[str]): The names of the migrations that were applied
         """
 
-        await self.execute(
-            """
-            CREATE TABLE IF NOT EXISTS public.guild (
-                discord_id bigint NOT NULL PRIMARY KEY,
-                whitelisted_countries char(2)[],
-                blacklisted_osu_users integer[],
-                role_remove bigint,
-                role_add bigint,
-                role_1_digit bigint,
-                role_2_digit bigint,
-                role_3_digit bigint,
-                role_4_digit bigint,
-                role_5_digit bigint,
-                role_6_digit bigint,
-                role_7_digit bigint,
-                role_standard bigint,
-                role_taiko bigint,
-                role_ctb bigint,
-                role_mania bigint
-            )
-            """
-        )
-        await self.execute(
-            """
-            CREATE TABLE IF NOT EXISTS public.user (
-                discord_id bigint NOT NULL PRIMARY KEY,
-                osu_id integer NOT NULL,
-                gamemode smallint NOT NULL
-            )
-            """
-        )
-        await self.execute(
-            """
-            CREATE TABLE IF NOT EXISTS public.verification (
-                discord_id bigint NOT NULL PRIMARY KEY,
-                uuid TEXT NOT NULL,
-                expires TIMESTAMP
-            )
-            """
-        )
+        migrations = {}
+        for path in sorted(Path(MIGRATIONS_DIR).glob('*.sql')):
+            version = int(path.name.split('_', 1)[0])
+            if version in migrations:
+                raise RuntimeError(f'Two migrations have the number {version}: {migrations[version].name}, {path.name}')
+            migrations[version] = path
+
+        applied = []
+        async with self.pool.connection() as connection:
+            # Keep two instances of the bot from migrating the same database at once
+            await connection.execute('SELECT pg_advisory_lock(%s)', (MIGRATION_LOCK_ID,))
+            try:
+                await connection.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS public.schema_migrations (
+                        version integer NOT NULL PRIMARY KEY,
+                        name text NOT NULL,
+                        applied_at timestamptz NOT NULL DEFAULT now()
+                    )
+                    """
+                )
+                cursor = await connection.execute('SELECT version FROM public.schema_migrations')
+                done = {row[0] for row in await cursor.fetchall()}
+
+                for version, path in migrations.items():
+                    if version in done:
+                        continue
+                    async with connection.transaction():
+                        await connection.execute(path.read_text(encoding='utf-8'))
+                        await connection.execute(
+                            'INSERT INTO public.schema_migrations (version, name) VALUES (%s, %s)', (version, path.stem)
+                        )
+                    applied.append(path.stem)
+            finally:
+                await connection.execute('SELECT pg_advisory_unlock(%s)', (MIGRATION_LOCK_ID,))
+
+        return applied
 
     async def get_version(self) -> str:
         """
@@ -180,6 +186,8 @@ class Table(Database):
         self.table_name = table_name
         self.dataclass = dataclass
         self.create_row_on_none = create_row_on_none
+        # Name the columns instead of selecting *, so columns the code doesn't know about can't break the dataclass
+        self.columns = ', '.join(field.name for field in fields(dataclass))
 
     async def get(self, discord_id: int) -> dataclass | None:
         """
@@ -194,7 +202,9 @@ class Table(Database):
         (dataclass | None): A dataclass object, or None if the row doesn't exist and create_row_on_none is False
         """
 
-        db_data = await self.fetchone(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
+        db_data = await self.fetchone(
+            f'SELECT {self.columns} FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,)
+        )
 
         if not db_data:
             if not self.create_row_on_none:
@@ -205,7 +215,7 @@ class Table(Database):
                 f"""
                 INSERT INTO public.{self.table_name} (discord_id) VALUES (%s)
                 ON CONFLICT (discord_id) DO UPDATE SET discord_id = EXCLUDED.discord_id
-                RETURNING *
+                RETURNING {self.columns}
                 """, (discord_id,)
             )
 
@@ -220,7 +230,7 @@ class Table(Database):
         (tuple[dataclass]): A tuple of dataclass objects
         """
 
-        db_data = await self.fetchall(f'SELECT * FROM public.{self.table_name}')
+        db_data = await self.fetchall(f'SELECT {self.columns} FROM public.{self.table_name}')
         return tuple(self.dataclass(*data) for data in db_data)
 
     async def count(self) -> int:
@@ -338,7 +348,9 @@ class VerificationTable(Table):
         """
 
         inserted = await self.execute(
-            f'INSERT INTO public.{self.table_name} VALUES (%s, %s, %s) ON CONFLICT (discord_id) DO NOTHING',
-            astuple(verification)
+            f'''
+            INSERT INTO public.{self.table_name} ({self.columns}) VALUES (%s, %s, %s)
+            ON CONFLICT (discord_id) DO NOTHING
+            ''', astuple(verification)
         )
         return inserted == 1

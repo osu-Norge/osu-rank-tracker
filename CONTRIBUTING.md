@@ -45,3 +45,10 @@ Some parameters appear everywhere, and are described the same way each time:
 - `interaction (discord.Interaction): The slash command interaction`
 - `ctx (commands.Context): The command context`
 - `bot (commands.Bot): The bot instance`
+
+## Database changes
+
+Never change the tables by editing existing SQL. Instead, add a new file to [src/migrations](src/migrations), numbered one higher than the last one, e.g. `0003_add_osu_username.sql`. The bot applies new migrations in order when it starts, each in a transaction, and records them in the `schema_migrations` table.
+
+- Don't edit a migration once it's been released. Databases that already applied it won't run it again.
+- When you add or remove a column, update the matching dataclass in [database.py](src/cogs/utils/database.py) in the same commit.

@@ -68,7 +68,8 @@ class Bot(commands.Bot):
         await OsuApi.check_credentials()
 
         await database.Database.open(config['database'])
-        await database.Database().init_db()
+        if applied := await database.Database().migrate():
+            self.logger.info(f'Applied database migrations: {", ".join(applied)}')
 
         # Load cogs
         for file in listdir('./src/cogs'):
