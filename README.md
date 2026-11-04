@@ -19,7 +19,7 @@
 ### Prerequisites
 
 - Postgresql database
-- Python 3.10+
+- [uv](https://docs.astral.sh/uv/getting-started/installation/), which installs the right Python version
 - osu!API v2 API credentials
 
 This README will assume you have managed to set all of these up correctly.
@@ -43,15 +43,13 @@ If you have changed the specified port in the config remember to reflect that in
 1. Install dependencies
 
 ```
-python -m pip install -r requirements.txt
+uv sync
 ```
-
-This assumes that `python` points to a python3.10+ installation.
 
 2. Run the bot
 
 ```
-python src/run.py
+uv run src/run.py
 ```
 
 ## Invite

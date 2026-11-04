@@ -17,7 +17,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          pip install -r requirements.txt
       - name: Flake8 Lint
         run: |
           pip install flake8

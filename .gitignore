@@ -5,6 +5,7 @@ __pycache__/
 .vscode/
 .idea/
 venv/
+.venv/
 lib64
 pyvenv.cfg
 lib/
