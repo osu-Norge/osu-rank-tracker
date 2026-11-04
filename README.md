@@ -6,7 +6,7 @@
 
 ## Features (\* = new in rewrite)
 
-- Updates roles every 12 hours
+- Updates roles every 12 hours, at 00:00 and 12:00 UTC
 - Users can pick their desired gamemode to be tracked
 - OAuth2 authentication with osu!\*
 - Slash commands\*
@@ -19,10 +19,15 @@
 ### Prerequisites
 
 - Postgresql database
+- A Discord bot application with the privileged intents enabled (see below)
 - [uv](https://docs.astral.sh/uv/getting-started/installation/), which installs the right Python version
 - osu!API v2 API credentials
 
 This README will assume you have managed to set all of these up correctly.
+
+### Presteps - Discord application
+
+The bot uses every gateway intent, including the privileged ones. In the [Discord Developer Portal](https://discord.com/developers/applications), open your application, go to **Bot** and enable **Presence Intent**, **Server Members Intent** and **Message Content Intent**. Otherwise the bot stops at startup with `PrivilegedIntentsRequired`.
 
 ### Presteps - Configuration
 
@@ -51,6 +56,12 @@ uv sync
 ```
 uv run src/run.py
 ```
+
+## Development
+
+Set `config_mode` to anything other than `prod`, e.g. `dev`, and `dev_guild_id` to the ID of your test server. Slash commands are then only synced to that server instead of globally.
+
+Use a separate bot application, with its own token, for development. If you run dev mode with the production bot's token, every command shows up twice in the test server: once as a global command and once as a server command. The bot logs a warning when this happens, and prod mode removes the test server's commands again if `dev_guild_id` is set. To check which application you're running, compare the bot ID logged to `discord.log` at startup. If Discord still shows old commands, press Ctrl+R to reload it.
 
 ## Invite
 

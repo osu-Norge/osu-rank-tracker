@@ -82,8 +82,7 @@ class RankUpdate(commands.Cog):
     @update_ranks.before_loop
     async def before_update_ranks(self):
         """
-        Schedule the update ranks task to every 12 hours at 00:00/12:00 UTC
-        Chooses the closest next time to run based on the current time
+        Make sure the bot is ready before starting the rank update loop
         """
 
         await self.bot.wait_until_ready()
