@@ -2,29 +2,105 @@ from abc import abstractmethod
 from dataclasses import astuple, dataclass
 from datetime import datetime
 
-import psycopg2
-import yaml
+import psycopg
+from psycopg_pool import AsyncConnectionPool
 
 
 class Database:
-    def __init__(self):
-        with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
-            self.db = yaml.load(f, Loader=yaml.SafeLoader).get('database', {})
+    pool: AsyncConnectionPool | None = None  # Shared by every table, opened by the bot at startup
 
-        self.connection = psycopg2.connect(
-                host=self.db['host'],
-                dbname=self.db['dbname'],
-                user=self.db['username'],
-                password=self.db['password']
-            )
-        self.cursor = self.connection.cursor()
+    @classmethod
+    async def open(cls, config: dict) -> None:
+        """
+        Opens the connection pool. Must be called before any queries are run
 
-    def init_db(self) -> None:
+        Parameters
+        ----------
+        config (dict): The database section of the config
+        """
+
+        cls.pool = AsyncConnectionPool(
+            kwargs={
+                'host': config['host'],
+                'dbname': config['dbname'],
+                'user': config['username'],
+                'password': config['password'],
+                'autocommit': True,
+            },
+            check=AsyncConnectionPool.check_connection,
+            open=False,
+        )
+        await cls.pool.open(wait=True, timeout=30)
+
+    @classmethod
+    async def close(cls) -> None:
+        """
+        Closes the connection pool
+        """
+
+        if cls.pool:
+            await cls.pool.close()
+
+    async def execute(self, query: str, params: tuple = ()) -> int:
+        """
+        Runs a query
+
+        Parameters
+        ----------
+        query (str): The SQL query
+        params (tuple): The query parameters
+
+        Returns
+        ----------
+        (int) The number of rows affected
+        """
+
+        async with self.pool.connection() as connection:
+            cursor = await connection.execute(query, params)
+            return cursor.rowcount
+
+    async def fetchone(self, query: str, params: tuple = ()) -> tuple | None:
+        """
+        Runs a query and returns the first row
+
+        Parameters
+        ----------
+        query (str): The SQL query
+        params (tuple): The query parameters
+
+        Returns
+        ----------
+        (tuple | None) The first row, or None if there are no rows
+        """
+
+        async with self.pool.connection() as connection:
+            cursor = await connection.execute(query, params)
+            return await cursor.fetchone()
+
+    async def fetchall(self, query: str, params: tuple = ()) -> list[tuple]:
+        """
+        Runs a query and returns all rows
+
+        Parameters
+        ----------
+        query (str): The SQL query
+        params (tuple): The query parameters
+
+        Returns
+        ----------
+        (list[tuple]) The rows
+        """
+
+        async with self.pool.connection() as connection:
+            cursor = await connection.execute(query, params)
+            return await cursor.fetchall()
+
+    async def init_db(self) -> None:
         """
         Creates all the necessary tables in order for the bot to function
         """
 
-        self.cursor.execute(
+        await self.execute(
             """
             CREATE TABLE IF NOT EXISTS public.guild (
                 discord_id bigint NOT NULL PRIMARY KEY,
@@ -46,7 +122,7 @@ class Database:
             )
             """
         )
-        self.cursor.execute(
+        await self.execute(
             """
             CREATE TABLE IF NOT EXISTS public.user (
                 discord_id bigint NOT NULL PRIMARY KEY,
@@ -55,7 +131,7 @@ class Database:
             )
             """
         )
-        self.cursor.execute(
+        await self.execute(
             """
             CREATE TABLE IF NOT EXISTS public.verification (
                 discord_id bigint NOT NULL PRIMARY KEY,
@@ -64,8 +140,6 @@ class Database:
             )
             """
         )
-
-        self.connection.commit()
 
     async def get_version(self) -> str:
         """
@@ -76,14 +150,12 @@ class Database:
         str: The database driver name and its version number
         """
 
-        self.cursor.execute('SELECT VERSION()')
-        version = self.cursor.fetchone()[0].split(' ')[:2]
+        version = (await self.fetchone('SELECT VERSION()'))[0].split(' ')[:2]
         return ' '.join(version)
 
 
 class Table(Database):
     def __init__(self, table_name: str, dataclass: dataclass, create_row_on_none: bool = False):
-        super().__init__()
         self.table_name = table_name
         self.dataclass = dataclass
         self.create_row_on_none = create_row_on_none
@@ -101,18 +173,15 @@ class Table(Database):
         dataclass: A dataclass object
         """
 
-        self.cursor.execute(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
-        db_data = self.cursor.fetchone()
+        select_query = f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s'
+        db_data = await self.fetchone(select_query, (discord_id,))
 
         if not db_data:
             if not self.create_row_on_none:
                 return None
 
-            self.cursor.execute(f'INSERT INTO public.{self.table_name} VALUES (%s)', (discord_id,))
-            self.connection.commit()
-
-            self.cursor.execute(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
-            db_data = self.cursor.fetchone()
+            await self.execute(f'INSERT INTO public.{self.table_name} VALUES (%s)', (discord_id,))
+            db_data = await self.fetchone(select_query, (discord_id,))
 
         return self.dataclass(*db_data)
 
@@ -125,9 +194,7 @@ class Table(Database):
         tuple[dataclass]: A tuple of dataclass objects
         """
 
-        self.cursor.execute(f'SELECT * FROM public.{self.table_name}')
-        db_data = self.cursor.fetchall()
-
+        db_data = await self.fetchall(f'SELECT * FROM public.{self.table_name}')
         return tuple(self.dataclass(*data) for data in db_data)
 
     async def count(self) -> int:
@@ -138,8 +205,7 @@ class Table(Database):
         int: The number of rows in the database
         """
 
-        self.cursor.execute(f'SELECT COUNT(*) FROM public.{self.table_name}')
-        return self.cursor.fetchone()[0]
+        return (await self.fetchone(f'SELECT COUNT(*) FROM public.{self.table_name}'))[0]
 
     @abstractmethod
     async def save(self, data: dataclass) -> None:
@@ -166,8 +232,7 @@ class Table(Database):
         discord_id (int): The Discord ID
         """
 
-        self.cursor.execute(f'DELETE FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
-        self.connection.commit()
+        await self.execute(f'DELETE FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
 
 
 @dataclass
@@ -206,20 +271,19 @@ class GuildTable(Table):
         values = astuple(guild)
 
         try:
-            self.cursor.execute(
+            await self.execute(
                 f"""
                 INSERT INTO {self.table_name}
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """, values)
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
+        except psycopg.errors.UniqueViolation:
+            pass
         else:
             return
 
         values = values + (guild.discord_id,)
 
-        self.cursor.execute(
+        await self.execute(
             f"""
             UPDATE {self.table_name} SET
             discord_id = %s,
@@ -241,7 +305,6 @@ class GuildTable(Table):
             WHERE discord_id = %s
             """, values
         )
-        self.connection.commit()
 
 
 @dataclass
@@ -267,16 +330,15 @@ class UserTable(Table):
         values = astuple(user)
 
         try:
-            self.cursor.execute(f'INSERT INTO public.{self.table_name} VALUES (%s, %s, %s)', values)
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
+            await self.execute(f'INSERT INTO public.{self.table_name} VALUES (%s, %s, %s)', values)
+        except psycopg.errors.UniqueViolation:
+            pass
         else:
             return
 
         values = astuple(user) + (user.discord_id,)
 
-        self.cursor.execute(
+        await self.execute(
             f"""
             UPDATE public.{self.table_name} SET
             discord_id = %s,
@@ -285,7 +347,6 @@ class UserTable(Table):
             WHERE discord_id = %s
             """, values
         )
-        self.connection.commit()
 
 
 @dataclass
@@ -315,10 +376,8 @@ class VerificationTable(Table):
         values = astuple(verification)
 
         try:
-            self.cursor.execute(f'INSERT INTO {self.table_name} VALUES (%s, %s, %s)', values)
-            self.connection.commit()
-        except psycopg2.errors.UniqueViolation:
-            self.connection.rollback()
+            await self.execute(f'INSERT INTO {self.table_name} VALUES (%s, %s, %s)', values)
+        except psycopg.errors.UniqueViolation:
             return False
 
         return True

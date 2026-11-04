@@ -4,7 +4,8 @@ expiringdict==1.2.*
 fastapi==0.135.*
 iso3166==3.0.*
 jinja2==3.1.*
-psycopg2==2.9.*
+psycopg[binary]==3.3.*
+psycopg-pool==3.3.*
 pyyaml==6.0.*
 psutil==7.2.*
 uvicorn==0.41.*

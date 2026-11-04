@@ -19,6 +19,20 @@ app.mount('/static', StaticFiles(directory='src/verification_server/static'), na
 templates = Jinja2Templates(directory='src/verification_server/templates')
 
 
+async def run_on_bot_loop(request: Request, coro):
+    """
+    Runs a coroutine on the bot's event loop and waits for the result.
+    The database pool and HTTP session belong to that loop, while this server runs on its own in a separate thread
+
+    Parameters
+    ----------
+    request (Request): The request being handled
+    coro (Coroutine): The coroutine to run
+    """
+
+    return await asyncio.wrap_future(asyncio.run_coroutine_threadsafe(coro, request.app.state.bot.loop))
+
+
 @app.get('/')
 async def index():
     return 'This is not where you\'re supposed be, dummy!'
@@ -40,7 +54,7 @@ async def callback(request: Request, code: str, state: str):
 
     # Check if user is pending verification
     verification_table = database.VerificationTable()
-    verification = await verification_table.get(int(discord_id))
+    verification = await run_on_bot_loop(request, verification_table.get(int(discord_id)))
 
     # Verify user link
     if not verification or verification.uuid != uuid:
@@ -50,10 +64,8 @@ async def callback(request: Request, code: str, state: str):
             context={'message': 'Not a valid user or identifier'}
         )
 
-    # Get osu! user. The osu! API session belongs to the bot's event loop, while this server runs on its own
-    bot = request.app.state.bot
-    get_me_user = asyncio.run_coroutine_threadsafe(OsuApi.get_me_user(code, gamemode), bot.loop)
-    if not (osu_user := await asyncio.wrap_future(get_me_user)):
+    # Get osu! user
+    if not (osu_user := await run_on_bot_loop(request, OsuApi.get_me_user(code, gamemode))):
         return templates.TemplateResponse(
             request=request,
             name='error.html',
@@ -67,10 +79,11 @@ async def callback(request: Request, code: str, state: str):
 
     # Enter user into database
     user = database.User(discord_id=int(discord_id), osu_id=osu_id, gamemode=gamemode.id)
-    await database.UserTable().save(user)
+    await run_on_bot_loop(request, database.UserTable().save(user))
 
-    await verification_table.delete(discord_id)
+    await run_on_bot_loop(request, verification_table.delete(int(discord_id)))
 
+    bot = request.app.state.bot
     bot.loop.call_soon_threadsafe(bot.dispatch, 'user_registered', user.discord_id)
 
     return RedirectResponse(f'/success/{osu_name}', status_code=303)

@@ -19,8 +19,6 @@ from verification_server.server import app as verification_app
 with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
     config = yaml.load(f, Loader=yaml.SafeLoader)
 
-database.Database().init_db()
-
 
 class Bot(commands.Bot):
     def __init__(self):
@@ -60,6 +58,9 @@ class Bot(commands.Bot):
         self.http_session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
         OsuApi.session = self.http_session
 
+        await database.Database.open(config['database'])
+        await database.Database().init_db()
+
         # Load cogs
         for file in listdir('./src/cogs'):
             if file.endswith('.py'):
@@ -95,6 +96,7 @@ class Bot(commands.Bot):
         await super().close()
         if self.http_session:
             await self.http_session.close()
+        await database.Database.close()
 
     def _on_sigterm(self):
         self.logger.info('Received SIGTERM, shutting down...')
