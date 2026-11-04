@@ -28,6 +28,10 @@ async def run_on_bot_loop(request: Request, coro):
     ----------
     request (Request): The request being handled
     coro (Coroutine): The coroutine to run
+
+    Returns
+    ----------
+    (Any): What the coroutine returns
     """
 
     return await asyncio.wrap_future(asyncio.run_coroutine_threadsafe(coro, request.app.state.bot.loop))
@@ -35,11 +39,32 @@ async def run_on_bot_loop(request: Request, coro):
 
 @app.get('/')
 async def index():
+    """
+    Show a message at the server root, which users aren't meant to visit
+
+    Returns
+    ----------
+    (str): The message
+    """
+
     return 'This is not where you\'re supposed be, dummy!'
 
 
 @app.get('/callback')
 async def callback(request: Request, code: str, state: str):
+    """
+    Handle the redirect from osu! after a user authorizes the bot, and register the user
+
+    Parameters
+    ----------
+    request (Request): The incoming request
+    code (str): The authorization code from osu!
+    state (str): The Discord ID, gamemode ID and verification UUID, separated by colons
+
+    Returns
+    ----------
+    (TemplateResponse | RedirectResponse): An error page, or a redirect to the success page
+    """
 
     try:
         discord_id, gamemode, uuid = state.split(':')
@@ -91,4 +116,17 @@ async def callback(request: Request, code: str, state: str):
 
 @app.get('/success/{name}')
 async def success(request: Request, name: str):
+    """
+    Show the page confirming that a user's osu! account is connected
+
+    Parameters
+    ----------
+    request (Request): The incoming request
+    name (str): The osu! username to show
+
+    Returns
+    ----------
+    (TemplateResponse): The success page
+    """
+
     return templates.TemplateResponse(request=request, name='success.html', context={'name': name})

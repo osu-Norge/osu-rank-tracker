@@ -14,6 +14,12 @@ class Settings(commands.Cog):
     """Manage guild settings"""
 
     def __init__(self, bot):
+        """
+        Parameters
+        ----------
+        bot (commands.Bot): The bot instance
+        """
+
         self.bot = bot
 
     settings_group = app_commands.Group(
@@ -42,7 +48,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         role (str): The user inputted role name, id or mention
         role_variable (str): The database column name
         role_name (str): The role name that will be displayed in the confirmation message on Discord
@@ -73,7 +79,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         """
 
         await interaction.response.send_message('This feature is not yet implemented')
@@ -85,7 +91,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         """
 
         await interaction.response.send_message('This feature is not yet implemented')
@@ -97,7 +103,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         """
 
         guild_table = database.GuildTable()
@@ -118,7 +124,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         country_code (str): The iso3166 country code to add to the whitelist
         """
 
@@ -155,7 +161,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         country_code (str): The iso3166 country code to remove from the whitelist
         """
 
@@ -188,7 +194,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         """
 
         guild_table = database.GuildTable()
@@ -216,7 +222,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         osu_user (str): The osu! user to add to the blacklist
         """
 
@@ -254,7 +260,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         osu_user (str): The osu! user to remove from the blacklist
         """
 
@@ -288,7 +294,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         """
 
         guild_table = database.GuildTable()
@@ -338,7 +344,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         type (Roles): The type of role to set
         role (discord.Role): The role to set
         """
@@ -353,7 +359,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         type (Roles): The type of role to remove
         """
 
@@ -366,7 +372,7 @@ class Settings(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         """
 
         guild_table = database.GuildTable()
@@ -388,7 +394,7 @@ async def setup(bot: commands.Bot):
 
     Parameters
     ----------
-    bot (commands.Bot): Bot instance
+    bot (commands.Bot): The bot instance
     """
 
     await bot.add_cog(Settings(bot))

@@ -6,12 +6,12 @@ def default_footer(interaction: discord.Interaction, embed: discord.Embed) -> di
     Sets a footer containing the command invoker's name, discriminator and avatar
 
     Parameters
-    -----------
-    interaction (discord.Interaction): The slash command context object
+    ----------
+    interaction (discord.Interaction): The slash command interaction
     embed (discord.Embed): An embed object to add the footer to
 
     Returns
-    -----------
+    ----------
     (discord.Embed): The passed in embed + footer
     """
 
@@ -26,11 +26,11 @@ def error_warning(text: str) -> discord.Embed:
     Creates an embed with a specified error message based on a warning template
 
     Parameters
-    -----------
+    ----------
     text (str): The error message
 
     Returns
-    -----------
+    ----------
     (discord.Embed): An embed object based on the template with the specified text
     """
 
@@ -42,11 +42,11 @@ def error_fatal(text: str) -> discord.Embed:
     Creates an embed with a specified error message based on a warning template
 
     Parameters
-    -----------
+    ----------
     text (str): The error message
 
     Returns
-    -----------
+    ----------
     (discord.Embed): An embed object based on the template with the specified text
     """
 
@@ -58,12 +58,12 @@ def success(text: str) -> discord.Embed:
     Creates an embed with a specified message using a template signifying success.
 
     Parameters
-    -----------
+    ----------
     text (str): The message
 
     Returns
-    -----------
-    discord.Embed: An embed object based on the template with the specified text
+    ----------
+    (discord.Embed): An embed object based on the template with the specified text
     """
 
     return discord.Embed(color=discord.Color.green(), description=f'✅ {text}')

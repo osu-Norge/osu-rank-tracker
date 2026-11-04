@@ -16,3 +16,32 @@
 It is preferred that you also consider the following, however it is not required:
 
 - Use embeds. Default embed color should be set to `interaction.client.user.color` unless there's a reason to use another color.
+
+## Docstrings
+
+Every function gets a docstring in this style, except functions nested inside other functions:
+
+```python
+def greet(self, name: str) -> str:
+    """
+    Greets the invoking user using the inputted name
+
+    Parameters
+    ----------
+    name (str): The user's inputted name
+
+    Returns
+    ----------
+    (str): A greeting
+    """
+
+    return f'Hello, {name}'
+```
+
+Leave out sections that would be empty. Write unions as `a | b`, and the return value as `(type): description`. Optional parameters should say what the default is, e.g. `Defaults to the invoking user`.
+
+Some parameters appear everywhere, and are described the same way each time:
+
+- `interaction (discord.Interaction): The slash command interaction`
+- `ctx (commands.Context): The command context`
+- `bot (commands.Bot): The bot instance`

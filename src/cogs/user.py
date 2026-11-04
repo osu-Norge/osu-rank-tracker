@@ -15,6 +15,12 @@ class User(commands.Cog):
     """User commands cog"""
 
     def __init__(self, bot):
+        """
+        Parameters
+        ----------
+        bot (commands.Bot): The bot instance
+        """
+
         self.bot = bot
         self.verification_cleanup.start()
 
@@ -24,6 +30,10 @@ class User(commands.Cog):
     )
 
     def cog_unload(self):
+        """
+        Stop the verification cleanup loop when the cog is unloaded
+        """
+
         self.verification_cleanup.cancel()
 
     @tasks.loop(minutes=2)
@@ -57,7 +67,8 @@ class User(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
+        gamemode (GamemodeOptions): The gamemode to track the rank in. Defaults to standard
         """
 
         # Check if user is already registered
@@ -94,7 +105,7 @@ class User(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         """
 
         user_table = database.UserTable()
@@ -122,7 +133,7 @@ class User(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         user (discord.Member): User to view. If not provided, defaults to the author of the command
         """
 
@@ -187,7 +198,7 @@ class User(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         gamemode (GamemodeOptions): Gamemode to set
         """
 
@@ -219,7 +230,7 @@ class User(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         """
 
         # Defer because I suck at programming and this function takes a shit ton of time to run.
@@ -270,7 +281,7 @@ async def setup(bot: commands.Bot):
 
     Parameters
     ----------
-    bot (commands.Bot): Bot instance
+    bot (commands.Bot): The bot instance
     """
 
     await bot.add_cog(User(bot))

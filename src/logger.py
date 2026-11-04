@@ -4,6 +4,18 @@ LOG_FORMAT = '[{asctime}] [{levelname:<8}] {name}: {message}'
 
 
 def setup_logger(name: str) -> logging.Logger:
+    """
+    Create a logger that writes to discord.log
+
+    Parameters
+    ----------
+    name (str): The name of the logger
+
+    Returns
+    ----------
+    (logging.Logger): The logger
+    """
+
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     logger.propagate = False

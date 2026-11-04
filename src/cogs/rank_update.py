@@ -14,10 +14,20 @@ class RankUpdate(commands.Cog):
     """Cog for handling rank updates"""
 
     def __init__(self, bot):
+        """
+        Parameters
+        ----------
+        bot (commands.Bot): The bot instance
+        """
+
         self.bot = bot
         self.update_ranks.start()
 
     def cog_unload(self):
+        """
+        Stop the rank update loop when the cog is unloaded
+        """
+
         self.update_ranks.cancel()
 
     @tasks.loop(time=time(hour=0, minute=0))
@@ -122,7 +132,13 @@ class RankUpdate(commands.Cog):
 
     @commands.Cog.listener('on_user_registered')
     async def on_user_registered(self, discord_id: int):
-        """Update rank roles after a user's osu! account is verified."""
+        """
+        Update rank roles after a user's osu! account is verified
+
+        Parameters
+        ----------
+        discord_id (int): The Discord ID of the user who registered
+        """
 
         user = await database.UserTable().get(discord_id)
         if not user:
@@ -135,7 +151,13 @@ class RankUpdate(commands.Cog):
 
     @commands.Cog.listener('on_user_unregistered')
     async def on_user_unregistered(self, discord_id: int):
-        """Remove osu! roles after a user's account is unregistered."""
+        """
+        Remove osu! roles after a user's account is unregistered
+
+        Parameters
+        ----------
+        discord_id (int): The Discord ID of the user who unregistered
+        """
 
         for discord_guild in self.bot.guilds:
             member = discord_guild.get_member(discord_id)
@@ -152,6 +174,16 @@ class RankUpdate(commands.Cog):
                 self.bot.logger.info(f'Removed osu! roles from user ({discord_id}) in guild ({discord_guild.id})')
 
     async def update_member_rank(self, member: discord.Member, user: database.User, reason: str):
+        """
+        Update a member's rank roles from their osu! profile
+
+        Parameters
+        ----------
+        member (discord.Member): The member to update
+        user (database.User): The member's registered osu! account
+        reason (str): The reason shown in the audit log
+        """
+
         guild = await database.GuildTable().get(member.guild.id)
         gamemode = Gamemode.from_id(user.gamemode)
         osu_user = await OsuApi.get_user(user.osu_id, gamemode)
@@ -195,7 +227,7 @@ async def setup(bot: commands.Bot):
 
     Parameters
     ----------
-    bot (commands.Bot): Bot instance
+    bot (commands.Bot): The bot instance
     """
 
     await bot.add_cog(RankUpdate(bot))

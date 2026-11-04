@@ -27,7 +27,7 @@ class Errors(commands.Cog):
 
         Parameters
         ----------
-        ctx (commands.Context): Context object
+        ctx (commands.Context): The command context
         """
 
         self.bot.logger.info(
@@ -47,7 +47,7 @@ class Errors(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         command (app_commands.Command | app_commands.ContextMenu): Command object
         """
 
@@ -64,8 +64,8 @@ class Errors(commands.Cog):
 
         Parameters
         ----------
-        ctx (commands.Context): Context object
-        error (commands.CommandError): Eror context object
+        ctx (commands.Context): The command context
+        error (commands.CommandError): The error the command raised
         """
 
         # Failed invocations shouldn't count towards the cooldown, but the cooldown error itself must not reset it
@@ -137,8 +137,8 @@ class Errors(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
-        error (app_commands.AppCommandError): Eror context object
+        interaction (discord.Interaction): The slash command interaction
+        error (app_commands.AppCommandError): The error the command raised
         """
 
         # Log command usage, just in case
@@ -175,7 +175,7 @@ class Errors(commands.Cog):
 
         Parameters
         ----------
-        interaction (discord.Interaction): Slash command context object
+        interaction (discord.Interaction): The slash command interaction
         embed (discord.Embed): The error message
         """
 
@@ -191,7 +191,7 @@ async def setup(bot: commands.Bot):
 
     Parameters
     ----------
-    bot (commands.Bot): Bot instance
+    bot (commands.Bot): The bot instance
     """
 
     await bot.add_cog(Errors(bot))

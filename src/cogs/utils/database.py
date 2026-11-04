@@ -65,7 +65,7 @@ class Database:
 
         Returns
         ----------
-        (int) The number of rows affected
+        (int): The number of rows affected
         """
 
         async with self.pool.connection() as connection:
@@ -83,7 +83,7 @@ class Database:
 
         Returns
         ----------
-        (tuple | None) The first row, or None if there are no rows
+        (tuple | None): The first row, or None if there are no rows
         """
 
         async with self.pool.connection() as connection:
@@ -101,7 +101,7 @@ class Database:
 
         Returns
         ----------
-        (list[tuple]) The rows
+        (list[tuple]): The rows
         """
 
         async with self.pool.connection() as connection:
@@ -160,7 +160,7 @@ class Database:
 
         Returns
         ----------
-        str: The database driver name and its version number
+        (str): The database server name and version
         """
 
         version = (await self.fetchone('SELECT VERSION()'))[0].split(' ')[:2]
@@ -169,11 +169,19 @@ class Database:
 
 class Table(Database):
     def __init__(self, table_name: str, dataclass: dataclass, create_row_on_none: bool = False):
+        """
+        Parameters
+        ----------
+        table_name (str): The name of the table
+        dataclass (dataclass): The dataclass rows are converted to
+        create_row_on_none (bool): Whether get() creates missing rows. Defaults to False
+        """
+
         self.table_name = table_name
         self.dataclass = dataclass
         self.create_row_on_none = create_row_on_none
 
-    async def get(self, discord_id: int) -> dataclass:
+    async def get(self, discord_id: int) -> dataclass | None:
         """
         Fetches a row from the database
 
@@ -183,7 +191,7 @@ class Table(Database):
 
         Returns
         ----------
-        dataclass: A dataclass object
+        (dataclass | None): A dataclass object, or None if the row doesn't exist and create_row_on_none is False
         """
 
         db_data = await self.fetchone(f'SELECT * FROM public.{self.table_name} WHERE discord_id = %s', (discord_id,))
@@ -209,7 +217,7 @@ class Table(Database):
 
         Returns
         ----------
-        tuple[dataclass]: A tuple of dataclass objects
+        (tuple[dataclass]): A tuple of dataclass objects
         """
 
         db_data = await self.fetchall(f'SELECT * FROM public.{self.table_name}')
@@ -220,7 +228,7 @@ class Table(Database):
         Counts the number of rows in the database
         Returns
         ----------
-        int: The number of rows in the database
+        (int): The number of rows in the database
         """
 
         return (await self.fetchone(f'SELECT COUNT(*) FROM public.{self.table_name}'))[0]
@@ -278,6 +286,10 @@ class Guild:
 
 class GuildTable(Table):
     def __init__(self):
+        """
+        Access the guild table
+        """
+
         super().__init__(table_name='guild', dataclass=Guild, create_row_on_none=True)
 
 
@@ -290,6 +302,10 @@ class User:
 
 class UserTable(Table):
     def __init__(self):
+        """
+        Access the user table
+        """
+
         super().__init__(table_name='user', dataclass=User, create_row_on_none=False)
 
 
@@ -302,6 +318,10 @@ class Verification:
 
 class VerificationTable(Table):
     def __init__(self):
+        """
+        Access the table of pending verifications
+        """
+
         super().__init__(table_name='verification', dataclass=Verification, create_row_on_none=False)
 
     async def insert(self, verification: Verification) -> bool:
@@ -314,7 +334,7 @@ class VerificationTable(Table):
 
         Returns
         ----------
-        bool: True if the verification was inserted, False if it already exists
+        (bool): True if the verification was inserted, False if it already exists
         """
 
         inserted = await self.execute(

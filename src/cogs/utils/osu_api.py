@@ -74,7 +74,7 @@ class OsuApi:
 
         Returns
         ----------
-        dict: The user data. None if user not found
+        (dict | None): The user data, or None if the user isn't found
         """
 
         # Get cached API token. Renew token if expired
@@ -102,7 +102,7 @@ class OsuApi:
 
         Returns
         ----------
-        dict: The user data
+        (dict): The user data
         """
 
         # Use code to get token
@@ -133,13 +133,13 @@ class OsuApi:
         Inserts pending verification into database
 
         Parameters
-        -----------
+        ----------
         discord_user_id (int): The discord user id
         gamemode (Gamemode): The gamemode to set tracking for
 
         Returns
-        -----------
-        str: The authorization link
+        ----------
+        (str): The authorization link
         """
 
         identifier = str(uuid.uuid1())
@@ -177,7 +177,7 @@ class OsuApi:
 
         Returns
         ----------
-        dict: Information about the rank update. {success: bool, message: str}
+        (dict): Information about the rank update. {success: bool, message: str}
         """
 
         # Check if the user is blacklisted
@@ -247,7 +247,7 @@ class OsuApi:
 
         Returns
         ----------
-        list[str]: A list of roles to remove
+        (list[str]): A list of roles to remove
         """
 
         # This kinda fucking sucks because of its time complexity and it's hardcoded but whatever
@@ -270,12 +270,12 @@ class Gamemode:
         Creates an instance of its class based on id
 
         Parameters
-        -----------
+        ----------
         id (int): The gamemode id
 
         Returns
-        -----------
-        Gamemode: A Gamemode object
+        ----------
+        (Gamemode): A Gamemode object
         """
 
         name = cls.id_to_name(id)
@@ -288,12 +288,12 @@ class Gamemode:
         Creates an instance of its class based on name
 
         Parameters
-        -----------
+        ----------
         name (str): The gamemode name
 
         Returns
-        -----------
-        Gamemode: A Gamemode object
+        ----------
+        (Gamemode): A Gamemode object
         """
 
         id = cls.name_to_id(name)
@@ -307,12 +307,12 @@ class Gamemode:
         Creates an instance of its class based on URL name
 
         Parameters
-        -----------
+        ----------
         url_name (str): The gamemode URL name
 
         Returns
-        -----------
-        Gamemode: A Gamemode object
+        ----------
+        (Gamemode): A Gamemode object
         """
 
         id = Gamemode.url_name_to_id(url_name)
@@ -326,12 +326,12 @@ class Gamemode:
         Converts a gamemode id to its display name
 
         Parameters
-        -----------
+        ----------
         id (int): The gamemode id
 
         Returns
-        -----------
-        str: The gamemode display name
+        ----------
+        (str): The gamemode display name
         """
 
         gamemode_names = {
@@ -348,12 +348,12 @@ class Gamemode:
         Converts a gamemode id to its name used in URLs
 
         Parameters
-        -----------
+        ----------
         id (int): The gamemode id
 
         Returns
-        -----------
-        str: The gamemode URL name
+        ----------
+        (str): The gamemode URL name
         """
 
         gamemode_urls = {
@@ -370,12 +370,12 @@ class Gamemode:
         Converts a gamemode URL name to its id
 
         Parameters
-        -----------
+        ----------
         url_name (str): The gamemode URL name
 
         Returns
-        -----------
-        int: The gamemode id
+        ----------
+        (int): The gamemode id
         """
 
         # This is a reversal of the method above.
@@ -395,12 +395,12 @@ class Gamemode:
         Converts a gamemode display name to its id
 
         Parameters
-        -----------
+        ----------
         name (str): The gamemode name
 
         Returns
-        -----------
-        int: The gamemode id
+        ----------
+        (int): The gamemode id
         """
 
         gamemode_ids = {

@@ -21,6 +21,10 @@ with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
 
 class Bot(commands.Bot):
     def __init__(self):
+        """
+        Set up the bot and start the verification server in a separate thread
+        """
+
         super().__init__(
             command_prefix=commands.when_mentioned_or(config['bot']['prefix']),
             case_insensitive=True,
@@ -47,6 +51,11 @@ class Bot(commands.Bot):
         server.start()
 
     async def setup_hook(self):
+        """
+        Prepare the bot after logging in: handle SIGTERM, open the HTTP session and the database pool,
+        load the cogs and sync slash commands
+        """
+
         # Shut down cleanly on SIGTERM
         try:
             asyncio.get_running_loop().add_signal_handler(signal.SIGTERM, self._on_sigterm)
@@ -92,12 +101,20 @@ class Bot(commands.Bot):
                 )
 
     async def close(self):
+        """
+        Shut down the bot, then close the HTTP session and the database pool
+        """
+
         await super().close()
         if self.http_session:
             await self.http_session.close()
         await database.Database.close()
 
     def _on_sigterm(self):
+        """
+        Shut down the bot when the process receives SIGTERM
+        """
+
         self.logger.info('Received SIGTERM, shutting down...')
         self._shutdown_task = asyncio.create_task(self.close())  # Keep a reference so the task isn't garbage collected
 
@@ -107,6 +124,10 @@ bot = Bot()
 
 @bot.event
 async def on_ready():
+    """
+    Log the bot's account and set its presence once it's connected
+    """
+
     if not hasattr(bot, 'uptime'):
         bot.uptime = time()
 
