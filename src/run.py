@@ -5,12 +5,14 @@ from os import listdir
 from threading import Thread
 from time import time
 
+import aiohttp
 import discord
 import uvicorn
 import yaml
 from discord.ext import commands
 
 import cogs.utils.database as database
+from cogs.utils.osu_api import OsuApi
 from logger import logger
 from verification_server.server import app as verification_app
 
@@ -30,6 +32,7 @@ class Bot(commands.Bot):
         )
 
         self.logger = logger
+        self.http_session: aiohttp.ClientSession | None = None
 
         self.presence = config['bot'].get('presence', {})
         self.emoji = config.get('emoji', {})
@@ -52,6 +55,10 @@ class Bot(commands.Bot):
             asyncio.get_running_loop().add_signal_handler(signal.SIGTERM, self._on_sigterm)
         except NotImplementedError:
             pass  # Not supported on Windows
+
+        # One HTTP session for the whole bot, so connections are reused
+        self.http_session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
+        OsuApi.session = self.http_session
 
         # Load cogs
         for file in listdir('./src/cogs'):
@@ -83,6 +90,11 @@ class Bot(commands.Bot):
                     f'This application has {len(global_commands)} global commands, so commands will show up twice '
                     'in the dev guild. Use a separate bot application for development'
                 )
+
+    async def close(self):
+        await super().close()
+        if self.http_session:
+            await self.http_session.close()
 
     def _on_sigterm(self):
         self.logger.info('Received SIGTERM, shutting down...')

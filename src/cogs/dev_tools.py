@@ -2,7 +2,6 @@ import asyncio
 from os import listdir
 
 import discord
-import requests
 from discord.ext import commands
 
 from cogs.utils import embed_templates
@@ -139,7 +138,8 @@ class DevTools(commands.Cog):
         ctx (commands.Context): Context object
         """
 
-        data = requests.get('https://wtfismyip.com/json', timeout=10).json()
+        async with self.bot.http_session.get('https://wtfismyip.com/json') as r:
+            data = await r.json(content_type=None)
         ip = data['YourFuckingIPAddress']
         location = data['YourFuckingLocation']
         isp = data['YourFuckingISP']

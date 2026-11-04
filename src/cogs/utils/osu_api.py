@@ -24,6 +24,7 @@ class OsuApi:
     )
     MANAGED_ROLE_NAMES = (*RANK_AND_GAMEMODE_ROLES, 'role_add')
     cache = ExpiringDict(max_len=1, max_age_seconds=86400)
+    session: aiohttp.ClientSession | None = None  # The bot's HTTP session, set at startup
 
     with open('./src/config/config.yaml', 'r', encoding='utf8') as f:
         credntials = yaml.load(f, Loader=yaml.SafeLoader).get('api', {}).get('osu', {})
@@ -54,16 +55,15 @@ class OsuApi:
 
         logger.info('Fetching new token...')
 
-        async with aiohttp.ClientSession() as session:
-            async with session.post('https://osu.ppy.sh/oauth/token', json=cls.token_payload) as r:
-                if r.status == 200:
-                    data = await r.json()
+        async with cls.session.post('https://osu.ppy.sh/oauth/token', json=cls.token_payload) as r:
+            if r.status == 200:
+                data = await r.json()
 
-                    cls.cache.update({
-                        'token': data.get('access_token')
-                    })
-                else:
-                    raise aiohttp.HTTPException(response=r.status, message=r.reason)
+                cls.cache.update({
+                    'token': data.get('access_token')
+                })
+            else:
+                raise aiohttp.HTTPException(response=r.status, message=r.reason)
 
     @classmethod
     async def get_user(cls, user: str, gamemode: Gamemode) -> dict | None:
@@ -87,12 +87,11 @@ class OsuApi:
             token = cls.cache.get('token')
 
         # Get user data
-        async with aiohttp.ClientSession() as session:
-            header = {'Authorization': f'Bearer {token}'}
-            async with session.get(f'https://osu.ppy.sh/api/v2/users/{user}/{gamemode.url_name}', headers=header) as r:
-                if r.status == 200:
-                    data = await r.json()
-                    return data
+        header = {'Authorization': f'Bearer {token}'}
+        async with cls.session.get(f'https://osu.ppy.sh/api/v2/users/{user}/{gamemode.url_name}', headers=header) as r:
+            if r.status == 200:
+                data = await r.json()
+                return data
 
     @classmethod
     async def get_me_user(cls, code: str, gamemode: Gamemode) -> dict:
@@ -110,26 +109,25 @@ class OsuApi:
         """
 
         # Use code to get token
-        async with aiohttp.ClientSession() as session:
-            payload = cls.user_payload.copy()
-            payload.update({
-                'code': code
-            })
+        payload = cls.user_payload.copy()
+        payload.update({
+            'code': code
+        })
 
-            async with session.post('https://osu.ppy.sh/oauth/token', json=payload) as r:
-                if r.status == 200:
-                    data = await r.json()
-                    token = data.get('access_token')
-                else:
-                    raise aiohttp.ClientResponseError(r.request_info, r.history)
-
-            # Get user data
-            header = {'Authorization': f'Bearer {token}'}
-            async with session.get(f'https://osu.ppy.sh/api/v2/me/{gamemode.url_name}', headers=header) as r:
-                if r.status == 200:
-                    data = await r.json()
-                    return data
+        async with cls.session.post('https://osu.ppy.sh/oauth/token', json=payload) as r:
+            if r.status == 200:
+                data = await r.json()
+                token = data.get('access_token')
+            else:
                 raise aiohttp.ClientResponseError(r.request_info, r.history)
+
+        # Get user data
+        header = {'Authorization': f'Bearer {token}'}
+        async with cls.session.get(f'https://osu.ppy.sh/api/v2/me/{gamemode.url_name}', headers=header) as r:
+            if r.status == 200:
+                data = await r.json()
+                return data
+            raise aiohttp.ClientResponseError(r.request_info, r.history)
 
     @classmethod
     async def generate_auth_link(cls, discord_user_id: int, gamemode: Gamemode) -> str:

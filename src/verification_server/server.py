@@ -1,3 +1,4 @@
+import asyncio
 import sys
 
 sys.path.append('..')  # Allow to share the same database abstractions and connection
@@ -49,8 +50,10 @@ async def callback(request: Request, code: str, state: str):
             context={'message': 'Not a valid user or identifier'}
         )
 
-    # Get osu! user
-    if not (osu_user := await OsuApi.get_me_user(code, gamemode)):
+    # Get osu! user. The osu! API session belongs to the bot's event loop, while this server runs on its own
+    bot = request.app.state.bot
+    get_me_user = asyncio.run_coroutine_threadsafe(OsuApi.get_me_user(code, gamemode), bot.loop)
+    if not (osu_user := await asyncio.wrap_future(get_me_user)):
         return templates.TemplateResponse(
             request=request,
             name='error.html',
@@ -68,7 +71,6 @@ async def callback(request: Request, code: str, state: str):
 
     await verification_table.delete(discord_id)
 
-    bot = request.app.state.bot
     bot.loop.call_soon_threadsafe(bot.dispatch, 'user_registered', user.discord_id)
 
     return RedirectResponse(f'/success/{osu_name}', status_code=303)
