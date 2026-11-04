@@ -54,9 +54,27 @@ class Bot(commands.Bot):
         # Sync slash commands to Discord
         if config.get('config_mode') == 'prod':
             await self.tree.sync()
+
+            # Remove commands left in the dev guild by dev mode, which would otherwise show up twice there
+            if dev_guild_id := config.get('dev_guild_id'):
+                dev_guild = discord.Object(id=dev_guild_id)
+                self.tree.clear_commands(guild=dev_guild)
+                try:
+                    await self.tree.sync(guild=dev_guild)
+                except discord.HTTPException as e:
+                    self.logger.warning(f'Could not remove dev guild commands from {dev_guild_id}: {e}')
         else:
-            self.tree.copy_global_to(guild=discord.Object(id=config['dev_guild_id']))
-            await self.tree.sync(guild=discord.Object(id=config['dev_guild_id']))
+            dev_guild = discord.Object(id=config['dev_guild_id'])
+            self.tree.copy_global_to(guild=dev_guild)
+            await self.tree.sync(guild=dev_guild)
+
+            # Global commands from prod mode show up twice in the dev guild. Don't delete them here,
+            # since this might be the production bot's token
+            if global_commands := await self.tree.fetch_commands():
+                self.logger.warning(
+                    f'This application has {len(global_commands)} global commands, so commands will show up twice '
+                    'in the dev guild. Use a separate bot application for development'
+                )
 
 
 bot = Bot()
