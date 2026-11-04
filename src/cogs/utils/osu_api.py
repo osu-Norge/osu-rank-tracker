@@ -111,19 +111,15 @@ class OsuApi:
         })
 
         async with cls.session.post('https://osu.ppy.sh/oauth/token', json=payload) as r:
-            if r.status == 200:
-                data = await r.json()
-                token = data.get('access_token')
-            else:
-                raise aiohttp.ClientResponseError(r.request_info, r.history)
+            r.raise_for_status()
+            data = await r.json()
+            token = data.get('access_token')
 
         # Get user data
         header = {'Authorization': f'Bearer {token}'}
         async with cls.session.get(f'https://osu.ppy.sh/api/v2/me/{gamemode.url_name}', headers=header) as r:
-            if r.status == 200:
-                data = await r.json()
-                return data
-            raise aiohttp.ClientResponseError(r.request_info, r.history)
+            r.raise_for_status()
+            return await r.json()
 
     @classmethod
     async def generate_auth_link(cls, discord_user_id: int, gamemode: Gamemode) -> str:
