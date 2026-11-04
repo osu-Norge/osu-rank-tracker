@@ -76,18 +76,51 @@ class OsuApi:
         (dict | None): The user data, or None if the user isn't found
         """
 
-        # Get cached API token. Renew token if expired
-        token = cls.cache.get('token')
-        if not token:
-            await cls.renew_token()
-            token = cls.cache.get('token')
-
-        # Get user data
-        header = {'Authorization': f'Bearer {token}'}
+        header = {'Authorization': f'Bearer {await cls._get_token()}'}
         async with cls.session.get(f'https://osu.ppy.sh/api/v2/users/{user}/{gamemode.url_name}', headers=header) as r:
             if r.status == 200:
                 data = await r.json()
                 return data
+
+    @classmethod
+    async def get_usernames(cls, user_ids: list[int]) -> dict[int, str]:
+        """
+        Fetch the usernames of several osu! users from the v2 API
+
+        Parameters
+        ----------
+        user_ids (list[int]): The osu! user IDs
+
+        Returns
+        ----------
+        (dict[int, str]): The usernames by user ID. Restricted and deleted users are left out
+        """
+
+        header = {'Authorization': f'Bearer {await cls._get_token()}'}
+        usernames = {}
+        for start in range(0, len(user_ids), 50):  # The API returns at most 50 users per request
+            params = [('ids[]', user_id) for user_id in user_ids[start:start + 50]]
+            async with cls.session.get('https://osu.ppy.sh/api/v2/users', headers=header, params=params) as r:
+                r.raise_for_status()
+                data = await r.json()
+            usernames.update({user['id']: user['username'] for user in data['users']})
+
+        return usernames
+
+    @classmethod
+    async def _get_token(cls) -> str:
+        """
+        Returns the cached API token, renewing it if it has expired
+
+        Returns
+        ----------
+        (str): The API token
+        """
+
+        if not cls.cache.get('token'):
+            await cls.renew_token()
+
+        return cls.cache.get('token')
 
     @classmethod
     async def get_me_user(cls, code: str, gamemode: Gamemode) -> dict:

@@ -1,11 +1,12 @@
 from enum import Enum
 
+import aiohttp
 import discord
 from discord import app_commands
 from discord.ext import commands
 from iso3166 import countries
 
-from cogs.utils import database, embed_templates
+from cogs.utils import database, discord_utils, embed_templates, misc_utils
 from cogs.utils.osu_api import Gamemode, OsuApi
 
 
@@ -302,22 +303,44 @@ class Settings(commands.Cog):
         interaction (discord.Interaction): The slash command interaction
         """
 
-        guild_table = database.GuildTable()
-        guild = await guild_table.get(interaction.guild.id)
+        guild = await database.GuildTable().get(interaction.guild.id)
+        blacklist = guild.blacklisted_osu_users
 
-        if not guild.blacklisted_osu_users:
+        if not blacklist:
             embed = embed_templates.error_warning('No users are blacklisted!')
             return await interaction.response.send_message(embed=embed)
 
-        guild.blacklisted_osu_users = [f'[{u}](https://osu.ppy.sh/users/{u})' for u in guild.blacklisted_osu_users]
+        # Looking up a long blacklist can take longer than Discord waits for a response
+        await interaction.response.defer()
 
-        if len(guild.blacklisted_osu_users) > 2048:
-            embed = embed_templates.error_warning('Blacklist is too long to be displayed!')
-            return await interaction.response.send_message(embed=embed)
+        try:
+            usernames = await OsuApi.get_usernames(blacklist)
+        except aiohttp.ClientError:
+            usernames = None  # Fall back to showing the IDs
 
-        embed = discord.Embed(title='Blacklisted users (IDs)')
-        embed.description = ', '.join(guild.blacklisted_osu_users)
-        await interaction.response.send_message(embed=embed)
+        if usernames is None:
+            lines = [f'[{user_id}](https://osu.ppy.sh/users/{user_id})' for user_id in blacklist]
+        else:
+            found = sorted((i for i in blacklist if i in usernames), key=lambda i: usernames[i].lower())
+            lines = [
+                f'[{discord.utils.escape_markdown(usernames[i])}](https://osu.ppy.sh/users/{i}) ({i})' for i in found
+            ]
+            lines += [f'{user_id} (restricted or deleted)' for user_id in blacklist if user_id not in usernames]
+
+        title = f'Blacklisted osu! users ({len(lines)})'
+        if usernames is None:
+            title += ' - couldn\'t look up usernames'
+        embeds = [
+            discord.Embed(color=interaction.client.user.color, title=title, description=page)
+            for page in misc_utils.paginate(lines)
+        ]
+
+        if len(embeds) == 1:
+            return await interaction.followup.send(embed=embeds[0])
+
+        for number, embed in enumerate(embeds, 1):
+            embed.set_footer(text=f'Page {number}/{len(embeds)}')
+        await interaction.followup.send(embed=embeds[0], view=discord_utils.Scroller(embeds, interaction))
 
     class Roles(Enum):
         """

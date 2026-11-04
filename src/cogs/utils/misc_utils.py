@@ -53,3 +53,35 @@ def log_errors(coro):
             logger.exception(f'Unhandled exception in background loop {coro.__qualname__}, continuing')
 
     return wrapper
+
+
+def paginate(lines: list[str], max_lines: int = 20, max_chars: int = 4096) -> list[str]:
+    """
+    Splits lines into pages that fit in an embed description
+
+    Parameters
+    ----------
+    lines (list[str]): The lines to split
+    max_lines (int): The most lines on one page. Defaults to 20
+    max_chars (int): The most characters on one page. Defaults to 4096, Discord's limit for embed descriptions
+
+    Returns
+    ----------
+    (list[str]): The pages, with the lines joined by newlines
+    """
+
+    pages = []
+    page = []
+    length = 0
+    for line in lines:
+        line = line[:max_chars]
+        if page and (len(page) == max_lines or length + 1 + len(line) > max_chars):
+            pages.append('\n'.join(page))
+            page, length = [], 0
+        length += len(line) + (1 if page else 0)
+        page.append(line)
+
+    if page:
+        pages.append('\n'.join(page))
+
+    return pages
