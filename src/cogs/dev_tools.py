@@ -161,7 +161,7 @@ class DevTools(commands.Cog):
         """
 
         if not ctx.invoked_subcommand:
-            await ctx.reply_help(ctx.command)
+            await ctx.send_help(ctx.command)
 
     @cogs.command(name='unload')
     async def cogs_unload(self, ctx: commands.Context, cog: str):
