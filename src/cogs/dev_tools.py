@@ -22,25 +22,25 @@ class DevTools(commands.Cog):
     @commands.is_owner()
     @commands.bot_has_permissions(embed_links=True)
     @commands.command(name='custommsg', description='Send a message to any channel in any server the bot is in')
-    async def custommsg(self, ctx: commands.Context, channel: int, *text: tuple[str]):
+    async def custommsg(self, ctx: commands.Context, channel_id: int, *, text: str):
         """
         Send a message to any channel on any server the bot is in
 
         Parameters
         ----------
         ctx (commands.Context): The command context
-        channel (int): The channel ID to send the message to
-        text (tuple[str]): The text to send
+        channel_id (int): The channel ID to send the message to
+        text (str): The text to send, which is everything after the channel ID
         """
 
-        # Send message to the requested channel
-        channel = self.bot.get_channel(channel)
-        custommessage = ' '.join(text)
-        await channel.send(custommessage)
+        if not (channel := self.bot.get_channel(channel_id)):
+            embed = embed_templates.error_fatal(f'Could not find a channel with the ID {channel_id}')
+            return await ctx.reply(embed=embed)
 
-        # Send confirmation message to the invoker
-        embed = discord.Embed(color=ctx.me.color)
-        embed.add_field(name='Sent', value=custommessage)
+        await channel.send(text)
+
+        # Send confirmation message to the invoker. The description fits a whole message, unlike a field
+        embed = discord.Embed(color=ctx.me.color, title='Sent', description=text)
         await ctx.reply(embed=embed)
 
     @commands.is_owner()
