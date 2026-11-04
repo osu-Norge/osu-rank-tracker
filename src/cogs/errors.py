@@ -126,7 +126,7 @@ class Errors(commands.Cog):
         elif isinstance(error, commands.CheckFailure):
             return
 
-        embed = embed_templates.error_fatal(ctx, text='An unknown error occurred')
+        embed = embed_templates.error_fatal('An unknown error occurred')
         await ctx.reply(embed=embed)
 
         # Log full exception to file

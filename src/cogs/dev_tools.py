@@ -103,7 +103,7 @@ class DevTools(commands.Cog):
         try:
             guild = await self.bot.fetch_guild(guild_id)
         except discord.errors.Forbidden:
-            embed = embed_templates.error_fatal(ctx, text='Bot is not a member of this guild')
+            embed = embed_templates.error_fatal('Bot is not a member of this guild')
             return await ctx.reply(embed=embed)
 
         # Send confirmation message for leaving
@@ -182,7 +182,7 @@ class DevTools(commands.Cog):
                     embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been disabled')
                     return await ctx.reply(embed=embed)
 
-        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        embed = embed_templates.error_fatal(f'{cog} does not exist')
         await ctx.reply(embed=embed)
 
     @cogs.command(name='load')
@@ -204,7 +204,7 @@ class DevTools(commands.Cog):
                     embed = discord.Embed(color=ctx.me.color, description=f'{cog} loaded')
                     return await ctx.reply(embed=embed)
 
-        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        embed = embed_templates.error_fatal(f'{cog} does not exist')
         await ctx.reply(embed=embed)
 
     @cogs.command(name='reload')
@@ -225,7 +225,7 @@ class DevTools(commands.Cog):
                     embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been reloaded')
                     return await ctx.reply(embed=embed)
 
-        embed = embed_templates.error_fatal(ctx, text=f'{cog} does not exist')
+        embed = embed_templates.error_fatal(f'{cog} does not exist')
         await ctx.reply(embed=embed)
 
     @cogs.command(name='reloadunloaded')
