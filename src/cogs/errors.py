@@ -147,24 +147,40 @@ class Errors(commands.Cog):
             permissions = ', '.join(error.missing_permissions)
             embed = embed_templates.error_warning('I\'m missing the following permissions:\n\n' +
                                                   f'```\n{permissions}\n```')
-            return await interaction.response.send_message(embed=embed)
+            return await self._send_error(interaction, embed)
 
         elif isinstance(error, app_commands.MissingPermissions):
             permissions = ', '.join(error.missing_permissions)
             embed = embed_templates.error_warning('You\'re missing the following permissions:\n\n' +
                                                   f'```\n{permissions}\n```')
-            return await interaction.response.send_message(embed=embed)
+            return await self._send_error(interaction, embed)
 
         elif isinstance(error, app_commands.CommandOnCooldown):
             embed = embed_templates.error_warning('The command has just been invoked\n' +
                                                   f'Try again in `{error.retry_after:.1f}` seconds.')
-            return await interaction.response.send_message(embed=embed)
-
-        embed = embed_templates.error_fatal('An unknown error occurred!')
-        await interaction.response.send_message(embed=embed)
+            return await self._send_error(interaction, embed)
 
         # Log full exception to file
         self.bot.logger.error(''.join(traceback.format_exception(type(error), error, error.__traceback__)))
+
+        embed = embed_templates.error_fatal('An unknown error occurred!')
+        await self._send_error(interaction, embed)
+
+    @staticmethod
+    async def _send_error(interaction: discord.Interaction, embed: discord.Embed):
+        """
+        Send an error message, as a followup if the command has already responded or deferred
+
+        Parameters
+        ----------
+        interaction (discord.Interaction): Slash command context object
+        embed (discord.Embed): The error message
+        """
+
+        if interaction.response.is_done():
+            await interaction.followup.send(embed=embed)
+        else:
+            await interaction.response.send_message(embed=embed)
 
 
 async def setup(bot: commands.Bot):
