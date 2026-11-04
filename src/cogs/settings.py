@@ -331,10 +331,10 @@ class Settings(commands.Cog):
         if usernames is None:
             lines = [f'[{user_id}](https://osu.ppy.sh/users/{user_id})' for user_id in blacklist]
         else:
+            # No markdown escaping: Discord shows the backslashes in link text, and osu! usernames can't contain * or `
             found = sorted((i for i in blacklist if i in usernames), key=lambda i: usernames[i].lower())
-            lines = [
-                f'[{discord.utils.escape_markdown(usernames[i])}](https://osu.ppy.sh/users/{i}) ({i})' for i in found
-            ]
+            lines = [f'[{usernames[i]}](https://osu.ppy.sh/users/{i})' for i in found]
+            # Keep the ID of accounts without a name, as it's needed to remove them
             lines += [f'{user_id} (restricted or deleted)' for user_id in blacklist if user_id not in usernames]
 
         title = f'Blacklisted osu! users ({len(lines)})'
