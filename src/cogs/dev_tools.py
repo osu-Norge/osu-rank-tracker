@@ -174,15 +174,21 @@ class DevTools(commands.Cog):
         cog (str): The name of the cog to disable
         """
 
-        for file in listdir('./src/cogs'):
-            if file.endswith('.py'):
-                name = file[:-3]
-                if name == cog:
-                    await self.bot.unload_extension(f'cogs.{name}')
-                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been disabled')
-                    return await ctx.reply(embed=embed)
+        if f'{cog}.py' not in listdir('./src/cogs'):
+            embed = embed_templates.error_fatal(f'{cog} does not exist')
+            return await ctx.reply(embed=embed)
 
-        embed = embed_templates.error_fatal(f'{cog} does not exist')
+        if f'cogs.{cog}' not in self.bot.extensions:
+            embed = embed_templates.error_warning(f'{cog} is not loaded')
+            return await ctx.reply(embed=embed)
+
+        try:
+            await self.bot.unload_extension(f'cogs.{cog}')
+        except commands.ExtensionError as error:
+            self.bot.logger.error(f'Failed to unload cogs.{cog}', exc_info=error)
+            embed = embed_templates.error_warning(f'{cog} could not be unloaded:\n\n{error}')
+        else:
+            embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been disabled')
         await ctx.reply(embed=embed)
 
     @cogs.command(name='load')
@@ -196,15 +202,21 @@ class DevTools(commands.Cog):
         cog (str): The name of the cog to enable
         """
 
-        for file in listdir('./src/cogs'):
-            if file.endswith('.py'):
-                name = file[:-3]
-                if name == cog:
-                    await self.bot.load_extension(f'cogs.{name}')
-                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} loaded')
-                    return await ctx.reply(embed=embed)
+        if f'{cog}.py' not in listdir('./src/cogs'):
+            embed = embed_templates.error_fatal(f'{cog} does not exist')
+            return await ctx.reply(embed=embed)
 
-        embed = embed_templates.error_fatal(f'{cog} does not exist')
+        if f'cogs.{cog}' in self.bot.extensions:
+            embed = embed_templates.error_warning(f'{cog} is already loaded')
+            return await ctx.reply(embed=embed)
+
+        try:
+            await self.bot.load_extension(f'cogs.{cog}')
+        except commands.ExtensionError as error:
+            self.bot.logger.error(f'Failed to load cogs.{cog}', exc_info=error)
+            embed = embed_templates.error_warning(f'{cog} could not be loaded:\n\n{error}')
+        else:
+            embed = discord.Embed(color=ctx.me.color, description=f'{cog} loaded')
         await ctx.reply(embed=embed)
 
     @cogs.command(name='reload')
@@ -217,15 +229,16 @@ class DevTools(commands.Cog):
         ctx (commands.Context): The command context
         cog (str): The name of the cog to reload
         """
-        for file in listdir('./src/cogs'):
-            if file.endswith('.py'):
-                name = file[:-3]
-                if name == cog:
-                    await self.bot.reload_extension(f'cogs.{name}')
-                    embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been reloaded')
-                    return await ctx.reply(embed=embed)
 
-        embed = embed_templates.error_fatal(f'{cog} does not exist')
+        if f'{cog}.py' not in listdir('./src/cogs'):
+            embed = embed_templates.error_fatal(f'{cog} does not exist')
+            return await ctx.reply(embed=embed)
+
+        # Loads the cog instead if it isn't loaded
+        if failed := await self._reload_extensions([f'cogs.{cog}']):
+            embed = embed_templates.error_warning(f'{cog} could not be reloaded:\n\n{failed[f"cogs.{cog}"]}')
+        else:
+            embed = discord.Embed(color=ctx.me.color, description=f'{cog} has been reloaded')
         await ctx.reply(embed=embed)
 
     @cogs.command(name='reloadunloaded')
