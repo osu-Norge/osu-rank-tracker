@@ -238,20 +238,9 @@ class DevTools(commands.Cog):
         ctx (commands.Context): Context object
         """
 
-        # Unload all cogs
-        for file in listdir('./src/cogs'):
-            if file.endswith('.py'):
-                name = file[:-3]
-                await self.bot.unload_extension(f'cogs.{name}')
-
-        # Load all cogs
-        for file in listdir('./src/cogs'):
-            if file.endswith('.py'):
-                name = file[:-3]
-                await self.bot.load_extension(f'cogs.{name}')
-
-        embed = discord.Embed(color=ctx.me.color, description='Reloaded all cogs')
-        await ctx.reply(embed=embed)
+        names = [f'cogs.{file[:-3]}' for file in listdir('./src/cogs') if file.endswith('.py')]
+        failed = await self._reload_extensions(names)
+        await self._reply_reload_result(ctx, 'Reloaded all cogs', failed)
 
     @cogs.command(name='reloadall')
     async def cogs_reloadall(self, ctx: commands.Context):
@@ -263,12 +252,52 @@ class DevTools(commands.Cog):
         ctx (commands.Context): Context object
         """
 
-        for file in listdir('./src/cogs'):
-            if file.endswith('.py'):
-                name = file[:-3]
-                await self.bot.reload_extension(f'cogs.{name}')
+        failed = await self._reload_extensions(list(self.bot.extensions))
+        await self._reply_reload_result(ctx, 'Reloaded all previously enabled cogs', failed)
 
-        embed = discord.Embed(color=ctx.me.color, description='Reloaded all previously enabled cogs')
+    async def _reload_extensions(self, names: list[str]) -> dict[str, commands.ExtensionError]:
+        """
+        Reloads the given extensions if they're loaded and loads them if they're not, continuing past failures
+
+        Parameters
+        ----------
+        names (list[str]): The extension names, e.g. cogs.user
+
+        Returns
+        ----------
+        (dict[str, commands.ExtensionError]) The extensions that failed, with their errors
+        """
+
+        failed = {}
+        for name in names:
+            try:
+                if name in self.bot.extensions:
+                    await self.bot.reload_extension(name)
+                else:
+                    await self.bot.load_extension(name)
+            except commands.ExtensionError as error:
+                self.bot.logger.error(f'Failed to reload {name}', exc_info=error)
+                failed[name] = error
+
+        return failed
+
+    async def _reply_reload_result(self, ctx: commands.Context, description: str, failed: dict[str, Exception]):
+        """
+        Replies with the result of reloading several cogs
+
+        Parameters
+        ----------
+        ctx (commands.Context): Context object
+        description (str): The message to send if every cog was reloaded
+        failed (dict[str, Exception]): The cogs that failed, with their errors
+        """
+
+        if not failed:
+            embed = discord.Embed(color=ctx.me.color, description=description)
+            return await ctx.reply(embed=embed)
+
+        failures = '\n'.join(f'`{name}`: {error}' for name, error in failed.items())
+        embed = embed_templates.error_warning(f'{description}, except:\n\n{failures}')
         await ctx.reply(embed=embed)
 
 
