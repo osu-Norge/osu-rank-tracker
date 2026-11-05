@@ -1,3 +1,5 @@
+from contextlib import suppress
+
 import aiohttp
 import discord
 from discord import app_commands
@@ -6,6 +8,7 @@ from iso3166 import countries
 
 from cogs.utils import database, discord_utils, embed_templates
 from cogs.utils.osu_api import Gamemode, OsuApi
+from cogs.utils.setup_wizard import SetupWizard
 
 
 class Settings(commands.Cog):
@@ -70,17 +73,31 @@ class Settings(commands.Cog):
         await interaction.response.send_message(embed=embed)
 
     @app_commands.guild_only()
+    @app_commands.default_permissions(manage_guild=True)
     @app_commands.command()
     async def setup(self, interaction: discord.Interaction):
         """
-        Automatic setup wizard for the bot
+        Set up roles, the country whitelist and the blacklist step by step
 
         Parameters
         ----------
         interaction (discord.Interaction): The slash command interaction
         """
 
-        await interaction.response.send_message('This feature is not yet implemented')
+        guild = await database.GuildTable().get(interaction.guild.id)
+
+        usernames = {}
+        if guild.blacklisted_osu_users:
+            # Looking up a long blacklist can take longer than Discord waits for a response
+            await interaction.response.defer(ephemeral=True, thinking=True)
+            with suppress(aiohttp.ClientError):  # Fall back to showing the IDs
+                usernames = await OsuApi.get_usernames(guild.blacklisted_osu_users)
+
+        wizard = SetupWizard(interaction, guild, self.ROLE_TYPES, usernames)
+        if interaction.response.is_done():
+            await interaction.edit_original_response(view=wizard)
+        else:
+            await interaction.response.send_message(view=wizard, ephemeral=True)
 
     @settings_group.command()
     async def show(self, interaction: discord.Interaction):
