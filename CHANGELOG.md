@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/osu-Norge/osu-rank-tracker/compare/1.1.0...1.2.0) (2026-11-05)
+
+
+### Features
+
+* add /setup wizard for roles, whitelist and blacklist ([2650fa4](https://github.com/osu-Norge/osu-rank-tracker/commit/2650fa4c4dc9805c17a99c8392b722673a3f8346)), closes [#20](https://github.com/osu-Norge/osu-rank-tracker/issues/20)
+
+
+### Bug Fixes
+
+* warn instead of showing an empty box when no roles are set ([c13dd1b](https://github.com/osu-Norge/osu-rank-tracker/commit/c13dd1b30ed6439d8524f84dcdfec743c9f4acc1)), closes [#22](https://github.com/osu-Norge/osu-rank-tracker/issues/22)
+
 ## [1.1.0](https://github.com/osu-Norge/osu-rank-tracker/compare/1.0.0...1.1.0) (2026-11-04)
 
 
