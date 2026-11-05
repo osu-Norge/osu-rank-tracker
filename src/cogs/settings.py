@@ -407,12 +407,16 @@ class Settings(commands.Cog):
         guild_table = database.GuildTable()
         guild = await guild_table.get(interaction.guild.id)
 
+        roles = {name: role_id for column, name in self.ROLE_TYPES.items() if (role_id := getattr(guild, column))}
+
+        if not roles:
+            embed = embed_templates.error_warning('No roles are set! Set one with `/settings role set`')
+            return await interaction.response.send_message(embed=embed)
+
         embed = discord.Embed(title='Role associations')
-        for column, name in self.ROLE_TYPES.items():
-            role_id = getattr(guild, column)
-            if role_id:
-                discord_role = interaction.guild.get_role(role_id)
-                embed.add_field(name=name, value=discord_role.mention)
+        for name, role_id in roles.items():
+            discord_role = interaction.guild.get_role(role_id)
+            embed.add_field(name=name, value=discord_role.mention if discord_role else f'Deleted role ({role_id})')
 
         await interaction.response.send_message(embed=embed)
 
